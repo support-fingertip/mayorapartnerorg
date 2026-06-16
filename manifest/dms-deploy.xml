@@ -2,7 +2,6 @@
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
     <types>
         <members>dmsData</members>
-        <members>dmsTokens</members>
         <members>dmsPageHeader</members>
         <members>dmsKpiCard</members>
         <members>dmsStatusBadge</members>
