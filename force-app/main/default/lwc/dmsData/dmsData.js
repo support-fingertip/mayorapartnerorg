@@ -62,28 +62,72 @@ const numFmt = new Intl.NumberFormat('en-IN');
 /** Plain grouped number, e.g. 6000 -> "6,000". */
 const formatNumber = (value) => numFmt.format(value);
 
+// Line-item products used to build order details (units = cases × pcs,
+// amount = cases × rate). Order summaries are derived from these lines so
+// the list rows and the detail modal always reconcile.
+const LINE_PRODUCTS = {
+    'MLK-CHE-130': { name: 'Malkist Cheese Crackers', brand: 'Malkist', pcs: 24, rate: 576 },
+    'MLK-CHO-130': { name: 'Malkist Double Chocolatey', brand: 'Malkist', pcs: 24, rate: 576 },
+    'SOL-STR-90': { name: "Slai O'lai Strawberry", brand: "Slai O'lai", pcs: 36, rate: 432 },
+    'KIS-MNT-18': { name: 'KIS Mint Candy', brand: 'KIS', pcs: 60, rate: 480 },
+    'JMK-50': { name: 'JuizyMilk Candy', brand: 'JuizyMilk', pcs: 60, rate: 960 },
+    'KOP-JAR-140': { name: 'Kopiko Jar', brand: 'Kopiko', pcs: 12, rate: 768 },
+    'RMG-250': { name: 'Roma Marie Gold', brand: 'Roma', pcs: 24, rate: 672 },
+    'DAN-BUT-200': { name: 'Danisa Butter', brand: 'Danisa', pcs: 12, rate: 1440 },
+    'CFJ-100': { name: 'Coffee Joy', brand: 'Coffee Joy', pcs: 36, rate: 576 },
+    'BNG-CHO-20': { name: 'Beng-Beng', brand: 'Beng-Beng', pcs: 48, rate: 480 },
+    'JME-CHK-75': { name: 'JoyMee Noodles', brand: 'JoyMee', pcs: 36, rate: 432 },
+    'CHK-CHO-50': { name: 'Choki-Choki', brand: 'Choki-Choki', pcs: 24, rate: 960 }
+};
+
+const expandLines = (refs) =>
+    refs.map((r) => {
+        const lp = LINE_PRODUCTS[r.p];
+        return {
+            sku: r.p,
+            name: lp.name,
+            brand: lp.brand,
+            cases: r.cases,
+            units: r.cases * lp.pcs,
+            rate: lp.rate,
+            amount: r.cases * lp.rate
+        };
+    });
+
+const buildOrder = (meta) => {
+    const lines = expandLines(meta.lines);
+    return {
+        ...meta,
+        lines,
+        skus: lines.length,
+        cases: lines.reduce((s, l) => s + l.cases, 0),
+        units: lines.reduce((s, l) => s + l.units, 0),
+        value: lines.reduce((s, l) => s + l.amount, 0)
+    };
+};
+
 const P1_ORDERS = [
-    { id: 'PO-2847', date: '29 May 2026', skus: 5, cases: 205, units: 6000, value: 144960, status: 'Pending Approval' },
-    { id: 'PO-2841', date: '26 May 2026', skus: 6, cases: 390, units: 16820, value: 198720, status: 'GRN Given' },
-    { id: 'PO-2828', date: '18 May 2026', skus: 5, cases: 300, units: 8640, value: 195840, status: 'GRN Given' },
-    { id: 'PO-2815', date: '08 May 2026', skus: 2, cases: 50, units: 1920, value: 36480, status: 'Rejected' },
-    { id: 'PO-2810', date: '05 May 2026', skus: 2, cases: 40, units: 840, value: 31680, status: 'Draft' }
-];
+    { id: 'PO-2847', date: '29 May 2026', status: 'Pending Approval', lines: [{ p: 'MLK-CHE-130', cases: 40 }, { p: 'KOP-JAR-140', cases: 30 }, { p: 'CFJ-100', cases: 50 }, { p: 'DAN-BUT-200', cases: 20 }, { p: 'RMG-250', cases: 15 }] },
+    { id: 'PO-2841', date: '26 May 2026', status: 'GRN Given', lines: [{ p: 'MLK-CHO-130', cases: 60 }, { p: 'SOL-STR-90', cases: 80 }, { p: 'BNG-CHO-20', cases: 100 }, { p: 'JME-CHK-75', cases: 70 }, { p: 'KIS-MNT-18', cases: 50 }, { p: 'CHK-CHO-50', cases: 30 }] },
+    { id: 'PO-2828', date: '18 May 2026', status: 'GRN Given', lines: [{ p: 'RMG-250', cases: 70 }, { p: 'DAN-BUT-200', cases: 40 }, { p: 'MLK-CHE-130', cases: 90 }, { p: 'KOP-JAR-140', cases: 60 }, { p: 'CFJ-100', cases: 40 }] },
+    { id: 'PO-2815', date: '08 May 2026', status: 'Rejected', lines: [{ p: 'SOL-STR-90', cases: 30 }, { p: 'CFJ-100', cases: 20 }] },
+    { id: 'PO-2810', date: '05 May 2026', status: 'Draft', lines: [{ p: 'MLK-CHE-130', cases: 25 }, { p: 'CHK-CHO-50', cases: 15 }] }
+].map(buildOrder);
 
 const P2_ORDERS = [
-    { id: 'PO-2835', date: '22 May 2026', skus: 3, cases: 110, units: 4200, value: 103680 },
-    { id: 'PO-2820', date: '12 May 2026', skus: 4, cases: 350, units: 15720, value: 169920 }
-];
+    { id: 'PO-2835', date: '22 May 2026', lines: [{ p: 'MLK-CHO-130', cases: 40 }, { p: 'KOP-JAR-140', cases: 40 }, { p: 'DAN-BUT-200', cases: 30 }] },
+    { id: 'PO-2820', date: '12 May 2026', lines: [{ p: 'BNG-CHO-20', cases: 120 }, { p: 'SOL-STR-90', cases: 100 }, { p: 'JME-CHK-75', cases: 80 }, { p: 'MLK-CHE-130', cases: 50 }] }
+].map(buildOrder);
 
 const SECONDARY_ORDERS = [
-    { id: 'SO-6432', date: '29 May 2026', customer: 'ABC Mart', type: 'Retailer', units: 132, value: 5376 },
-    { id: 'SO-6431', date: '28 May 2026', customer: 'City Grocery', type: 'Retailer', units: 552, value: 7488 },
-    { id: 'SO-6428', date: '25 May 2026', customer: 'North Zone SD', type: 'Sub-Dist.', units: 1568, value: 32832 },
-    { id: 'SO-6424', date: '24 May 2026', customer: 'Fresh Mart', type: 'Retailer', units: 300, value: 4032 },
-    { id: 'SO-6420', date: '23 May 2026', customer: 'Metro General Store', type: 'Retailer', units: 348, value: 7392 },
-    { id: 'SO-6416', date: '22 May 2026', customer: 'East Zone SD', type: 'Sub-Dist.', units: 4032, value: 49968 },
-    { id: 'SO-6412', date: '21 May 2026', customer: 'Sharma Kirana', type: 'Retailer', units: 272, value: 5280 }
-];
+    { id: 'SO-6432', date: '29 May 2026', customer: 'ABC Mart', type: 'Retailer', lines: [{ p: 'MLK-CHE-130', cases: 3 }, { p: 'SOL-STR-90', cases: 1 }] },
+    { id: 'SO-6431', date: '28 May 2026', customer: 'City Grocery', type: 'Retailer', lines: [{ p: 'BNG-CHO-20', cases: 6 }, { p: 'KIS-MNT-18', cases: 4 }] },
+    { id: 'SO-6428', date: '25 May 2026', customer: 'North Zone SD', type: 'Sub-Dist.', lines: [{ p: 'MLK-CHE-130', cases: 20 }, { p: 'KOP-JAR-140', cases: 15 }, { p: 'DAN-BUT-200', cases: 10 }] },
+    { id: 'SO-6424', date: '24 May 2026', customer: 'Fresh Mart', type: 'Retailer', lines: [{ p: 'CFJ-100', cases: 5 }, { p: 'RMG-250', cases: 3 }] },
+    { id: 'SO-6420', date: '23 May 2026', customer: 'Metro General Store', type: 'Retailer', lines: [{ p: 'SOL-STR-90', cases: 4 }, { p: 'CHK-CHO-50', cases: 3 }, { p: 'MLK-CHO-130', cases: 2 }] },
+    { id: 'SO-6416', date: '22 May 2026', customer: 'East Zone SD', type: 'Sub-Dist.', lines: [{ p: 'MLK-CHO-130', cases: 18 }, { p: 'SOL-STR-90', cases: 25 }, { p: 'KIS-MNT-18', cases: 30 }, { p: 'JMK-50', cases: 15 }] },
+    { id: 'SO-6412', date: '21 May 2026', customer: 'Sharma Kirana', type: 'Retailer', lines: [{ p: 'MLK-CHE-130', cases: 4 }, { p: 'JME-CHK-75', cases: 3 }] }
+].map(buildOrder);
 
 // Products available in the New P1 Order entry screen.
 const ORDER_PRODUCTS = [

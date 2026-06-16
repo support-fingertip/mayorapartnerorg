@@ -39,6 +39,8 @@ export default class DmsOrders extends LightningElement {
     cartOpen = false;
     showConfirm = false;
     confirmTitle = '';
+    detailOpen = false;
+    selected = null;
     creditLimit = ORDER_CREDIT_LIMIT;
     activeSchemes = ORDER_ACTIVE_SCHEMES;
 
@@ -150,6 +152,34 @@ export default class DmsOrders extends LightningElement {
             valueLabel: formatCurrency(o.value),
             statusTheme: STATUS_THEME[o.status] || 'neutral'
         };
+    }
+
+    /* --------------------------- order detail ----------------------------- */
+    viewOrder(event) {
+        const id = event.currentTarget.dataset.id;
+        const order = [...this.p1, ...this.p2, ...this.secondaryOrders].find((o) => o.id === id);
+        if (!order) {
+            return;
+        }
+        this.selected = {
+            id: order.id,
+            subtitle: order.customer ? `${order.date} · ${order.customer}` : order.date,
+            lines: order.lines.map((l) => ({
+                ...l,
+                key: l.sku,
+                unitsLabel: formatNumber(l.units),
+                rateLabel: formatCurrency(l.rate),
+                amountLabel: formatCurrency(l.amount)
+            })),
+            totalCases: order.cases,
+            totalUnitsLabel: formatNumber(order.units),
+            orderValueLabel: formatCurrency(order.value)
+        };
+        this.detailOpen = true;
+    }
+
+    closeDetail() {
+        this.detailOpen = false;
     }
 
     /* --------------------------- New P1 Order ----------------------------- */

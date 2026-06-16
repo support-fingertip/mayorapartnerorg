@@ -611,6 +611,109 @@
     padding: 0.65rem 2rem;
 }
 
+/* Order detail modal */
+.dms-detail {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9101;
+    width: min(780px, 94vw);
+    max-height: 86vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--dms-surface);
+    border-radius: 1rem;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.22);
+    overflow: hidden;
+}
+
+.dms-detail__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+}
+
+.dms-detail__head h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--dms-navy);
+    margin: 0;
+}
+
+.dms-detail__head p {
+    font-size: 0.82rem;
+    color: var(--dms-text-muted);
+    margin: 0.2rem 0 0;
+}
+
+.dms-detail__body {
+    flex: 1;
+    overflow: auto;
+    padding: 0 1.5rem;
+}
+
+.dms-tbl_detail {
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+}
+
+.dms-tbl_detail .dms-thead,
+.dms-tbl_detail .dms-trow {
+    grid-template-columns: 1.1fr 1.8fr 1fr 0.7fr 0.8fr 1fr 1fr;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.dms-tbl_detail .dms-thead {
+    background: none;
+    border-bottom: 1px solid var(--dms-border);
+    border-radius: 0;
+}
+
+.dms-brandpill {
+    display: inline-block;
+    background: #eef1f5;
+    color: var(--dms-navy);
+    font-size: 0.74rem;
+    font-weight: 600;
+    padding: 0.12rem 0.5rem;
+    border-radius: 0.35rem;
+}
+
+.dms-code {
+    font-family: 'Courier New', monospace;
+    font-size: 0.8rem;
+    color: var(--dms-text-muted);
+}
+
+.dms-detail__totals {
+    display: flex;
+    gap: 2.5rem;
+    padding: 1.1rem 1.5rem;
+    background: #f7f9fb;
+    border-top: 1px solid var(--dms-border);
+}
+
+.dms-detail__tl {
+    display: block;
+    font-size: 0.72rem;
+    color: var(--dms-text-muted);
+}
+
+.dms-detail__tv {
+    display: block;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--dms-navy);
+}
+
+.dms-detail__tv_big {
+    font-size: 1.25rem;
+}
+
 /* Inline SVG icons */
 .dms-ic {
     width: 1.05rem;

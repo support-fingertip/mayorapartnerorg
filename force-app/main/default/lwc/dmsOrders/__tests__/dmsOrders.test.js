@@ -43,6 +43,30 @@ describe('c-dms-orders', () => {
         expect(element.shadowRoot.querySelectorAll('.dms-tbl_secondary .dms-trow').length).toBe(7);
     });
 
+    it('opens the order detail modal from a View link', async () => {
+        const element = createElement('c-dms-orders', { is: DmsOrders });
+        document.body.appendChild(element);
+
+        // Secondary tab -> SO-6416 has the known 4-line breakdown
+        [...element.shadowRoot.querySelectorAll('.dms-subtab')]
+            .find((t) => t.dataset.tab === 'secondary')
+            .click();
+        await flush();
+
+        const view = [...element.shadowRoot.querySelectorAll('.dms-view')].find(
+            (v) => v.dataset.id === 'SO-6416'
+        );
+        view.click();
+        await flush();
+
+        expect(element.shadowRoot.querySelector('.dms-detail__head h2').textContent).toBe('SO-6416');
+        expect(element.shadowRoot.querySelectorAll('.dms-tbl_detail .dms-trow').length).toBe(4);
+        const totals = [...element.shadowRoot.querySelectorAll('.dms-detail__tv')].map((t) =>
+            t.textContent
+        );
+        expect(totals[0]).toBe('88'); // total cases
+    });
+
     it('opens the New Order screen and updates the cart total via the stepper', async () => {
         const element = createElement('c-dms-orders', { is: DmsOrders });
         document.body.appendChild(element);

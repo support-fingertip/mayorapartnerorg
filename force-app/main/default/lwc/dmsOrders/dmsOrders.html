@@ -69,7 +69,7 @@
                                 <span data-label="Status">
                                     <c-dms-status-badge label={o.status} theme={o.statusTheme}></c-dms-status-badge>
                                 </span>
-                                <span class="dms-view" data-label="Action">View ›</span>
+                                <span class="dms-view" data-label="Action" data-id={o.id} onclick={viewOrder}>View ›</span>
                             </div>
                         </template>
                     </div>
@@ -101,7 +101,7 @@
                                 <span class="dms-num" data-label="Cases">{o.cases}</span>
                                 <span class="dms-num" data-label="Units">{o.unitsLabel}</span>
                                 <span class="dms-num dms-strong" data-label="Value">{o.valueLabel}</span>
-                                <span class="dms-view" data-label="Action">View ›</span>
+                                <span class="dms-view" data-label="Action" data-id={o.id} onclick={viewOrder}>View ›</span>
                             </div>
                         </template>
                     </div>
@@ -135,7 +135,7 @@
                                 </span>
                                 <span class="dms-num" data-label="Units">{o.unitsLabel}</span>
                                 <span class="dms-num dms-strong" data-label="Value">{o.valueLabel}</span>
-                                <span class="dms-view" data-label="Action">View ›</span>
+                                <span class="dms-view" data-label="Action" data-id={o.id} onclick={viewOrder}>View ›</span>
                             </div>
                         </template>
                     </div>
@@ -313,6 +313,61 @@
                         <button class="dms-btn dms-modal__done" type="button" onclick={handleDone}>Done</button>
                     </div>
                 </template>
+            </div>
+        </template>
+
+        <!-- Order detail modal -->
+        <template lwc:if={detailOpen}>
+            <div class="dms-modal__overlay" onclick={closeDetail}></div>
+            <div class="dms-detail" role="dialog">
+                <header class="dms-detail__head">
+                    <div>
+                        <h2>{selected.id}</h2>
+                        <p>{selected.subtitle}</p>
+                    </div>
+                    <button class="dms-cart__close" type="button" onclick={closeDetail} title="Close">
+                        <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </header>
+
+                <div class="dms-detail__body">
+                    <div class="dms-tbl dms-tbl_detail">
+                        <div class="dms-thead">
+                            <span>SKU</span><span>Product</span><span>Brand</span>
+                            <span class="dms-num">Cases</span><span class="dms-num">Units</span>
+                            <span class="dms-num">Rate/Case</span><span class="dms-num">Amount</span>
+                        </div>
+                        <template for:each={selected.lines} for:item="l">
+                            <div key={l.key} class="dms-trow">
+                                <span class="dms-code" data-label="SKU">{l.sku}</span>
+                                <span class="dms-strong" data-label="Product">{l.name}</span>
+                                <span data-label="Brand"><span class="dms-brandpill">{l.brand}</span></span>
+                                <span class="dms-num" data-label="Cases">{l.cases}</span>
+                                <span class="dms-num" data-label="Units">{l.unitsLabel}</span>
+                                <span class="dms-num" data-label="Rate/Case">{l.rateLabel}</span>
+                                <span class="dms-num dms-strong" data-label="Amount">{l.amountLabel}</span>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <div class="dms-detail__totals">
+                    <div class="dms-detail__total">
+                        <span class="dms-detail__tl">Total Cases</span>
+                        <span class="dms-detail__tv">{selected.totalCases}</span>
+                    </div>
+                    <div class="dms-detail__total">
+                        <span class="dms-detail__tl">Total Units</span>
+                        <span class="dms-detail__tv">{selected.totalUnitsLabel}</span>
+                    </div>
+                    <div class="dms-detail__total">
+                        <span class="dms-detail__tl">Order Value</span>
+                        <span class="dms-detail__tv dms-detail__tv_big">{selected.orderValueLabel}</span>
+                    </div>
+                </div>
             </div>
         </template>
     </div>
