@@ -10,7 +10,7 @@ on:
       project_name:
         description: 'Salesforce project name'
         required: true
-        default: 'main'
+        default: 'mayorapartnerorg'
       api_version:
         description: 'Salesforce API version'
         required: true
@@ -58,9 +58,16 @@ jobs:
           git fetch origin
 
           if git ls-remote --heads origin "$BRANCH" | grep -q "$BRANCH"; then
-            echo "✅ Branch '$BRANCH' exists. Checking out..."
-            git checkout -b "$BRANCH" origin/"$BRANCH"
-            git pull origin "$BRANCH"
+            echo "✅ Branch '$BRANCH' exists remotely."
+            # Check if the branch already exists locally (e.g. 'main' checked out by actions/checkout)
+            if git show-ref --verify --quiet "refs/heads/$BRANCH"; then
+              echo "📍 Branch '$BRANCH' already checked out locally. Pulling latest..."
+              git checkout "$BRANCH"
+              git pull origin "$BRANCH"
+            else
+              echo "📥 Checking out remote branch '$BRANCH' locally..."
+              git checkout -b "$BRANCH" origin/"$BRANCH"
+            fi
           else
             echo "🌿 Branch '$BRANCH' does not exist. Creating new branch..."
             git checkout -b "$BRANCH"
