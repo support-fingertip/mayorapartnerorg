@@ -15,13 +15,21 @@ on:
         description: 'Salesforce API version'
         required: true
         default: '59.0'
+      namespace:
+        description: 'Salesforce namespace (leave blank if none)'
+        required: false
+        default: ''
+      login_url:
+        description: 'Salesforce login URL'
+        required: false
+        default: 'https://login.salesforce.com'
 
 jobs:
   create-skeleton:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    
+
     steps:
       # ---------------------------------------------------------
       # 1️⃣ Checkout repository
@@ -46,11 +54,9 @@ jobs:
       - name: Checkout branch
         run: |
           BRANCH="${{ github.event.inputs.branch_name }}"
-          
-          # Fetch all remote branches
+
           git fetch origin
-          
-          # Check if branch exists remotely
+
           if git ls-remote --heads origin "$BRANCH" | grep -q "$BRANCH"; then
             echo "✅ Branch '$BRANCH' exists. Checking out..."
             git checkout -b "$BRANCH" origin/"$BRANCH"
@@ -59,7 +65,7 @@ jobs:
             echo "🌿 Branch '$BRANCH' does not exist. Creating new branch..."
             git checkout -b "$BRANCH"
           fi
-          
+
           echo "📍 Current branch: $(git branch --show-current)"
 
       # ---------------------------------------------------------
@@ -68,11 +74,8 @@ jobs:
       - name: Create SFDC Skeleton
         run: |
           echo "📦 Creating Salesforce project skeleton..."
-          
-          PROJECT_NAME="${{ github.event.inputs.project_name }}"
-          API_VERSION="${{ github.event.inputs.api_version }}"
-          
-          # Create directory structure
+
+          # Source directories
           mkdir -p force-app/main/default/classes
           mkdir -p force-app/main/default/triggers
           mkdir -p force-app/main/default/lwc
@@ -86,14 +89,20 @@ jobs:
           mkdir -p force-app/main/default/tabs
           mkdir -p force-app/main/default/pages
           mkdir -p force-app/main/default/components
-          mkdir -p force-app/main/default/email
+          mkdir -p force-app/main/default/email/unfiled\$public
           mkdir -p force-app/main/default/queues
           mkdir -p force-app/main/default/reports
           mkdir -p force-app/main/default/dashboards
+          mkdir -p force-app/main/default/customMetadata
+          mkdir -p force-app/main/default/contentassets
+
+          # Support directories
           mkdir -p scripts/apex
+          mkdir -p scripts/soql
           mkdir -p config
           mkdir -p .vscode
-          
+          mkdir -p .github/workflows
+
           echo "✅ Directory structure created"
 
       # ---------------------------------------------------------
@@ -103,7 +112,9 @@ jobs:
         run: |
           API_VERSION="${{ github.event.inputs.api_version }}"
           PROJECT_NAME="${{ github.event.inputs.project_name }}"
-          
+          NAMESPACE="${{ github.event.inputs.namespace }}"
+          LOGIN_URL="${{ github.event.inputs.login_url }}"
+
           if [ ! -f "sfdx-project.json" ]; then
             cat > sfdx-project.json << EOF
           {
@@ -114,9 +125,12 @@ jobs:
               }
             ],
             "name": "${PROJECT_NAME}",
-            "namespace": "",
-            "sfdcLoginUrl": "https://login.salesforce.com",
-            "sourceApiVersion": "${API_VERSION}"
+            "namespace": "${NAMESPACE}",
+            "sfdcLoginUrl": "${LOGIN_URL}",
+            "sourceApiVersion": "${API_VERSION}",
+            "plugins": {
+              "sfdxDevhubUsername": ""
+            }
           }
           EOF
             echo "✅ sfdx-project.json created"
@@ -125,13 +139,47 @@ jobs:
           fi
 
       # ---------------------------------------------------------
-      # 6️⃣ Create .forceignore
+      # 6️⃣ Create scratch org definition
+      # ---------------------------------------------------------
+      - name: Create scratch org definition
+        run: |
+          API_VERSION="${{ github.event.inputs.api_version }}"
+          NAMESPACE="${{ github.event.inputs.namespace }}"
+
+          if [ ! -f "config/project-scratch-def.json" ]; then
+            cat > config/project-scratch-def.json << EOF
+          {
+            "orgName": "${{ github.event.inputs.project_name }}",
+            "edition": "Developer",
+            "namespace": "${NAMESPACE}",
+            "features": [],
+            "settings": {
+              "apexSettings": {
+                "enableAggregateCodeCoverageOnly": false
+              },
+              "lightningExperienceSettings": {
+                "enableS1DesktopEnabled": true
+              },
+              "mobileSettings": {
+                "enableS1EncryptedStoragePref2": false
+              }
+            }
+          }
+          EOF
+            echo "✅ config/project-scratch-def.json created"
+          else
+            echo "⏭️ config/project-scratch-def.json already exists, skipping..."
+          fi
+
+      # ---------------------------------------------------------
+      # 7️⃣ Create .forceignore
       # ---------------------------------------------------------
       - name: Create .forceignore
         run: |
           if [ ! -f ".forceignore" ]; then
             cat > .forceignore << 'EOF'
-          # List files or directories below to ignore them when running force:source:push, force:source:pull, and force:source:status
+          # List files or directories below to ignore them when running
+          # sf project deploy/retrieve commands
 
           package.xml
 
@@ -149,6 +197,9 @@ jobs:
           **/appMenus/**
           **/objectTranslations/**
           **/connectedApps/**
+
+          # Node modules
+          node_modules/
           EOF
             echo "✅ .forceignore created"
           else
@@ -156,18 +207,18 @@ jobs:
           fi
 
       # ---------------------------------------------------------
-      # 7️⃣ Create .gitignore
+      # 8️⃣ Create .gitignore
       # ---------------------------------------------------------
       - name: Create .gitignore for SFDC
         run: |
           if [ ! -f ".gitignore" ]; then
             cat > .gitignore << 'EOF'
-          # Salesforce
+          # Salesforce CLI
           .sf/
           .sfdx/
           .localdevserver/
 
-          # LWC
+          # LWC source maps
           **/lwc/**/*.css.map
           **/lwc/**/*.js.map
 
@@ -175,7 +226,7 @@ jobs:
           *.log
           logs/
 
-          # OS Files
+          # OS files
           .DS_Store
           Thumbs.db
 
@@ -187,16 +238,20 @@ jobs:
           # Node
           node_modules/
           package-lock.json
+          yarn.lock
 
-          # Auth files
+          # Auth / secrets
           authfile.txt
           *.key
           *.crt
+          server.key
+          consumer.key
 
-          # Deployment
+          # Deployment artifacts
           deployment-result.json
           changed-files.txt
           delta-package/
+          destructiveChanges.xml
           EOF
             echo "✅ .gitignore created"
           else
@@ -204,7 +259,7 @@ jobs:
           fi
 
       # ---------------------------------------------------------
-      # 8️⃣ Create VS Code settings
+      # 9️⃣ Create VS Code settings
       # ---------------------------------------------------------
       - name: Create VS Code settings
         run: |
@@ -219,14 +274,20 @@ jobs:
               "**/bower_components": true,
               "**/.sfdx": true,
               "**/.sf": true
-            }
+            },
+            "files.exclude": {
+              "**/.sfdx": true,
+              "**/.sf": true
+            },
+            "eslint.enable": true,
+            "eslint.nodePath": "./node_modules"
           }
           EOF
             echo "✅ VS Code settings.json created"
           else
             echo "⏭️ VS Code settings.json already exists, skipping..."
           fi
-          
+
           if [ ! -f ".vscode/extensions.json" ]; then
             cat > .vscode/extensions.json << 'EOF'
           {
@@ -234,7 +295,10 @@ jobs:
               "salesforce.salesforcedx-vscode",
               "salesforce.salesforcedx-vscode-apex",
               "salesforce.salesforcedx-vscode-lwc",
-              "redhat.vscode-xml"
+              "salesforce.salesforcedx-vscode-soql",
+              "redhat.vscode-xml",
+              "dbaeumer.vscode-eslint",
+              "esbenp.prettier-vscode"
             ]
           }
           EOF
@@ -243,20 +307,121 @@ jobs:
             echo "⏭️ VS Code extensions.json already exists, skipping..."
           fi
 
+          if [ ! -f ".vscode/launch.json" ]; then
+            cat > .vscode/launch.json << 'EOF'
+          {
+            "version": "0.2.0",
+            "configurations": [
+              {
+                "name": "Launch Apex Replay Debugger",
+                "type": "apex-replay",
+                "request": "launch",
+                "logFile": "${command:AskForLogFileName}",
+                "stopOnEntry": true,
+                "trace": true
+              }
+            ]
+          }
+          EOF
+            echo "✅ VS Code launch.json created"
+          else
+            echo "⏭️ VS Code launch.json already exists, skipping..."
+          fi
+
       # ---------------------------------------------------------
-      # 9️⃣ Create sample Apex class
+      # 🔟 Create package.json (for LWC Jest + ESLint)
+      # ---------------------------------------------------------
+      - name: Create package.json and lint configs
+        run: |
+          if [ ! -f "package.json" ]; then
+            cat > package.json << 'EOF'
+          {
+            "name": "salesforce-app",
+            "private": true,
+            "version": "1.0.0",
+            "description": "Salesforce DX project",
+            "scripts": {
+              "lint": "eslint force-app/main/default/lwc",
+              "test": "jest --coverage",
+              "test:unit": "jest",
+              "test:unit:watch": "jest --watch",
+              "test:unit:debug": "jest --debug",
+              "test:unit:coverage": "jest --coverage"
+            },
+            "devDependencies": {
+              "@lwc/eslint-plugin-lwc": "^1.7.0",
+              "@salesforce/eslint-config-lwc": "^3.5.2",
+              "@salesforce/eslint-plugin-lightning": "^1.0.0",
+              "@salesforce/sfdx-lwc-jest": "^3.0.0",
+              "eslint": "^8.0.0",
+              "jest": "^29.0.0"
+            }
+          }
+          EOF
+            echo "✅ package.json created"
+          else
+            echo "⏭️ package.json already exists, skipping..."
+          fi
+
+          if [ ! -f ".eslintrc.json" ]; then
+            cat > .eslintrc.json << 'EOF'
+          {
+            "extends": "@salesforce/eslint-config-lwc/recommended",
+            "plugins": ["@salesforce/eslint-plugin-lightning"],
+            "rules": {
+              "no-console": "warn"
+            }
+          }
+          EOF
+            echo "✅ .eslintrc.json created"
+          else
+            echo "⏭️ .eslintrc.json already exists, skipping..."
+          fi
+
+          if [ ! -f "jest.config.js" ]; then
+            cat > jest.config.js << 'EOF'
+          const { jestConfig } = require('@salesforce/sfdx-lwc-jest/config.js');
+
+          module.exports = {
+            ...jestConfig,
+            modulePathIgnorePatterns: ['<rootDir>/.localdevserver'],
+            setupFiles: ['<rootDir>/jest.setup.js'],
+          };
+          EOF
+            echo "✅ jest.config.js created"
+          else
+            echo "⏭️ jest.config.js already exists, skipping..."
+          fi
+
+          if [ ! -f "jest.setup.js" ]; then
+            cat > jest.setup.js << 'EOF'
+          // Jest setup file — add global mocks and test utilities here
+          EOF
+            echo "✅ jest.setup.js created"
+          else
+            echo "⏭️ jest.setup.js already exists, skipping..."
+          fi
+
+      # ---------------------------------------------------------
+      # 1️⃣1️⃣ Create sample Apex class
       # ---------------------------------------------------------
       - name: Create sample Apex class
         run: |
           API_VERSION="${{ github.event.inputs.api_version }}"
-          
-          # Only create if doesn't exist
+
           if [ ! -f "force-app/main/default/classes/HelloWorld.cls" ]; then
             cat > force-app/main/default/classes/HelloWorld.cls << 'EOF'
           /**
-           * @description Sample Apex class
+           * @description Sample Apex class demonstrating basic patterns.
+           * @author      GitHub Actions Skeleton Generator
            */
           public with sharing class HelloWorld {
+
+              /**
+               * @description Returns a greeting for the provided name.
+               * @param  name The name to greet. If blank, returns a generic greeting.
+               * @return      A greeting string.
+               */
               public static String sayHello(String name) {
                   if (String.isBlank(name)) {
                       return 'Hello, World!';
@@ -265,7 +430,7 @@ jobs:
               }
           }
           EOF
-            
+
             cat > force-app/main/default/classes/HelloWorld.cls-meta.xml << EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <ApexClass xmlns="http://soap.sforce.com/2006/04/metadata">
@@ -273,18 +438,43 @@ jobs:
               <status>Active</status>
           </ApexClass>
           EOF
-            
+
             cat > force-app/main/default/classes/HelloWorldTest.cls << 'EOF'
+          /**
+           * @description Unit tests for HelloWorld.
+           */
           @isTest
           private class HelloWorldTest {
+
               @isTest
-              static void testSayHello() {
-                  System.assertEquals('Hello, World!', HelloWorld.sayHello(null));
-                  System.assertEquals('Hello, Test!', HelloWorld.sayHello('Test'));
+              static void testSayHello_withName() {
+                  System.assertEquals(
+                      'Hello, Test!',
+                      HelloWorld.sayHello('Test'),
+                      'Expected personalised greeting'
+                  );
+              }
+
+              @isTest
+              static void testSayHello_withNull() {
+                  System.assertEquals(
+                      'Hello, World!',
+                      HelloWorld.sayHello(null),
+                      'Expected generic greeting for null'
+                  );
+              }
+
+              @isTest
+              static void testSayHello_withBlank() {
+                  System.assertEquals(
+                      'Hello, World!',
+                      HelloWorld.sayHello('   '),
+                      'Expected generic greeting for blank string'
+                  );
               }
           }
           EOF
-            
+
             cat > force-app/main/default/classes/HelloWorldTest.cls-meta.xml << EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <ApexClass xmlns="http://soap.sforce.com/2006/04/metadata">
@@ -292,34 +482,39 @@ jobs:
               <status>Active</status>
           </ApexClass>
           EOF
-            
+
             echo "✅ Sample Apex classes created"
           else
             echo "⏭️ HelloWorld.cls already exists, skipping..."
           fi
 
       # ---------------------------------------------------------
-      # 🔟 Create sample LWC
+      # 1️⃣2️⃣ Create sample LWC with Jest test
       # ---------------------------------------------------------
       - name: Create sample LWC
         run: |
           API_VERSION="${{ github.event.inputs.api_version }}"
-          
-          # Only create if doesn't exist
+
           if [ ! -d "force-app/main/default/lwc/helloWorld" ]; then
-            mkdir -p force-app/main/default/lwc/helloWorld
-            
+            mkdir -p force-app/main/default/lwc/helloWorld/__tests__
+
             cat > force-app/main/default/lwc/helloWorld/helloWorld.html << 'EOF'
           <template>
               <lightning-card title="Hello World" icon-name="custom:custom14">
                   <div class="slds-p-horizontal_small">
-                      <lightning-input label="Enter your name" value={name} onchange={handleNameChange}></lightning-input>
-                      <p class="slds-p-top_medium"><strong>{greeting}</strong></p>
+                      <lightning-input
+                          label="Enter your name"
+                          value={name}
+                          onchange={handleNameChange}>
+                      </lightning-input>
+                      <p class="slds-p-top_medium">
+                          <strong>{greeting}</strong>
+                      </p>
                   </div>
               </lightning-card>
           </template>
           EOF
-            
+
             cat > force-app/main/default/lwc/helloWorld/helloWorld.js << 'EOF'
           import { LightningElement, track } from 'lwc';
 
@@ -335,7 +530,13 @@ jobs:
               }
           }
           EOF
-            
+
+            cat > force-app/main/default/lwc/helloWorld/helloWorld.css << 'EOF'
+          :host {
+              display: block;
+          }
+          EOF
+
             cat > force-app/main/default/lwc/helloWorld/helloWorld.js-meta.xml << EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
@@ -348,22 +549,88 @@ jobs:
               </targets>
           </LightningComponentBundle>
           EOF
-            
-            echo "✅ Sample LWC created"
+
+            cat > force-app/main/default/lwc/helloWorld/__tests__/helloWorld.test.js << 'EOF'
+          import { createElement } from 'lwc';
+          import HelloWorld from 'c/helloWorld';
+
+          describe('c-hello-world', () => {
+              afterEach(() => {
+                  while (document.body.firstChild) {
+                      document.body.removeChild(document.body.firstChild);
+                  }
+              });
+
+              it('displays default greeting when no name is entered', () => {
+                  const element = createElement('c-hello-world', { is: HelloWorld });
+                  document.body.appendChild(element);
+
+                  const p = element.shadowRoot.querySelector('p');
+                  expect(p.textContent).toBe('Hello, World!');
+              });
+
+              it('displays personalised greeting when name is entered', async () => {
+                  const element = createElement('c-hello-world', { is: HelloWorld });
+                  document.body.appendChild(element);
+
+                  const input = element.shadowRoot.querySelector('lightning-input');
+                  input.value = 'Salesforce';
+                  input.dispatchEvent(new CustomEvent('change'));
+
+                  await Promise.resolve();
+
+                  const p = element.shadowRoot.querySelector('p');
+                  expect(p.textContent).toBe('Hello, Salesforce!');
+              });
+          });
+          EOF
+
+            echo "✅ Sample LWC created (with Jest test)"
           else
             echo "⏭️ helloWorld LWC already exists, skipping..."
           fi
 
       # ---------------------------------------------------------
-      # 1️⃣1️⃣ Create package.xml manifest
+      # 1️⃣3️⃣ Create anonymous Apex scripts
+      # ---------------------------------------------------------
+      - name: Create anonymous Apex scripts
+        run: |
+          if [ ! -f "scripts/apex/hello.apex" ]; then
+            cat > scripts/apex/hello.apex << 'EOF'
+          // Anonymous Apex — run with:
+          //   sf apex run --file scripts/apex/hello.apex --target-org <alias>
+          System.debug(HelloWorld.sayHello('World'));
+          EOF
+            echo "✅ scripts/apex/hello.apex created"
+          else
+            echo "⏭️ scripts/apex/hello.apex already exists, skipping..."
+          fi
+
+          if [ ! -f "scripts/soql/sample.soql" ]; then
+            cat > scripts/soql/sample.soql << 'EOF'
+          -- Sample SOQL — run with:
+          --   sf data query --query "SELECT Id, Name FROM Account LIMIT 10" --target-org <alias>
+          SELECT Id, Name, CreatedDate
+          FROM Account
+          ORDER BY CreatedDate DESC
+          LIMIT 10
+          EOF
+            echo "✅ scripts/soql/sample.soql created"
+          else
+            echo "⏭️ scripts/soql/sample.soql already exists, skipping..."
+          fi
+
+      # ---------------------------------------------------------
+      # 1️⃣4️⃣ Create package.xml manifest
       # ---------------------------------------------------------
       - name: Create package.xml manifest
         run: |
           API_VERSION="${{ github.event.inputs.api_version }}"
-          
+
           mkdir -p manifest
-          
-          cat > manifest/package.xml << EOF
+
+          if [ ! -f "manifest/package.xml" ]; then
+            cat > manifest/package.xml << EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <Package xmlns="http://soap.sforce.com/2006/04/metadata">
               <types>
@@ -385,6 +652,10 @@ jobs:
               <types>
                   <members>*</members>
                   <name>CustomObject</name>
+              </types>
+              <types>
+                  <members>*</members>
+                  <name>CustomField</name>
               </types>
               <types>
                   <members>*</members>
@@ -436,10 +707,6 @@ jobs:
               </types>
               <types>
                   <members>*</members>
-                  <name>CustomField</name>
-              </types>
-              <types>
-                  <members>*</members>
                   <name>ValidationRule</name>
               </types>
               <types>
@@ -450,57 +717,138 @@ jobs:
                   <members>*</members>
                   <name>CustomMetadata</name>
               </types>
+              <types>
+                  <members>*</members>
+                  <name>ContentAsset</name>
+              </types>
               <version>${API_VERSION}</version>
           </Package>
           EOF
-          
-          echo "✅ package.xml manifest created"
+            echo "✅ manifest/package.xml created"
+          else
+            echo "⏭️ manifest/package.xml already exists, skipping..."
+          fi
 
       # ---------------------------------------------------------
-      # 1️⃣2️⃣ Create README
+      # 1️⃣5️⃣ Create README
       # ---------------------------------------------------------
       - name: Create README
         run: |
           PROJECT_NAME="${{ github.event.inputs.project_name }}"
           API_VERSION="${{ github.event.inputs.api_version }}"
-          
-          cat > README.md << EOF
+          LOGIN_URL="${{ github.event.inputs.login_url }}"
+
+          if [ ! -f "README.md" ]; then
+            cat > README.md << EOF
           # ${PROJECT_NAME}
 
-          Salesforce DX Project - API Version ${API_VERSION}
+          Salesforce DX Project — API Version ${API_VERSION}
 
           ## 🚀 Getting Started
 
-          1. **Authorize your org**
-             \`\`\`bash
-             sf org login web --alias myorg --set-default
-             \`\`\`
+          ### Prerequisites
+          - [Salesforce CLI (sf)](https://developer.salesforce.com/tools/salesforcecli) v2+
+          - Java 11+ (required for Apex language server)
+          - Node.js 18+ (required for LWC Jest tests)
 
-          2. **Deploy to your org**
-             \`\`\`bash
-             sf project deploy start --source-dir force-app --target-org myorg
-             \`\`\`
+          ### 1. Authorize your org
 
-          3. **Run tests**
-             \`\`\`bash
-             sf apex run test --target-org myorg --test-level RunLocalTests
-             \`\`\`
+          \`\`\`bash
+          # Production / Developer org
+          sf org login web --alias myorg --instance-url ${LOGIN_URL} --set-default
+
+          # Scratch org (requires Dev Hub)
+          sf org login web --alias devhub --set-default-dev-hub
+          sf org create scratch --definition-file config/project-scratch-def.json --alias scratch --set-default --duration-days 30
+          \`\`\`
+
+          ### 2. Deploy to your org
+
+          \`\`\`bash
+          # Deploy all source
+          sf project deploy start --source-dir force-app --target-org myorg
+
+          # Deploy via manifest
+          sf project deploy start --manifest manifest/package.xml --target-org myorg
+          \`\`\`
+
+          ### 3. Run Apex tests
+
+          \`\`\`bash
+          sf apex run test --target-org myorg --test-level RunLocalTests --result-format human
+          \`\`\`
+
+          ### 4. Run LWC Jest tests
+
+          \`\`\`bash
+          npm install
+          npm test
+          \`\`\`
+
+          ### 5. Run anonymous Apex
+
+          \`\`\`bash
+          sf apex run --file scripts/apex/hello.apex --target-org myorg
+          \`\`\`
+
+          ### 6. Retrieve metadata
+
+          \`\`\`bash
+          sf project retrieve start --manifest manifest/package.xml --target-org myorg
+          \`\`\`
 
           ## 📁 Project Structure
 
-          - \`force-app/\` - Main source directory
-          - \`scripts/\` - Utility scripts
-          - \`config/\` - Configuration files
+          \`\`\`
+          .
+          ├── config/
+          │   └── project-scratch-def.json   # Scratch org definition
+          ├── force-app/
+          │   └── main/default/
+          │       ├── classes/               # Apex classes
+          │       ├── triggers/              # Apex triggers
+          │       ├── lwc/                   # Lightning Web Components
+          │       ├── aura/                  # Aura components
+          │       ├── flows/                 # Flows / Process Builder
+          │       ├── objects/               # Custom objects & fields
+          │       ├── layouts/               # Page layouts
+          │       ├── permissionsets/        # Permission sets
+          │       ├── profiles/              # Profiles
+          │       ├── staticresources/       # Static resources
+          │       ├── customMetadata/        # Custom metadata types
+          │       └── contentassets/         # Content assets
+          ├── manifest/
+          │   └── package.xml                # Metadata manifest
+          ├── scripts/
+          │   ├── apex/                      # Anonymous Apex scripts
+          │   └── soql/                      # SOQL query files
+          ├── .vscode/                       # VS Code settings
+          ├── .forceignore                   # Salesforce CLI ignore rules
+          ├── jest.config.js                 # LWC Jest configuration
+          ├── package.json                   # Node dependencies (Jest + ESLint)
+          └── sfdx-project.json              # SFDX project configuration
+          \`\`\`
 
-          ## 🛠️ Development
+          ## 🛠️ Useful Commands
 
-          This project was generated using GitHub Actions workflow.
+          | Task | Command |
+          |------|---------|
+          | Open org in browser | \`sf org open --target-org myorg\` |
+          | List orgs | \`sf org list\` |
+          | Run SOQL query | \`sf data query --query "SELECT Id FROM Account" --target-org myorg\` |
+          | Lint LWC | \`npm run lint\` |
+          | Generate Apex log | \`sf apex tail log --target-org myorg\` |
+
+          ---
+          *Generated by GitHub Actions on $(date -u '+%Y-%m-%d')*
           EOF
-          
-          echo "✅ README.md created"
+            echo "✅ README.md created"
+          else
+            echo "⏭️ README.md already exists, skipping..."
+          fi
 
       # ---------------------------------------------------------
-      # 1️⃣3️⃣ Create placeholder files
+      # 1️⃣6️⃣ Create placeholder .gitkeep files
       # ---------------------------------------------------------
       - name: Create placeholder files
         run: |
@@ -515,41 +863,107 @@ jobs:
           touch force-app/main/default/tabs/.gitkeep
           touch force-app/main/default/pages/.gitkeep
           touch force-app/main/default/components/.gitkeep
-          touch scripts/apex/.gitkeep
-          touch config/.gitkeep
-          
+          touch force-app/main/default/customMetadata/.gitkeep
+          touch force-app/main/default/contentassets/.gitkeep
+          touch "force-app/main/default/email/unfiled\$public/.gitkeep"
+          touch scripts/soql/.gitkeep
+
           echo "✅ Placeholder files created"
 
       # ---------------------------------------------------------
-      # 1️⃣4️⃣ Commit and Push
+      # 1️⃣7️⃣ Commit and Push
       # ---------------------------------------------------------
       - name: Commit and Push
         run: |
           BRANCH="${{ github.event.inputs.branch_name }}"
           PROJECT_NAME="${{ github.event.inputs.project_name }}"
           API_VERSION="${{ github.event.inputs.api_version }}"
-          
-          # Check if there are changes to commit
-          if ! git diff --quiet || ! git diff --staged --quiet; then
-            git add .
-            git commit -m "chore: create SFDC project skeleton
 
-            - SFDX project structure
-            - API Version: ${API_VERSION}
-            - Sample Apex class and LWC
+          # Stage all new/changed files
+          git add .
 
-            Generated by GitHub Actions"
-            
-            git push origin "$BRANCH"
-            
-            echo ""
-            echo "════════════════════════════════════════"
-            echo "✅ SFDC Skeleton Created Successfully!"
-            echo "════════════════════════════════════════"
-            echo "🌿 Branch: $BRANCH"
-            echo "📦 Project: $PROJECT_NAME"
-            echo "🔢 API Version: $API_VERSION"
-            echo "════════════════════════════════════════"
-          else
+          if git diff --staged --quiet; then
             echo "ℹ️ No changes to commit. Skeleton may already exist."
+          else
+            git commit -m "chore: create SFDC project skeleton for ${PROJECT_NAME}
+
+          Scaffolded a full Salesforce DX project structure:
+
+          Project settings
+          - API version: ${API_VERSION}
+          - Login URL: ${{ github.event.inputs.login_url }}
+          - Namespace: '${{ github.event.inputs.namespace }}'
+
+          Files created
+          - sfdx-project.json
+          - config/project-scratch-def.json
+          - manifest/package.xml
+          - .forceignore / .gitignore
+          - .vscode/settings.json, extensions.json, launch.json
+          - package.json, jest.config.js, .eslintrc.json (LWC tooling)
+          - force-app/ directory tree with .gitkeep placeholders
+          - Sample Apex class + 3 unit tests (HelloWorld)
+          - Sample LWC + Jest test (helloWorld)
+          - scripts/apex/hello.apex, scripts/soql/sample.soql
+          - README.md
+
+          Generated by GitHub Actions"
+
+            git push origin "$BRANCH"
+
+            echo ""
+            echo "════════════════════════════════════════════"
+            echo "✅  SFDC Skeleton Created Successfully!"
+            echo "════════════════════════════════════════════"
+            echo "🌿 Branch      : $BRANCH"
+            echo "📦 Project     : $PROJECT_NAME"
+            echo "🔢 API Version : $API_VERSION"
+            echo "════════════════════════════════════════════"
           fi
+
+      # ---------------------------------------------------------
+      # 1️⃣8️⃣ Write GitHub Job Summary
+      # ---------------------------------------------------------
+      - name: Write job summary
+        if: always()
+        run: |
+          BRANCH="${{ github.event.inputs.branch_name }}"
+          PROJECT_NAME="${{ github.event.inputs.project_name }}"
+          API_VERSION="${{ github.event.inputs.api_version }}"
+          REPO="${{ github.repository }}"
+
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          ## ✅ SFDC Project Skeleton
+
+          | Field | Value |
+          |-------|-------|
+          | **Project** | \`${PROJECT_NAME}\` |
+          | **Branch** | [\`${BRANCH}\`](https://github.com/${REPO}/tree/${BRANCH}) |
+          | **API Version** | \`${API_VERSION}\` |
+          | **Login URL** | \`${{ github.event.inputs.login_url }}\` |
+          | **Namespace** | \`${{ github.event.inputs.namespace || '(none)' }}\` |
+
+          ### 📁 What was created
+
+          | Path | Description |
+          |------|-------------|
+          | \`sfdx-project.json\` | SFDX project config |
+          | \`config/project-scratch-def.json\` | Scratch org definition |
+          | \`manifest/package.xml\` | Full metadata manifest |
+          | \`force-app/main/default/classes/\` | HelloWorld.cls + test |
+          | \`force-app/main/default/lwc/helloWorld/\` | LWC + Jest test |
+          | \`scripts/apex/hello.apex\` | Anonymous Apex script |
+          | \`scripts/soql/sample.soql\` | Sample SOQL query |
+          | \`package.json\` | Jest + ESLint dependencies |
+          | \`jest.config.js\` | LWC Jest configuration |
+          | \`.eslintrc.json\` | ESLint rules for LWC |
+          | \`.vscode/\` | VS Code settings, extensions, debugger |
+          | \`README.md\` | Getting-started guide |
+
+          ### 🚀 Next steps
+          \`\`\`bash
+          git checkout ${BRANCH}
+          sf org login web --alias myorg --set-default
+          sf project deploy start --source-dir force-app --target-org myorg
+          \`\`\`
+          EOF
