@@ -1,49 +1,255 @@
 <template>
-    <div class="dms-page">
-        <c-dms-page-header title="Orders" subtitle="Track and manage sales orders"></c-dms-page-header>
-
-        <!-- Status filter tabs -->
-        <div class="dms-tabs" role="tablist">
-            <template for:each={statusTabs} for:item="tab">
-                <button
-                    key={tab.status}
-                    class={tab.class}
-                    data-status={tab.status}
-                    onclick={handleTab}
-                    type="button"
-                >
-                    {tab.status}
-                </button>
-            </template>
-        </div>
-
-        <!-- Responsive table -->
-        <div class="dms-table" role="table">
-            <div class="dms-table__head" role="row">
-                <span class="dms-th dms-th_id">Order #</span>
-                <span class="dms-th dms-th_customer">Customer</span>
-                <span class="dms-th dms-th_date">Date</span>
-                <span class="dms-th dms-th_items">Items</span>
-                <span class="dms-th dms-th_amount">Amount</span>
-                <span class="dms-th dms-th_status">Status</span>
+    <div class="dms-orders">
+        <!-- ======================= ORDER LIST ======================= -->
+        <template lwc:if={showList}>
+            <div class="dms-subtabs" role="tablist">
+                <template for:each={subTabs} for:item="tab">
+                    <button
+                        key={tab.id}
+                        class={tab.class}
+                        data-tab={tab.id}
+                        onclick={handleTab}
+                        type="button"
+                    >
+                        {tab.label}
+                    </button>
+                </template>
             </div>
 
-            <template for:each={filteredOrders} for:item="order">
-                <div key={order.id} class="dms-table__row" role="row">
-                    <span class="dms-td dms-td_id" data-label="Order #">{order.id}</span>
-                    <span class="dms-td dms-td_customer" data-label="Customer">{order.customer}</span>
-                    <span class="dms-td dms-td_date" data-label="Date">{order.date}</span>
-                    <span class="dms-td dms-td_items" data-label="Items">{order.items}</span>
-                    <span class="dms-td dms-td_amount" data-label="Amount">{order.amountLabel}</span>
-                    <span class="dms-td dms-td_status" data-label="Status">
-                        <c-dms-status-badge status={order.status}></c-dms-status-badge>
-                    </span>
-                </div>
-            </template>
-        </div>
+            <div class="dms-body">
+                <!-- ----------------------- P1 ----------------------- -->
+                <template lwc:if={isP1}>
+                    <div class="dms-toolbar">
+                        <div class="dms-chiprow">
+                            <template for:each={p1StatusTabs} for:item="s">
+                                <button
+                                    key={s.status}
+                                    class={s.class}
+                                    data-status={s.status}
+                                    onclick={handleP1Status}
+                                    type="button"
+                                >
+                                    {s.status}
+                                </button>
+                            </template>
+                        </div>
+                        <div class="dms-toolbar__right">
+                            <lightning-input
+                                class="dms-search"
+                                type="search"
+                                variant="label-hidden"
+                                placeholder="Search order..."
+                                value={p1Search}
+                                onchange={handleP1Search}
+                            ></lightning-input>
+                            <button class="dms-btn" type="button" onclick={openNewOrder}>
+                                <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                                New Order
+                            </button>
+                        </div>
+                    </div>
 
-        <template lwc:if={isEmpty}>
-            <p class="dms-empty">No orders with this status.</p>
+                    <div class="dms-tbl dms-tbl_p1">
+                        <div class="dms-thead">
+                            <span>Order ID</span><span>Date</span><span class="dms-num">SKUs</span>
+                            <span class="dms-num">Cases</span><span class="dms-num">Units</span>
+                            <span class="dms-num">Value</span><span>Status</span><span>Action</span>
+                        </div>
+                        <template for:each={p1Orders} for:item="o">
+                            <div key={o.key} class="dms-trow">
+                                <span class="dms-link" data-label="Order ID">{o.id}</span>
+                                <span data-label="Date">{o.date}</span>
+                                <span class="dms-num" data-label="SKUs">{o.skus}</span>
+                                <span class="dms-num" data-label="Cases">{o.cases}</span>
+                                <span class="dms-num" data-label="Units">{o.unitsLabel}</span>
+                                <span class="dms-num dms-strong" data-label="Value">{o.valueLabel}</span>
+                                <span data-label="Status">
+                                    <c-dms-status-badge label={o.status} theme={o.statusTheme}></c-dms-status-badge>
+                                </span>
+                                <span class="dms-view" data-label="Action">View ›</span>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+                <!-- ----------------------- P2 ----------------------- -->
+                <template lwc:if={isP2}>
+                    <div class="dms-toolbar dms-toolbar_end">
+                        <lightning-input
+                            class="dms-search"
+                            type="search"
+                            variant="label-hidden"
+                            placeholder="Search order..."
+                            value={p2Search}
+                            onchange={handleP2Search}
+                        ></lightning-input>
+                    </div>
+                    <div class="dms-tbl dms-tbl_p2">
+                        <div class="dms-thead">
+                            <span>Order ID</span><span>Date</span><span class="dms-num">SKUs</span>
+                            <span class="dms-num">Cases</span><span class="dms-num">Units</span>
+                            <span class="dms-num">Value</span><span>Action</span>
+                        </div>
+                        <template for:each={p2Orders} for:item="o">
+                            <div key={o.key} class="dms-trow">
+                                <span class="dms-link" data-label="Order ID">{o.id}</span>
+                                <span data-label="Date">{o.date}</span>
+                                <span class="dms-num" data-label="SKUs">{o.skus}</span>
+                                <span class="dms-num" data-label="Cases">{o.cases}</span>
+                                <span class="dms-num" data-label="Units">{o.unitsLabel}</span>
+                                <span class="dms-num dms-strong" data-label="Value">{o.valueLabel}</span>
+                                <span class="dms-view" data-label="Action">View ›</span>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+                <!-- -------------------- Secondary ------------------- -->
+                <template lwc:if={isSecondary}>
+                    <div class="dms-toolbar dms-toolbar_end">
+                        <lightning-input
+                            class="dms-search"
+                            type="search"
+                            variant="label-hidden"
+                            placeholder="Search order or customer..."
+                            value={secondarySearch}
+                            onchange={handleSecondarySearch}
+                        ></lightning-input>
+                    </div>
+                    <div class="dms-tbl dms-tbl_secondary">
+                        <div class="dms-thead">
+                            <span>Order ID</span><span>Date</span><span>Customer</span>
+                            <span>Type</span><span class="dms-num">Units</span>
+                            <span class="dms-num">Value</span><span>Action</span>
+                        </div>
+                        <template for:each={secondaryRows} for:item="o">
+                            <div key={o.key} class="dms-trow">
+                                <span class="dms-link" data-label="Order ID">{o.id}</span>
+                                <span data-label="Date">{o.date}</span>
+                                <span class="dms-strong" data-label="Customer">{o.customer}</span>
+                                <span data-label="Type">
+                                    <c-dms-status-badge label={o.type} theme={o.typeTheme}></c-dms-status-badge>
+                                </span>
+                                <span class="dms-num" data-label="Units">{o.unitsLabel}</span>
+                                <span class="dms-num dms-strong" data-label="Value">{o.valueLabel}</span>
+                                <span class="dms-view" data-label="Action">View ›</span>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+            </div>
+        </template>
+
+        <!-- ======================= NEW P1 ORDER ======================= -->
+        <template lwc:if={showNewOrder}>
+            <div class="dms-neworder">
+                <header class="dms-no__top">
+                    <button class="dms-no__close" type="button" onclick={closeNewOrder} title="Close">
+                        <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                    <div class="dms-no__title">
+                        <h1>New P1 Order</h1>
+                        <p>To: Mayora India Pvt. Ltd.</p>
+                    </div>
+                    <div class="dms-no__credit">
+                        <div class="dms-no__credit-row">
+                            <div>
+                                <span class="dms-no__credit-label">Advance Credit Limit (SAP)</span>
+                                <span class="dms-no__credit-value">{creditLimitLabel}</span>
+                            </div>
+                            <div>
+                                <span class="dms-no__credit-label">Current Order</span>
+                                <span class="dms-no__credit-value">{currentOrderLabel}</span>
+                            </div>
+                        </div>
+                        <div class="dms-no__credit-track">
+                            <div class="dms-no__credit-bar" style={creditBarStyle}></div>
+                        </div>
+                    </div>
+                    <button class="dms-btn dms-no__cart" type="button">
+                        <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="9" cy="21" r="1"></circle>
+                            <circle cx="20" cy="21" r="1"></circle>
+                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                        </svg>
+                        {cartLabel}
+                    </button>
+                </header>
+
+                <div class="dms-no__schemes">
+                    <svg class="dms-ic dms-ic_sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                        <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                    </svg>
+                    <span class="dms-no__schemes-label">Active Schemes:</span>
+                    <span class="dms-no__schemes-text">{activeSchemes}</span>
+                </div>
+
+                <div class="dms-no__filters">
+                    <lightning-input
+                        class="dms-search dms-no__search"
+                        type="search"
+                        variant="label-hidden"
+                        placeholder="Search product..."
+                        value={orderSearch}
+                        onchange={handleOrderSearch}
+                    ></lightning-input>
+                    <div class="dms-chiprow">
+                        <span class="dms-no__filter-label">Brand:</span>
+                        <template for:each={brandChips} for:item="b">
+                            <button key={b.brand} class={b.class} data-brand={b.brand} onclick={handleOrderBrand} type="button">
+                                {b.label}
+                            </button>
+                        </template>
+                    </div>
+                    <div class="dms-chiprow">
+                        <span class="dms-no__filter-label">Sub-Brand:</span>
+                        <template for:each={subBrandChips} for:item="s">
+                            <button key={s.sub} class={s.class} data-sub={s.sub} onclick={handleOrderSubBrand} type="button">
+                                {s.label}
+                            </button>
+                        </template>
+                    </div>
+                </div>
+
+                <div class="dms-no__grid">
+                    <template for:each={orderCards} for:item="p">
+                        <article key={p.id} class="dms-pcard">
+                            <div class="dms-pcard__top">
+                                <span class="dms-pcard__brand">{p.brand}</span>
+                                <template lwc:if={p.scheme}>
+                                    <span class="dms-pcard__scheme">
+                                        <svg class="dms-ic dms-ic_xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                                            <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                                        </svg>
+                                        {p.scheme}
+                                    </span>
+                                </template>
+                            </div>
+                            <h3 class="dms-pcard__name">{p.name}</h3>
+                            <p class="dms-pcard__pack">{p.packLabel}</p>
+                            <div class="dms-pcard__foot">
+                                <div class="dms-pcard__price">
+                                    <span class="dms-pcard__case">{p.caseLabel}</span>
+                                    <span class="dms-pcard__mrp">{p.mrpLabel}</span>
+                                </div>
+                                <div class="dms-stepper">
+                                    <button class="dms-stepper__btn" data-id={p.id} data-dir="down" onclick={handleStep} type="button">−</button>
+                                    <span class="dms-stepper__qty">{p.qty}</span>
+                                    <button class="dms-stepper__btn" data-id={p.id} data-dir="up" onclick={handleStep} type="button">+</button>
+                                </div>
+                            </div>
+                        </article>
+                    </template>
+                </div>
+            </div>
         </template>
     </div>
 </template>

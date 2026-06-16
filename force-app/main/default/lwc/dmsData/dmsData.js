@@ -57,15 +57,74 @@ export function getSchemes() {
     return clone(SCHEMES);
 }
 
-const ORDERS = [
-    { id: 'SO-24001', customer: 'Toko Sumber Rejeki', date: '2026-06-14', items: 18, amount: 42500, status: 'Pending' },
-    { id: 'SO-24002', customer: 'UD Maju Jaya', date: '2026-06-13', items: 32, amount: 91200, status: 'Confirmed' },
-    { id: 'SO-24003', customer: 'Grosir Berkah', date: '2026-06-13', items: 9, amount: 18750, status: 'Shipped' },
-    { id: 'SO-24004', customer: 'Toko Anugerah', date: '2026-06-12', items: 24, amount: 64800, status: 'Delivered' },
-    { id: 'SO-24005', customer: 'CV Sinar Pagi', date: '2026-06-11', items: 5, amount: 9800, status: 'Cancelled' },
-    { id: 'SO-24006', customer: 'Toko Makmur Abadi', date: '2026-06-11', items: 41, amount: 117500, status: 'Confirmed' },
-    { id: 'SO-24007', customer: 'Warung Bu Tini', date: '2026-06-10', items: 7, amount: 13400, status: 'Delivered' }
+const numFmt = new Intl.NumberFormat('en-IN');
+
+/** Plain grouped number, e.g. 6000 -> "6,000". */
+const formatNumber = (value) => numFmt.format(value);
+
+const P1_ORDERS = [
+    { id: 'PO-2847', date: '29 May 2026', skus: 5, cases: 205, units: 6000, value: 144960, status: 'Pending Approval' },
+    { id: 'PO-2841', date: '26 May 2026', skus: 6, cases: 390, units: 16820, value: 198720, status: 'GRN Given' },
+    { id: 'PO-2828', date: '18 May 2026', skus: 5, cases: 300, units: 8640, value: 195840, status: 'GRN Given' },
+    { id: 'PO-2815', date: '08 May 2026', skus: 2, cases: 50, units: 1920, value: 36480, status: 'Rejected' },
+    { id: 'PO-2810', date: '05 May 2026', skus: 2, cases: 40, units: 840, value: 31680, status: 'Draft' }
 ];
+
+const P2_ORDERS = [
+    { id: 'PO-2835', date: '22 May 2026', skus: 3, cases: 110, units: 4200, value: 103680 },
+    { id: 'PO-2820', date: '12 May 2026', skus: 4, cases: 350, units: 15720, value: 169920 }
+];
+
+const SECONDARY_ORDERS = [
+    { id: 'SO-6432', date: '29 May 2026', customer: 'ABC Mart', type: 'Retailer', units: 132, value: 5376 },
+    { id: 'SO-6431', date: '28 May 2026', customer: 'City Grocery', type: 'Retailer', units: 552, value: 7488 },
+    { id: 'SO-6428', date: '25 May 2026', customer: 'North Zone SD', type: 'Sub-Dist.', units: 1568, value: 32832 },
+    { id: 'SO-6424', date: '24 May 2026', customer: 'Fresh Mart', type: 'Retailer', units: 300, value: 4032 },
+    { id: 'SO-6420', date: '23 May 2026', customer: 'Metro General Store', type: 'Retailer', units: 348, value: 7392 },
+    { id: 'SO-6416', date: '22 May 2026', customer: 'East Zone SD', type: 'Sub-Dist.', units: 4032, value: 49968 },
+    { id: 'SO-6412', date: '21 May 2026', customer: 'Sharma Kirana', type: 'Retailer', units: 272, value: 5280 }
+];
+
+// Products available in the New P1 Order entry screen.
+const ORDER_PRODUCTS = [
+    { id: 'op1', brand: 'Malkist', subBrand: 'Malkist Cheese', name: 'Malkist Cheese', packSize: '130g', pcs: 24, casePrice: 576, mrp: 30, scheme: 'Buy 4 Get 1' },
+    { id: 'op2', brand: 'Malkist', subBrand: 'Malkist Choco', name: 'Malkist Choco', packSize: '130g', pcs: 24, casePrice: 576, mrp: 30, scheme: 'Buy 4 Get 1' },
+    { id: 'op3', brand: 'Malkist', subBrand: 'Malkist Cappuccino', name: 'Malkist Cappuccino', packSize: '130g', pcs: 24, casePrice: 576, mrp: 30, scheme: 'Buy 4 Get 1' },
+    { id: 'op4', brand: 'Coffee Joy', subBrand: 'Coffee Joy Thin', name: 'Coffee Joy', packSize: '100g', pcs: 36, casePrice: 576, mrp: 20, scheme: '' },
+    { id: 'op5', brand: 'Roma', subBrand: 'Roma Marie Gold', name: 'Roma Marie Gold', packSize: '250g', pcs: 24, casePrice: 672, mrp: 35, scheme: '' },
+    { id: 'op6', brand: "Slai O'lai", subBrand: "Slai O'lai Strawberry", name: "Slai O'lai Straw.", packSize: '90g', pcs: 36, casePrice: 432, mrp: 15, scheme: '' },
+    { id: 'op7', brand: 'Danisa', subBrand: 'Danisa Butter', name: 'Danisa Butter', packSize: '200g', pcs: 12, casePrice: 1440, mrp: 150, scheme: '5% off >₹7.2k' },
+    { id: 'op8', brand: 'Kopiko', subBrand: 'Kopiko Jar', name: 'Kopiko Jar', packSize: '140g', pcs: 12, casePrice: 768, mrp: 80, scheme: 'Vol. Slab 3–8%' },
+    { id: 'op9', brand: 'Kopiko', subBrand: 'Kopiko Pouch', name: 'Kopiko Pouch', packSize: '27g', pcs: 48, casePrice: 768, mrp: 16, scheme: 'Vol. Slab 3–8%' },
+    { id: 'op10', brand: 'KIS', subBrand: 'KIS Mint', name: 'KIS Mint', packSize: '18.4g', pcs: 60, casePrice: 480, mrp: 8, scheme: '' },
+    { id: 'op11', brand: 'JuizyMilk', subBrand: 'JuizyMilk', name: 'JuizyMilk', packSize: '50g', pcs: 60, casePrice: 960, mrp: 16, scheme: '' },
+    { id: 'op12', brand: 'Choki-Choki', subBrand: 'Choki-Choki', name: 'Choki-Choki', packSize: '10g × 10', pcs: 24, casePrice: 960, mrp: 40, scheme: 'Upcoming: 4–7%' }
+];
+
+const ORDER_BRANDS = ['Malkist', 'Coffee Joy', 'Roma', "Slai O'lai", 'Danisa', 'Kopiko', 'KIS', 'JuizyMilk', 'Choki-Choki', 'Beng-Beng', 'JoyMee'];
+
+export const ORDER_CREDIT_LIMIT = 500000;
+export const ORDER_ACTIVE_SCHEMES = 'Malkist B4G1 · JoyMee B10G2 · Kopiko Vol Slab 3–8% · Danisa 5% off above ₹7.2k';
+
+export function getP1Orders() {
+    return clone(P1_ORDERS);
+}
+
+export function getP2Orders() {
+    return clone(P2_ORDERS);
+}
+
+export function getSecondaryOrders() {
+    return clone(SECONDARY_ORDERS);
+}
+
+export function getOrderProducts() {
+    return clone(ORDER_PRODUCTS);
+}
+
+export function getOrderBrands() {
+    return [...ORDER_BRANDS];
+}
 
 const INVOICES = [
     { id: 'INV-90012', order: 'SO-24004', customer: 'Toko Anugerah', date: '2026-06-12', due: '2026-06-26', amount: 64800, status: 'Paid' },
@@ -75,10 +134,6 @@ const INVOICES = [
     { id: 'INV-90007', order: 'SO-23975', customer: 'Grosir Berkah', date: '2026-05-22', due: '2026-06-05', amount: 34200, status: 'Overdue' },
     { id: 'INV-90015', order: 'SO-24002', customer: 'UD Maju Jaya', date: '2026-06-13', due: '2026-06-27', amount: 91200, status: 'Pending' }
 ];
-
-export function getOrders() {
-    return clone(ORDERS);
-}
 
 export function getInvoices() {
     return clone(INVOICES);
@@ -300,4 +355,4 @@ export function getPeriodOptions() {
     ];
 }
 
-export { formatCurrency, formatLakh };
+export { formatCurrency, formatLakh, formatNumber };

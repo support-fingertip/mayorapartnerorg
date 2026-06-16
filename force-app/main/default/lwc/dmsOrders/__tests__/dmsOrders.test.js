@@ -10,28 +10,55 @@ describe('c-dms-orders', () => {
         }
     });
 
-    it('renders all orders initially', () => {
+    it('renders P1 orders with status filter chips', () => {
         const element = createElement('c-dms-orders', { is: DmsOrders });
         document.body.appendChild(element);
 
-        const rows = element.shadowRoot.querySelectorAll('.dms-table__row');
-        expect(rows.length).toBeGreaterThan(0);
+        expect(element.shadowRoot.querySelectorAll('.dms-tbl_p1 .dms-trow').length).toBe(5);
+        expect(element.shadowRoot.querySelectorAll('.dms-chiprow .dms-chipbtn').length).toBe(7);
     });
 
-    it('filters rows when a status tab is clicked', async () => {
+    it('filters P1 orders by status chip', async () => {
         const element = createElement('c-dms-orders', { is: DmsOrders });
         document.body.appendChild(element);
 
-        const allCount = element.shadowRoot.querySelectorAll('.dms-table__row').length;
-
-        const tabs = element.shadowRoot.querySelectorAll('.dms-tab');
-        const confirmedTab = [...tabs].find((t) => t.dataset.status === 'Confirmed');
-        confirmedTab.click();
-
+        const grn = [...element.shadowRoot.querySelectorAll('.dms-chipbtn')].find(
+            (b) => b.dataset.status === 'GRN Given'
+        );
+        grn.click();
         await flush();
 
-        const filtered = element.shadowRoot.querySelectorAll('.dms-table__row').length;
-        expect(filtered).toBeGreaterThan(0);
-        expect(filtered).toBeLessThanOrEqual(allCount);
+        expect(element.shadowRoot.querySelectorAll('.dms-tbl_p1 .dms-trow').length).toBe(2);
+    });
+
+    it('switches to Secondary orders', async () => {
+        const element = createElement('c-dms-orders', { is: DmsOrders });
+        document.body.appendChild(element);
+
+        [...element.shadowRoot.querySelectorAll('.dms-subtab')]
+            .find((t) => t.dataset.tab === 'secondary')
+            .click();
+        await flush();
+
+        expect(element.shadowRoot.querySelectorAll('.dms-tbl_secondary .dms-trow').length).toBe(7);
+    });
+
+    it('opens the New Order screen and updates the cart total via the stepper', async () => {
+        const element = createElement('c-dms-orders', { is: DmsOrders });
+        document.body.appendChild(element);
+
+        element.shadowRoot.querySelector('.dms-btn').click();
+        await flush();
+
+        expect(element.shadowRoot.querySelector('.dms-neworder')).not.toBeNull();
+
+        // first product = Malkist Cheese @ ₹576/case
+        const plus = element.shadowRoot.querySelector('.dms-stepper__btn[data-dir="up"]');
+        plus.click();
+        await flush();
+
+        const qty = element.shadowRoot.querySelector('.dms-stepper__qty');
+        expect(qty.textContent).toBe('1');
+        expect(element.shadowRoot.querySelector('.dms-no__cart').textContent).toContain('1');
     });
 });
