@@ -1,0 +1,14 @@
+<template>
+    <div class="dms-kpi">
+        <div class="dms-kpi__icon">
+            <lightning-icon icon-name={icon} size="small" variant="inverse"></lightning-icon>
+        </div>
+        <div class="dms-kpi__body">
+            <p class="dms-kpi__label">{label}</p>
+            <p class="dms-kpi__value">{value}</p>
+            <template lwc:if={delta}>
+                <p class={deltaClass}>{delta}</p>
+            </template>
+        </div>
+    </div>
+</template>

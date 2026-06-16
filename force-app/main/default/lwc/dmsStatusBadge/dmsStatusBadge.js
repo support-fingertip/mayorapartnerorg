@@ -1,0 +1,38 @@
+import { LightningElement, api } from 'lwc';
+
+/**
+ * Colored status pill. Maps a free-text status to a semantic color theme.
+ * Reused across Orders, Invoices and Products.
+ */
+const THEME_MAP = {
+    // success / positive
+    paid: 'success',
+    delivered: 'success',
+    confirmed: 'success',
+    'in stock': 'success',
+    // warning
+    pending: 'warning',
+    shipped: 'warning',
+    'low stock': 'warning',
+    // danger
+    overdue: 'danger',
+    cancelled: 'danger',
+    'out of stock': 'danger'
+};
+
+export default class DmsStatusBadge extends LightningElement {
+    @api label;
+    @api status;
+
+    get theme() {
+        return THEME_MAP[(this.status || this.label || '').toLowerCase()] || 'neutral';
+    }
+
+    get badgeClass() {
+        return `dms-badge dms-badge_${this.theme}`;
+    }
+
+    get displayText() {
+        return this.label || this.status;
+    }
+}

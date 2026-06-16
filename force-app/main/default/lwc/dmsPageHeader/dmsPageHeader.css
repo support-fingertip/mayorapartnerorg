@@ -1,0 +1,37 @@
+@import 'c/dmsTokens';
+
+.dms-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding-bottom: 1rem;
+    border-bottom: 3px solid var(--dms-brand);
+    margin-bottom: 1.25rem;
+}
+
+.dms-header__title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--dms-navy);
+    margin: 0;
+}
+
+.dms-header__subtitle {
+    font-size: 0.85rem;
+    color: var(--dms-text-muted);
+    margin: 0.25rem 0 0;
+}
+
+.dms-header__actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+    .dms-header__title {
+        font-size: 1.25rem;
+    }
+}

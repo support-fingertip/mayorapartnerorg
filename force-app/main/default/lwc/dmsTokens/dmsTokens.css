@@ -1,0 +1,36 @@
+/**
+ * Mayora DMS — shared design tokens.
+ * CSS-only module imported by every DMS component via `@import 'c/dmsTokens';`
+ * so brand colors/spacing live in one place. Values approximate the Mayora
+ * brand palette (red primary, navy ink) and can be refined against the Figma
+ * theme tokens later.
+ */
+:host {
+    --dms-brand: #e2231a;
+    --dms-brand-dark: #b71c13;
+    --dms-navy: #1b2a4a;
+    --dms-accent: #f5a623;
+
+    --dms-bg: #f4f6f9;
+    --dms-surface: #ffffff;
+    --dms-text: #16202c;
+    --dms-text-muted: #5c6b7a;
+    --dms-border: #e1e5eb;
+
+    --dms-success: #2e844a;
+    --dms-success-bg: #ddf0e4;
+    --dms-warning: #c47d00;
+    --dms-warning-bg: #fcefc7;
+    --dms-danger: #ba0517;
+    --dms-danger-bg: #fcdcdc;
+    --dms-info: #1b96ff;
+    --dms-info-bg: #d8e6fe;
+    --dms-neutral: #5c6b7a;
+    --dms-neutral-bg: #eceff3;
+
+    --dms-radius: 0.75rem;
+    --dms-radius-sm: 0.5rem;
+    --dms-shadow: 0 1px 3px rgba(22, 32, 44, 0.08), 0 1px 2px rgba(22, 32, 44, 0.06);
+    --dms-gap: 1rem;
+    --dms-font: 'Salesforce Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}

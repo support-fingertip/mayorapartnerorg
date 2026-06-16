@@ -1,0 +1,130 @@
+@import 'c/dmsTokens';
+
+.dms-page {
+    padding: 1.25rem;
+    background: var(--dms-bg);
+    font-family: var(--dms-font);
+    min-height: 100%;
+    box-sizing: border-box;
+}
+
+/* Filter tabs */
+.dms-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+}
+
+.dms-tab {
+    border: 1px solid var(--dms-border);
+    background: var(--dms-surface);
+    color: var(--dms-text-muted);
+    border-radius: 1.25rem;
+    padding: 0.35rem 0.9rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.dms-tab_active {
+    background: var(--dms-brand);
+    border-color: var(--dms-brand);
+    color: #fff;
+}
+
+/* Table */
+.dms-table {
+    background: var(--dms-surface);
+    border: 1px solid var(--dms-border);
+    border-radius: var(--dms-radius);
+    box-shadow: var(--dms-shadow);
+    overflow: hidden;
+}
+
+.dms-table__head,
+.dms-table__row {
+    display: grid;
+    grid-template-columns: 1fr 1.6fr 1fr 0.6fr 1.2fr 1fr;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+}
+
+.dms-table__head {
+    background: var(--dms-navy);
+}
+
+.dms-th {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #fff;
+}
+
+.dms-table__row {
+    border-top: 1px solid var(--dms-border);
+}
+
+.dms-td {
+    font-size: 0.85rem;
+    color: var(--dms-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dms-td_id {
+    font-weight: 700;
+    color: var(--dms-navy);
+}
+
+.dms-td_amount {
+    font-weight: 600;
+}
+
+.dms-empty {
+    text-align: center;
+    color: var(--dms-text-muted);
+    padding: 2rem 0;
+}
+
+/* Mobile: collapse table rows into stacked cards */
+@media (max-width: 640px) {
+    .dms-table__head {
+        display: none;
+    }
+
+    .dms-table {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+    }
+
+    .dms-table__row {
+        grid-template-columns: 1fr;
+        gap: 0.35rem;
+        background: var(--dms-surface);
+        border: 1px solid var(--dms-border);
+        border-radius: var(--dms-radius);
+        box-shadow: var(--dms-shadow);
+        margin-bottom: 0.75rem;
+        padding: 0.9rem 1rem;
+    }
+
+    .dms-td {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        white-space: normal;
+    }
+
+    .dms-td::before {
+        content: attr(data-label);
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--dms-text-muted);
+    }
+}

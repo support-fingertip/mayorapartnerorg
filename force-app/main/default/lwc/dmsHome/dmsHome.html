@@ -1,0 +1,63 @@
+<template>
+    <div class="dms-page">
+        <c-dms-page-header
+            title="Welcome back, Distributor"
+            subtitle="Here's what's happening across your business today"
+        ></c-dms-page-header>
+
+        <!-- KPI tiles -->
+        <div class="slds-grid slds-wrap dms-kpi-grid">
+            <template for:each={kpis} for:item="kpi">
+                <div
+                    key={kpi.id}
+                    class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-4 dms-kpi-col"
+                >
+                    <c-dms-kpi-card
+                        label={kpi.label}
+                        value={kpi.value}
+                        delta={kpi.delta}
+                        icon={kpi.icon}
+                        positive={kpi.positive}
+                    ></c-dms-kpi-card>
+                </div>
+            </template>
+        </div>
+
+        <!-- Two-column panels -->
+        <div class="slds-grid slds-wrap dms-panel-grid">
+            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2 dms-panel-col">
+                <article class="dms-panel">
+                    <h2 class="dms-panel__title">Recent Orders</h2>
+                    <ul class="dms-list">
+                        <template for:each={recentOrders} for:item="order">
+                            <li key={order.id} class="dms-list__row">
+                                <div class="dms-list__main">
+                                    <span class="dms-list__primary">{order.id}</span>
+                                    <span class="dms-list__secondary">{order.customer}</span>
+                                </div>
+                                <c-dms-status-badge status={order.status}></c-dms-status-badge>
+                            </li>
+                        </template>
+                    </ul>
+                </article>
+            </div>
+
+            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2 dms-panel-col">
+                <article class="dms-panel">
+                    <h2 class="dms-panel__title">Outstanding Invoices</h2>
+                    <ul class="dms-list">
+                        <template for:each={recentInvoices} for:item="inv">
+                            <li key={inv.id} class="dms-list__row">
+                                <div class="dms-list__main">
+                                    <span class="dms-list__primary">{inv.id}</span>
+                                    <span class="dms-list__secondary">{inv.customer}</span>
+                                </div>
+                                <c-dms-status-badge status={inv.status}></c-dms-status-badge>
+                            </li>
+                        </template>
+                    </ul>
+                </article>
+            </div>
+        </div>
+    </div>
+</template>

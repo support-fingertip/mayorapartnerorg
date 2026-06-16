@@ -1,0 +1,49 @@
+<template>
+    <div class="dms-page">
+        <c-dms-page-header title="Orders" subtitle="Track and manage sales orders"></c-dms-page-header>
+
+        <!-- Status filter tabs -->
+        <div class="dms-tabs" role="tablist">
+            <template for:each={statusTabs} for:item="tab">
+                <button
+                    key={tab.status}
+                    class={tab.class}
+                    data-status={tab.status}
+                    onclick={handleTab}
+                    type="button"
+                >
+                    {tab.status}
+                </button>
+            </template>
+        </div>
+
+        <!-- Responsive table -->
+        <div class="dms-table" role="table">
+            <div class="dms-table__head" role="row">
+                <span class="dms-th dms-th_id">Order #</span>
+                <span class="dms-th dms-th_customer">Customer</span>
+                <span class="dms-th dms-th_date">Date</span>
+                <span class="dms-th dms-th_items">Items</span>
+                <span class="dms-th dms-th_amount">Amount</span>
+                <span class="dms-th dms-th_status">Status</span>
+            </div>
+
+            <template for:each={filteredOrders} for:item="order">
+                <div key={order.id} class="dms-table__row" role="row">
+                    <span class="dms-td dms-td_id" data-label="Order #">{order.id}</span>
+                    <span class="dms-td dms-td_customer" data-label="Customer">{order.customer}</span>
+                    <span class="dms-td dms-td_date" data-label="Date">{order.date}</span>
+                    <span class="dms-td dms-td_items" data-label="Items">{order.items}</span>
+                    <span class="dms-td dms-td_amount" data-label="Amount">{order.amountLabel}</span>
+                    <span class="dms-td dms-td_status" data-label="Status">
+                        <c-dms-status-badge status={order.status}></c-dms-status-badge>
+                    </span>
+                </div>
+            </template>
+        </div>
+
+        <template lwc:if={isEmpty}>
+            <p class="dms-empty">No orders with this status.</p>
+        </template>
+    </div>
+</template>

@@ -1,0 +1,36 @@
+@import 'c/dmsTokens';
+
+.dms-badge {
+    display: inline-block;
+    padding: 0.2rem 0.65rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.dms-badge_success {
+    color: var(--dms-success);
+    background: var(--dms-success-bg);
+}
+
+.dms-badge_warning {
+    color: var(--dms-warning);
+    background: var(--dms-warning-bg);
+}
+
+.dms-badge_danger {
+    color: var(--dms-danger);
+    background: var(--dms-danger-bg);
+}
+
+.dms-badge_info {
+    color: var(--dms-info);
+    background: var(--dms-info-bg);
+}
+
+.dms-badge_neutral {
+    color: var(--dms-neutral);
+    background: var(--dms-neutral-bg);
+}

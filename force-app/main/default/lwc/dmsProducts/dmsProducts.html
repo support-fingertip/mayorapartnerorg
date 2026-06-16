@@ -1,0 +1,57 @@
+<template>
+    <div class="dms-page">
+        <c-dms-page-header title="Products" subtitle="Browse the Mayora product catalog"></c-dms-page-header>
+
+        <!-- Filter bar -->
+        <div class="dms-filters slds-grid slds-wrap">
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-3 dms-filters__col">
+                <lightning-input
+                    type="search"
+                    label="Search products"
+                    variant="label-hidden"
+                    placeholder="Search by name or SKU..."
+                    value={searchKey}
+                    onchange={handleSearch}
+                ></lightning-input>
+            </div>
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 dms-filters__col">
+                <lightning-combobox
+                    label="Category"
+                    variant="label-hidden"
+                    value={selectedCategory}
+                    options={categoryOptions}
+                    onchange={handleCategory}
+                ></lightning-combobox>
+            </div>
+        </div>
+
+        <p class="dms-result-count">{resultCount} products</p>
+
+        <!-- Product grid -->
+        <div class="slds-grid slds-wrap dms-grid">
+            <template for:each={filteredProducts} for:item="product">
+                <div
+                    key={product.id}
+                    class="slds-col slds-size_1-of-1 slds-small-size_1-of-2 slds-large-size_1-of-4 dms-grid__col"
+                >
+                    <article class="dms-card">
+                        <div class="dms-card__top">
+                            <span class="dms-card__category">{product.category}</span>
+                            <c-dms-status-badge status={product.status}></c-dms-status-badge>
+                        </div>
+                        <h3 class="dms-card__name">{product.name}</h3>
+                        <p class="dms-card__sku">SKU: {product.sku}</p>
+                        <div class="dms-card__footer">
+                            <span class="dms-card__price">{product.priceLabel}</span>
+                            <span class="dms-card__stock">{product.stock} {product.unit}</span>
+                        </div>
+                    </article>
+                </div>
+            </template>
+        </div>
+
+        <template lwc:if={isEmpty}>
+            <p class="dms-empty">No products match your filters.</p>
+        </template>
+    </div>
+</template>

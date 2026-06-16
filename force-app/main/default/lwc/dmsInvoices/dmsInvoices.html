@@ -1,0 +1,71 @@
+<template>
+    <div class="dms-page">
+        <c-dms-page-header title="Invoices" subtitle="Monitor billing and collections"></c-dms-page-header>
+
+        <!-- Totals summary -->
+        <div class="slds-grid slds-wrap dms-summary">
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 dms-summary__col">
+                <div class="dms-summary__tile">
+                    <p class="dms-summary__label">Total Billed</p>
+                    <p class="dms-summary__value">{totalLabel}</p>
+                </div>
+            </div>
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 dms-summary__col">
+                <div class="dms-summary__tile dms-summary__tile_paid">
+                    <p class="dms-summary__label">Paid</p>
+                    <p class="dms-summary__value">{paidLabel}</p>
+                </div>
+            </div>
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 dms-summary__col">
+                <div class="dms-summary__tile dms-summary__tile_outstanding">
+                    <p class="dms-summary__label">Outstanding</p>
+                    <p class="dms-summary__value">{outstandingLabel}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status filter tabs -->
+        <div class="dms-tabs" role="tablist">
+            <template for:each={statusTabs} for:item="tab">
+                <button
+                    key={tab.status}
+                    class={tab.class}
+                    data-status={tab.status}
+                    onclick={handleTab}
+                    type="button"
+                >
+                    {tab.status}
+                </button>
+            </template>
+        </div>
+
+        <!-- Responsive table -->
+        <div class="dms-table" role="table">
+            <div class="dms-table__head" role="row">
+                <span class="dms-th">Invoice #</span>
+                <span class="dms-th">Customer</span>
+                <span class="dms-th">Issued</span>
+                <span class="dms-th">Due</span>
+                <span class="dms-th">Amount</span>
+                <span class="dms-th">Status</span>
+            </div>
+
+            <template for:each={filteredInvoices} for:item="inv">
+                <div key={inv.id} class="dms-table__row" role="row">
+                    <span class="dms-td dms-td_id" data-label="Invoice #">{inv.id}</span>
+                    <span class="dms-td" data-label="Customer">{inv.customer}</span>
+                    <span class="dms-td" data-label="Issued">{inv.date}</span>
+                    <span class="dms-td" data-label="Due">{inv.due}</span>
+                    <span class="dms-td dms-td_amount" data-label="Amount">{inv.amountLabel}</span>
+                    <span class="dms-td" data-label="Status">
+                        <c-dms-status-badge status={inv.status}></c-dms-status-badge>
+                    </span>
+                </div>
+            </template>
+        </div>
+
+        <template lwc:if={isEmpty}>
+            <p class="dms-empty">No invoices with this status.</p>
+        </template>
+    </div>
+</template>
