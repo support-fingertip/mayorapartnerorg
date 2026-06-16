@@ -155,6 +155,41 @@
     color: #fff;
 }
 
+.dms-toggle__btn_brand {
+    background: #c01a12;
+    color: #fff;
+}
+
+/* Two-column panel row (charts / pie) */
+.dms-two {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.dms-two .dms-panel {
+    margin-bottom: 0;
+}
+
+@media (max-width: 900px) {
+    .dms-two {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Inline meta + link text */
+.dms-meta {
+    font-size: 0.8rem;
+    color: var(--dms-accent);
+    font-weight: 600;
+}
+
+.dms-link {
+    color: #0b6e99;
+    font-weight: 600;
+}
+
 /* Charts */
 .dms-charts {
     margin: 0 -0.75rem;
@@ -233,6 +268,21 @@
 .dms-tbl_range .dms-thead,
 .dms-tbl_range .dms-trow {
     grid-template-columns: 1.5fr 1.5fr 2fr;
+}
+
+.dms-tbl_tickets .dms-thead,
+.dms-tbl_tickets .dms-trow {
+    grid-template-columns: 1fr 3fr 1fr 1fr;
+}
+
+.dms-tbl_collection .dms-thead,
+.dms-tbl_collection .dms-trow {
+    grid-template-columns: 2fr 1.2fr 1.2fr 1.2fr 1fr;
+}
+
+.dms-tbl_outlets .dms-thead,
+.dms-tbl_outlets .dms-trow {
+    grid-template-columns: 2fr 1.5fr 1fr 1fr;
 }
 
 /* Coverage progress */

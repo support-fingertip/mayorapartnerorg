@@ -207,16 +207,183 @@
                         </template>
                     </div>
                 </section>
+
+                <!-- Tickets -->
+                <section class="dms-panel">
+                    <h2 class="dms-panel__title">Tickets</h2>
+                    <div class="dms-tbl dms-tbl_tickets">
+                        <div class="dms-thead">
+                            <span>Ticket ID</span><span>Subject</span>
+                            <span>Priority</span><span>Status</span>
+                        </div>
+                        <template for:each={p2Tickets} for:item="t">
+                            <div key={t.id} class="dms-trow">
+                                <span class="dms-link" data-label="Ticket ID">{t.id}</span>
+                                <span data-label="Subject">{t.subject}</span>
+                                <span data-label="Priority">
+                                    <c-dms-status-badge label={t.priority} theme={t.priorityTheme}></c-dms-status-badge>
+                                </span>
+                                <span data-label="Status">
+                                    <c-dms-status-badge label={t.status} theme={t.statusTheme}></c-dms-status-badge>
+                                </span>
+                            </div>
+                        </template>
+                    </div>
+                </section>
             </template>
 
             <!-- ======================== Secondary ======================== -->
             <template lwc:if={isSecondary}>
-                <section class="dms-panel dms-placeholder">
-                    <h2 class="dms-panel__title">Secondary Dashboard</h2>
-                    <p class="dms-placeholder__text">
-                        This dashboard is reserved for secondary-sales analytics. Share the
-                        reference screen and it will be built out to match P1 / P2.
-                    </p>
+                <div class="dms-kpis">
+                    <template for:each={secondaryKpisTop} for:item="kpi">
+                        <c-dms-kpi-card
+                            key={kpi.id}
+                            label={kpi.label}
+                            value={kpi.value}
+                            variant={kpi.variant}
+                        ></c-dms-kpi-card>
+                    </template>
+                </div>
+                <div class="dms-kpis">
+                    <template for:each={secondaryKpisMain} for:item="kpi">
+                        <c-dms-kpi-card
+                            key={kpi.id}
+                            label={kpi.label}
+                            value={kpi.value}
+                            variant={kpi.variant}
+                        ></c-dms-kpi-card>
+                    </template>
+                </div>
+
+                <!-- Beat-wise + Outlet Type -->
+                <div class="dms-two">
+                    <section class="dms-panel">
+                        <h2 class="dms-panel__title">Beat-wise Sales Value (₹ L)</h2>
+                        <c-dms-column-chart
+                            scheme="blue"
+                            max={beatMax}
+                            ticks={beatTicks}
+                            items={beatSales}
+                        ></c-dms-column-chart>
+                    </section>
+                    <section class="dms-panel">
+                        <h2 class="dms-panel__title">Outlet Type Distribution</h2>
+                        <c-dms-pie-chart items={outletTypes}></c-dms-pie-chart>
+                    </section>
+                </div>
+
+                <!-- Top 5 Customers -->
+                <section class="dms-panel">
+                    <h2 class="dms-panel__title">Top 5 Customers by Sales Value (₹ L)</h2>
+                    <c-dms-bar-chart
+                        scheme="blue"
+                        max={customerMax}
+                        ticks={customerTicks}
+                        items={topCustomers}
+                    ></c-dms-bar-chart>
+                </section>
+
+                <!-- Range Selling -->
+                <section class="dms-panel">
+                    <div class="dms-panel__head">
+                        <h2 class="dms-panel__title">Range Selling</h2>
+                        <div class="dms-toggle">
+                            <template for:each={rangeDimButtons} for:item="btn">
+                                <button
+                                    key={btn.dim}
+                                    class={btn.class}
+                                    data-dim={btn.dim}
+                                    onclick={handleRangeDim}
+                                    type="button"
+                                >
+                                    {btn.label}
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+                    <div class="dms-tbl dms-tbl_range">
+                        <div class="dms-thead">
+                            <span>Name</span><span>Outlets Covered</span><span>Coverage %</span>
+                        </div>
+                        <template for:each={rangeRows} for:item="row">
+                            <div key={row.key} class="dms-trow">
+                                <span class="dms-strong" data-label="Name">{row.name}</span>
+                                <span data-label="Outlets Covered">{row.covered}</span>
+                                <span class="dms-coverage" data-label="Coverage %">
+                                    <span class="dms-coverage__track">
+                                        <span class="dms-coverage__bar" style={row.barStyle}></span>
+                                    </span>
+                                    <span class="dms-coverage__pct">{row.pctLabel}</span>
+                                </span>
+                            </div>
+                        </template>
+                    </div>
+                </section>
+
+                <!-- Secondary Collection -->
+                <section class="dms-panel">
+                    <h2 class="dms-panel__title">Secondary Collection</h2>
+                    <div class="dms-tbl dms-tbl_collection">
+                        <div class="dms-thead">
+                            <span>Customer</span><span>Invoice No.</span><span class="dms-num">Invoice Amt</span>
+                            <span class="dms-num">Collected</span><span>Status</span>
+                        </div>
+                        <template for:each={secondaryCollection} for:item="c">
+                            <div key={c.key} class="dms-trow">
+                                <span class="dms-strong" data-label="Customer">{c.customer}</span>
+                                <span class="dms-link" data-label="Invoice No.">{c.inv}</span>
+                                <span class="dms-num" data-label="Invoice Amt">{c.amt}</span>
+                                <span class="dms-num" data-label="Collected">{c.collected}</span>
+                                <span data-label="Status">
+                                    <c-dms-status-badge label={c.status} theme={c.statusTheme}></c-dms-status-badge>
+                                </span>
+                            </div>
+                        </template>
+                    </div>
+                </section>
+
+                <!-- New Outlets -->
+                <section class="dms-panel">
+                    <div class="dms-panel__head">
+                        <h2 class="dms-panel__title">New Outlets</h2>
+                        <span class="dms-meta">{newOutletsLabel}</span>
+                    </div>
+                    <div class="dms-tbl dms-tbl_outlets">
+                        <div class="dms-thead">
+                            <span>Outlet Name</span><span>Beat</span><span>Type</span><span>Date Added</span>
+                        </div>
+                        <template for:each={newOutlets} for:item="o">
+                            <div key={o.key} class="dms-trow">
+                                <span class="dms-strong" data-label="Outlet Name">{o.name}</span>
+                                <span data-label="Beat">{o.beat}</span>
+                                <span data-label="Type">{o.type}</span>
+                                <span data-label="Date Added">{o.date}</span>
+                            </div>
+                        </template>
+                    </div>
+                </section>
+
+                <!-- Tickets -->
+                <section class="dms-panel">
+                    <h2 class="dms-panel__title">Tickets</h2>
+                    <div class="dms-tbl dms-tbl_tickets">
+                        <div class="dms-thead">
+                            <span>Ticket ID</span><span>Subject</span>
+                            <span>Priority</span><span>Status</span>
+                        </div>
+                        <template for:each={secondaryTickets} for:item="t">
+                            <div key={t.id} class="dms-trow">
+                                <span class="dms-link" data-label="Ticket ID">{t.id}</span>
+                                <span data-label="Subject">{t.subject}</span>
+                                <span data-label="Priority">
+                                    <c-dms-status-badge label={t.priority} theme={t.priorityTheme}></c-dms-status-badge>
+                                </span>
+                                <span data-label="Status">
+                                    <c-dms-status-badge label={t.status} theme={t.statusTheme}></c-dms-status-badge>
+                                </span>
+                            </div>
+                        </template>
+                    </div>
                 </section>
             </template>
         </div>

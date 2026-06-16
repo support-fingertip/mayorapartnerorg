@@ -43,6 +43,34 @@ describe('c-dms-home', () => {
         expect(element.shadowRoot.querySelector('.dms-tbl_range')).not.toBeNull();
     });
 
+    it('renders P2 tickets', async () => {
+        const element = createElement('c-dms-home', { is: DmsHome });
+        document.body.appendChild(element);
+
+        [...element.shadowRoot.querySelectorAll('.dms-subtab')]
+            .find((t) => t.dataset.dash === 'p2')
+            .click();
+        await flush();
+
+        expect(element.shadowRoot.querySelector('.dms-tbl_tickets')).not.toBeNull();
+    });
+
+    it('renders the Secondary dashboard with KPIs, charts and tables', async () => {
+        const element = createElement('c-dms-home', { is: DmsHome });
+        document.body.appendChild(element);
+
+        [...element.shadowRoot.querySelectorAll('.dms-subtab')]
+            .find((t) => t.dataset.dash === 'secondary')
+            .click();
+        await flush();
+
+        expect(element.shadowRoot.querySelectorAll('c-dms-kpi-card').length).toBe(9);
+        expect(element.shadowRoot.querySelector('c-dms-column-chart')).not.toBeNull();
+        expect(element.shadowRoot.querySelector('c-dms-pie-chart')).not.toBeNull();
+        expect(element.shadowRoot.querySelector('.dms-tbl_collection')).not.toBeNull();
+        expect(element.shadowRoot.querySelector('.dms-tbl_outlets')).not.toBeNull();
+    });
+
     it('changes the Range Selling dimension when a toggle is clicked', async () => {
         const element = createElement('c-dms-home', { is: DmsHome });
         document.body.appendChild(element);

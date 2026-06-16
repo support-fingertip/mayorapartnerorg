@@ -1,6 +1,7 @@
 /* Mayora DMS brand tokens — keep in sync across DMS components. */
 :host {
     --dms-navy: #16202c;
+    --dms-brand: #c01a12;
     --dms-accent: #6d28d9;
     --dms-warning: #c47d00;
     --dms-danger: #ba0517;
@@ -38,6 +39,10 @@
 
 .dms-kpi__value_default {
     color: var(--dms-navy);
+}
+
+.dms-kpi__value_brand {
+    color: var(--dms-brand);
 }
 
 .dms-kpi__value_accent {

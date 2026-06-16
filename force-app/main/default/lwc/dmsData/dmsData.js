@@ -177,7 +177,83 @@ const P2_DASHBOARD = {
             { name: 'MLK-CHE-130', covered: '31 / 45', pct: 69 }, { name: 'KOP-JAR-140', covered: '27 / 45', pct: 60 },
             { name: 'BNG-CHOC-24', covered: '23 / 45', pct: 51 }, { name: 'JME-CHK-75', covered: '18 / 45', pct: 40 }
         ]
-    }
+    },
+    tickets: [
+        { id: 'TKT-001', subject: 'Invoice discrepancy — North Zone SD', priority: 'High', priorityTheme: 'danger', status: 'Open', statusTheme: 'info' },
+        { id: 'TKT-002', subject: 'Scheme credit not applied — East SD', priority: 'Medium', priorityTheme: 'warning', status: 'In Review', statusTheme: 'warning' },
+        { id: 'TKT-003', subject: 'Return approval delay — West SD', priority: 'Low', priorityTheme: 'neutral', status: 'Resolved', statusTheme: 'success' }
+    ]
+};
+
+/* ------------------------ Home: Secondary Dashboard ----------------------- */
+
+const SECONDARY_DASHBOARD = {
+    kpisTop: [
+        { id: 'ao', label: 'Active Outlets', value: '45', variant: 'brand' },
+        { id: 'beats', label: 'No. of Beats', value: '6', variant: 'brand' },
+        { id: 'users', label: 'No. of Users', value: '8', variant: 'brand' }
+    ],
+    kpisMain: [
+        { id: 'noo', label: 'No. of Orders', value: '38', variant: 'brand' },
+        { id: 'noi', label: 'No. of Invoices', value: '34', variant: 'brand' },
+        { id: 'nor', label: 'No. of Returns', value: '5', variant: 'brand' },
+        { id: 'ov', label: 'Order Value', value: formatLakh(649000), variant: 'brand' },
+        { id: 'iv', label: 'Invoice Value', value: formatLakh(593000), variant: 'brand' },
+        { id: 'rv', label: 'Return Value', value: formatLakh(56000), variant: 'brand' }
+    ],
+    beatSales: [
+        { label: 'Andheri West', value: 1.05 }, { label: 'Bandra-Kurla', value: 1.5 },
+        { label: 'Borivali North', value: 0.78 }, { label: 'Malad-Goregaon', value: 0.92 },
+        { label: 'Kandivali', value: 0.62 }, { label: 'Jogeshwari', value: 0.5 }
+    ],
+    outletTypes: [
+        { label: 'Kirana', value: 18 }, { label: 'Supermarket', value: 10 },
+        { label: 'Wholesale', value: 8 }, { label: 'Bakery', value: 5 }, { label: 'Tea Shop', value: 4 }
+    ],
+    topCustomers: [
+        { label: 'ABC Mart (Andheri W.)', value: 0.98 }, { label: 'City Grocery (Bandra E.)', value: 0.82 },
+        { label: 'North Zone SD (Mira-Bhayander)', value: 0.7 }, { label: 'Quick Mart (Borivali)', value: 0.6 },
+        { label: 'Star Kirana (Malad)', value: 0.5 }
+    ],
+    rangeSelling: {
+        brand: [
+            { name: 'Malkist', covered: '38 / 45', pct: 84 }, { name: 'Kopiko', covered: '30 / 45', pct: 67 },
+            { name: 'Beng-Beng', covered: '25 / 45', pct: 56 }, { name: 'JoyMee', covered: '20 / 45', pct: 44 },
+            { name: 'Coffee Joy', covered: '15 / 45', pct: 33 }, { name: 'Danisa', covered: '12 / 45', pct: 27 },
+            { name: 'Choki-Choki', covered: '10 / 45', pct: 22 }
+        ],
+        subBrand: [
+            { name: 'Malkist Crackers', covered: '34 / 45', pct: 76 }, { name: 'Malkist Choco', covered: '22 / 45', pct: 49 },
+            { name: 'Kopiko Classic', covered: '28 / 45', pct: 62 }, { name: 'Beng-Beng Share', covered: '19 / 45', pct: 42 }
+        ],
+        brandAlias: [
+            { name: 'MLK', covered: '38 / 45', pct: 84 }, { name: 'KPK', covered: '30 / 45', pct: 67 },
+            { name: 'BNG', covered: '25 / 45', pct: 56 }, { name: 'JME', covered: '20 / 45', pct: 44 }
+        ],
+        sku: [
+            { name: 'MLK-CHE-130', covered: '31 / 45', pct: 69 }, { name: 'KOP-JAR-140', covered: '27 / 45', pct: 60 },
+            { name: 'BNG-CHOC-24', covered: '23 / 45', pct: 51 }, { name: 'JME-CHK-75', covered: '18 / 45', pct: 40 }
+        ]
+    },
+    secondaryCollection: [
+        { customer: 'ABC Mart (Andheri W.)', inv: 'INV-1024', amt: formatCurrency(24768), collected: formatCurrency(24768), status: 'Collected', statusTheme: 'success' },
+        { customer: 'City Grocery (Bandra E.)', inv: 'INV-1023', amt: formatCurrency(89280), collected: formatCurrency(60000), status: 'Partial', statusTheme: 'warning' },
+        { customer: 'North Zone SD (Mira-Bhayander)', inv: 'INV-1022', amt: formatCurrency(38016), collected: '—', status: 'Pending', statusTheme: 'danger' },
+        { customer: 'Quick Mart (Borivali)', inv: 'INV-1021', amt: formatCurrency(12672), collected: formatCurrency(12672), status: 'Collected', statusTheme: 'success' },
+        { customer: 'Star Kirana (Malad)', inv: 'INV-1019', amt: formatCurrency(31200), collected: formatCurrency(31200), status: 'Collected', statusTheme: 'success' }
+    ],
+    newOutletsLabel: 'This JC: 4 new',
+    newOutlets: [
+        { name: 'Sunrise Kirana (Goregaon W.)', beat: 'Malad–Goregaon', type: 'Kirana', date: '03 Jun 2026' },
+        { name: 'Fresh Bake (Kandivali E.)', beat: 'Kandivali', type: 'Bakery', date: '01 Jun 2026' },
+        { name: 'Metro Wholesale (Andheri)', beat: 'Andheri West', type: 'Wholesale', date: '28 May 2026' },
+        { name: 'Coffee Corner (Bandra)', beat: 'Bandra–Kurla', type: 'Tea Shop', date: '26 May 2026' }
+    ],
+    tickets: [
+        { id: 'TKT-004', subject: 'Overcharge on INV-1023 — City Grocery', priority: 'High', priorityTheme: 'danger', status: 'Open', statusTheme: 'info' },
+        { id: 'TKT-005', subject: 'New outlet approval — Sunrise Kirana', priority: 'Medium', priorityTheme: 'warning', status: 'In Review', statusTheme: 'warning' },
+        { id: 'TKT-006', subject: 'Beat route change request — Kandivali', priority: 'Low', priorityTheme: 'neutral', status: 'Resolved', statusTheme: 'success' }
+    ]
 };
 
 export function getP1Dashboard() {
@@ -186,6 +262,10 @@ export function getP1Dashboard() {
 
 export function getP2Dashboard() {
     return clone(P2_DASHBOARD);
+}
+
+export function getSecondaryDashboard() {
+    return clone(SECONDARY_DASHBOARD);
 }
 
 /** Period selector options shared across dashboards. */

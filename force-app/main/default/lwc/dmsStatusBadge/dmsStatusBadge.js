@@ -26,13 +26,17 @@ const THEME_MAP = {
 export default class DmsStatusBadge extends LightningElement {
     @api label;
     @api status;
+    /** Optional explicit theme (success|warning|danger|info|neutral) that
+     *  overrides the auto-mapping — used where the same word needs a
+     *  different color by context (e.g. collection "Pending" = danger). */
+    @api theme;
 
-    get theme() {
-        return THEME_MAP[(this.status || this.label || '').toLowerCase()] || 'neutral';
+    get resolvedTheme() {
+        return this.theme || THEME_MAP[(this.status || this.label || '').toLowerCase()] || 'neutral';
     }
 
     get badgeClass() {
-        return `dms-badge dms-badge_${this.theme}`;
+        return `dms-badge dms-badge_${this.resolvedTheme}`;
     }
 
     get displayText() {

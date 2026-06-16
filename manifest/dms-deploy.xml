@@ -3,6 +3,8 @@
     <types>
         <members>dmsData</members>
         <members>dmsBarChart</members>
+        <members>dmsColumnChart</members>
+        <members>dmsPieChart</members>
         <members>dmsPageHeader</members>
         <members>dmsKpiCard</members>
         <members>dmsStatusBadge</members>
