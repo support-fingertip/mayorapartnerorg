@@ -172,7 +172,7 @@
                             <div class="dms-no__credit-bar" style={creditBarStyle}></div>
                         </div>
                     </div>
-                    <button class="dms-btn dms-no__cart" type="button">
+                    <button class="dms-btn dms-no__cart" type="button" onclick={openCart}>
                         <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <circle cx="9" cy="21" r="1"></circle>
                             <circle cx="20" cy="21" r="1"></circle>
@@ -249,6 +249,55 @@
                         </article>
                     </template>
                 </div>
+
+                <!-- Cart drawer -->
+                <template lwc:if={cartOpen}>
+                    <div class="dms-cart__overlay" onclick={closeCart}></div>
+                    <aside class="dms-cart">
+                        <header class="dms-cart__head">
+                            <h2>{cartTitle}</h2>
+                            <button class="dms-cart__close" type="button" onclick={closeCart} title="Close">
+                                <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+                        </header>
+
+                        <div class="dms-cart__items">
+                            <template for:each={cartItems} for:item="i">
+                                <div key={i.key} class="dms-cart__item">
+                                    <div class="dms-cart__info">
+                                        <span class="dms-cart__name">{i.name}</span>
+                                        <span class="dms-cart__pack">{i.packCaseLabel}</span>
+                                    </div>
+                                    <div class="dms-stepper">
+                                        <button class="dms-stepper__btn" data-id={i.id} data-dir="down" onclick={handleStep} type="button">−</button>
+                                        <span class="dms-stepper__qty">{i.qty}</span>
+                                        <button class="dms-stepper__btn" data-id={i.id} data-dir="up" onclick={handleStep} type="button">+</button>
+                                    </div>
+                                    <div class="dms-cart__line">
+                                        <span class="dms-cart__amt">{i.lineLabel}</span>
+                                        <span class="dms-cart__units">{i.unitsLabel}</span>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
+                        <div class="dms-cart__summary">
+                            <div class="dms-cart__row"><span>Total Cases</span><span class="dms-strong">{totalCases}</span></div>
+                            <div class="dms-cart__row"><span>Total Units</span><span class="dms-strong">{totalUnitsLabel}</span></div>
+                            <div class="dms-cart__row"><span>Subtotal</span><span class="dms-strong">{subtotalLabel}</span></div>
+                            <div class="dms-cart__row"><span>Scheme Discount</span><span class="dms-cart__disc">Applied at invoice</span></div>
+                            <div class="dms-cart__row dms-cart__row_total"><span>Order Total</span><span>{orderTotalLabel}</span></div>
+                        </div>
+
+                        <div class="dms-cart__actions">
+                            <button class="dms-btn dms-btn_outline" type="button">Save as Draft</button>
+                            <button class="dms-btn" type="button">Submit for Approval</button>
+                        </div>
+                    </aside>
+                </template>
             </div>
         </template>
     </div>

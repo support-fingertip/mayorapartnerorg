@@ -61,4 +61,28 @@ describe('c-dms-orders', () => {
         expect(qty.textContent).toBe('1');
         expect(element.shadowRoot.querySelector('.dms-no__cart').textContent).toContain('1');
     });
+
+    it('opens the cart drawer with line items and totals', async () => {
+        const element = createElement('c-dms-orders', { is: DmsOrders });
+        document.body.appendChild(element);
+
+        element.shadowRoot.querySelector('.dms-btn').click();
+        await flush();
+
+        // add two cases of the first product
+        const plus = element.shadowRoot.querySelector('.dms-stepper__btn[data-dir="up"]');
+        plus.click();
+        await flush();
+        plus.click();
+        await flush();
+
+        element.shadowRoot.querySelector('.dms-no__cart').click();
+        await flush();
+
+        expect(element.shadowRoot.querySelector('.dms-cart')).not.toBeNull();
+        expect(element.shadowRoot.querySelectorAll('.dms-cart__item').length).toBe(1);
+        expect(element.shadowRoot.querySelector('.dms-cart__head h2').textContent).toBe(
+            'Cart (1 products)'
+        );
+    });
 });

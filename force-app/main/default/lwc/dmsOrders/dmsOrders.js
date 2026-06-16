@@ -36,6 +36,7 @@ export default class DmsOrders extends LightningElement {
     orderBrand = ALL;
     orderSubBrand = ALL;
     orderSearch = '';
+    cartOpen = false;
     creditLimit = ORDER_CREDIT_LIMIT;
     activeSchemes = ORDER_ACTIVE_SCHEMES;
 
@@ -221,6 +222,43 @@ export default class DmsOrders extends LightningElement {
             const qty = Math.max(0, p.qty + (dir === 'up' ? 1 : -1));
             return { ...p, qty };
         });
+    }
+
+    /* ------------------------------ cart ------------------------------ */
+    openCart() {
+        this.cartOpen = true;
+    }
+    closeCart() {
+        this.cartOpen = false;
+    }
+
+    get cartTitle() {
+        return `Cart (${this.cartCount} products)`;
+    }
+
+    get cartItems() {
+        return this.orderProducts
+            .filter((p) => p.qty > 0)
+            .map((p) => ({
+                ...p,
+                key: p.id,
+                packCaseLabel: `${p.packSize} · ${formatCurrency(p.casePrice)}/case`,
+                lineLabel: formatCurrency(p.qty * p.casePrice),
+                unitsLabel: `${formatNumber(p.qty * p.pcs)} units`
+            }));
+    }
+
+    get totalCases() {
+        return this.orderProducts.reduce((sum, p) => sum + p.qty, 0);
+    }
+    get totalUnitsLabel() {
+        return formatNumber(this.orderProducts.reduce((sum, p) => sum + p.qty * p.pcs, 0));
+    }
+    get subtotalLabel() {
+        return formatCurrency(this.currentOrderValue);
+    }
+    get orderTotalLabel() {
+        return formatCurrency(this.currentOrderValue);
     }
 
     handleOrderBrand(event) {
