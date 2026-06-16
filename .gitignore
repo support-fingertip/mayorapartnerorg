@@ -1,0 +1,39 @@
+# Salesforce CLI
+.sf/
+.sfdx/
+.localdevserver/
+
+# LWC source maps
+**/lwc/**/*.css.map
+**/lwc/**/*.js.map
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Node
+node_modules/
+package-lock.json
+yarn.lock
+
+# Auth / secrets
+authfile.txt
+*.key
+*.crt
+server.key
+consumer.key
+
+# Deployment artifacts
+deployment-result.json
+changed-files.txt
+delta-package/
+destructiveChanges.xml

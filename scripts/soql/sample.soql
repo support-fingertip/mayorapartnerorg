@@ -1,0 +1,6 @@
+-- Sample SOQL — run with:
+--   sf data query --query "SELECT Id, Name FROM Account LIMIT 10" --target-org <alias>
+SELECT Id, Name, CreatedDate
+FROM Account
+ORDER BY CreatedDate DESC
+LIMIT 10
