@@ -42,14 +42,12 @@ export default class DmsProducts extends LightningElement {
     }
 
     /* -------------------------------- tabs -------------------------------- */
-    get subTabs() {
-        return [
-            { id: 'products', label: 'Products', icon: 'utility:product_item' },
-            { id: 'schemes', label: 'Schemes & Offers', icon: 'utility:tags' }
-        ].map((t) => ({
-            ...t,
-            class: t.id === this.activeTab ? 'dms-subtab dms-subtab_active' : 'dms-subtab'
-        }));
+    get productsTabClass() {
+        return this.isProducts ? 'dms-subtab dms-subtab_active' : 'dms-subtab';
+    }
+
+    get schemesTabClass() {
+        return this.isSchemes ? 'dms-subtab dms-subtab_active' : 'dms-subtab';
     }
 
     get isProducts() {

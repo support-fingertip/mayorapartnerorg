@@ -43,8 +43,28 @@
     white-space: nowrap;
 }
 
-.dms-subtab__icon {
-    --sds-c-icon-color-foreground-default: currentColor;
+/* Inline SVG icons */
+.dms-ic {
+    width: 1.05rem;
+    height: 1.05rem;
+    flex-shrink: 0;
+}
+
+.dms-ic_gift {
+    width: 1.3rem;
+    height: 1.3rem;
+    color: var(--dms-accent);
+}
+
+.dms-ic_sm {
+    width: 0.85rem;
+    height: 0.85rem;
+}
+
+.dms-scheme__chevron {
+    width: 1.1rem;
+    height: 1.1rem;
+    color: var(--dms-text-muted);
 }
 
 .dms-subtab_active {
