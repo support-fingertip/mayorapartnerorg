@@ -1,57 +1,159 @@
 <template>
-    <div class="dms-page">
-        <c-dms-page-header title="Products" subtitle="Browse the Mayora product catalog"></c-dms-page-header>
-
-        <!-- Filter bar -->
-        <div class="dms-filters slds-grid slds-wrap">
-            <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-3 dms-filters__col">
-                <lightning-input
-                    type="search"
-                    label="Search products"
-                    variant="label-hidden"
-                    placeholder="Search by name or SKU..."
-                    value={searchKey}
-                    onchange={handleSearch}
-                ></lightning-input>
-            </div>
-            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 dms-filters__col">
-                <lightning-combobox
-                    label="Category"
-                    variant="label-hidden"
-                    value={selectedCategory}
-                    options={categoryOptions}
-                    onchange={handleCategory}
-                ></lightning-combobox>
-            </div>
-        </div>
-
-        <p class="dms-result-count">{resultCount} products</p>
-
-        <!-- Product grid -->
-        <div class="slds-grid slds-wrap dms-grid">
-            <template for:each={filteredProducts} for:item="product">
-                <div
-                    key={product.id}
-                    class="slds-col slds-size_1-of-1 slds-small-size_1-of-2 slds-large-size_1-of-4 dms-grid__col"
+    <div class="dms-products">
+        <!-- Sub-tabs -->
+        <div class="dms-subtabs" role="tablist">
+            <template for:each={subTabs} for:item="tab">
+                <button
+                    key={tab.id}
+                    class={tab.class}
+                    data-tab={tab.id}
+                    onclick={handleTab}
+                    type="button"
                 >
-                    <article class="dms-card">
-                        <div class="dms-card__top">
-                            <span class="dms-card__category">{product.category}</span>
-                            <c-dms-status-badge status={product.status}></c-dms-status-badge>
-                        </div>
-                        <h3 class="dms-card__name">{product.name}</h3>
-                        <p class="dms-card__sku">SKU: {product.sku}</p>
-                        <div class="dms-card__footer">
-                            <span class="dms-card__price">{product.priceLabel}</span>
-                            <span class="dms-card__stock">{product.stock} {product.unit}</span>
-                        </div>
-                    </article>
-                </div>
+                    <lightning-icon icon-name={tab.icon} size="x-small" class="dms-subtab__icon"></lightning-icon>
+                    {tab.label}
+                </button>
             </template>
         </div>
 
-        <template lwc:if={isEmpty}>
-            <p class="dms-empty">No products match your filters.</p>
-        </template>
+        <div class="dms-body">
+            <!-- ========================= Products ======================== -->
+            <template lwc:if={isProducts}>
+                <div class="dms-filters">
+                    <div class="dms-filter">
+                        <span class="dms-filter__label">Brand:</span>
+                        <lightning-combobox
+                            variant="label-hidden"
+                            value={brand}
+                            options={brandOptions}
+                            onchange={handleBrand}
+                        ></lightning-combobox>
+                    </div>
+                    <div class="dms-filter">
+                        <span class="dms-filter__label">Sub-Brand:</span>
+                        <lightning-combobox
+                            variant="label-hidden"
+                            value={subBrand}
+                            options={subBrandOptions}
+                            onchange={handleSubBrand}
+                        ></lightning-combobox>
+                    </div>
+                    <div class="dms-filter">
+                        <span class="dms-filter__label">Alias:</span>
+                        <lightning-combobox
+                            variant="label-hidden"
+                            value={alias}
+                            options={aliasOptions}
+                            onchange={handleAlias}
+                        ></lightning-combobox>
+                    </div>
+                    <div class="dms-filter dms-filter_search">
+                        <lightning-input
+                            type="search"
+                            variant="label-hidden"
+                            placeholder="Search SKU or product..."
+                            value={searchKey}
+                            onchange={handleSearch}
+                        ></lightning-input>
+                    </div>
+                </div>
+
+                <div class="dms-tbl dms-tbl_products">
+                    <div class="dms-thead">
+                        <span>SKU Code</span><span>Product Name</span><span>Brand</span>
+                        <span>Sub-Brand</span><span>Brand Alias</span><span>Pack Size</span>
+                        <span class="dms-num">MRP/Case</span><span class="dms-num">Dist.Price/Case</span>
+                        <span class="dms-num">Units/Case</span><span class="dms-num">Price/Unit</span>
+                    </div>
+                    <template for:each={products} for:item="p">
+                        <div key={p.key} class="dms-trow">
+                            <span class="dms-code" data-label="SKU Code">{p.sku}</span>
+                            <span class="dms-product" data-label="Product Name">
+                                <span class="dms-product__name">{p.name}</span>
+                                <span class="dms-product__code">{p.code}</span>
+                            </span>
+                            <span data-label="Brand">
+                                <span class="dms-brand" style={p.brandStyle}>{p.brand}</span>
+                            </span>
+                            <span data-label="Sub-Brand">{p.subBrand}</span>
+                            <span data-label="Brand Alias">{p.alias}</span>
+                            <span data-label="Pack Size">{p.packSize}</span>
+                            <span class="dms-num dms-strong" data-label="MRP/Case">{p.mrpLabel}</span>
+                            <span class="dms-num dms-strong" data-label="Dist.Price/Case">{p.distLabel}</span>
+                            <span class="dms-num" data-label="Units/Case">{p.units}</span>
+                            <span class="dms-num dms-muted" data-label="Price/Unit">{p.ppuLabel}</span>
+                        </div>
+                    </template>
+                </div>
+                <p class="dms-count">{productCountLabel}</p>
+            </template>
+
+            <!-- ====================== Schemes & Offers =================== -->
+            <template lwc:if={isSchemes}>
+                <div class="dms-filters">
+                    <div class="dms-filter">
+                        <span class="dms-filter__label">List:</span>
+                        <lightning-combobox
+                            variant="label-hidden"
+                            value={schemeType}
+                            options={schemeTypeOptions}
+                            onchange={handleSchemeType}
+                        ></lightning-combobox>
+                    </div>
+                    <div class="dms-filter">
+                        <span class="dms-filter__label">Status:</span>
+                        <lightning-combobox
+                            variant="label-hidden"
+                            value={schemeStatus}
+                            options={schemeStatusOptions}
+                            onchange={handleSchemeStatus}
+                        ></lightning-combobox>
+                    </div>
+                    <div class="dms-filter dms-filter_search">
+                        <lightning-input
+                            type="search"
+                            variant="label-hidden"
+                            placeholder="Search scheme or product..."
+                            value={schemeSearch}
+                            onchange={handleSchemeSearch}
+                        ></lightning-input>
+                    </div>
+                </div>
+
+                <div class="dms-chips">
+                    <template for:each={schemeSummary} for:item="c">
+                        <div key={c.id} class="dms-chip">
+                            <span class="dms-chip__label">{c.label}:</span>
+                            <span class={c.valueClass}>{c.value}</span>
+                        </div>
+                    </template>
+                </div>
+
+                <div class="dms-schemes">
+                    <template for:each={filteredSchemes} for:item="s">
+                        <article key={s.id} class="dms-scheme">
+                            <div class="dms-scheme__icon">
+                                <lightning-icon icon-name="utility:gift" size="small"></lightning-icon>
+                            </div>
+                            <div class="dms-scheme__body">
+                                <div class="dms-scheme__head">
+                                    <span class="dms-scheme__name">{s.name}</span>
+                                    <c-dms-status-badge label={s.type} theme={s.typeTheme}></c-dms-status-badge>
+                                    <c-dms-status-badge label={s.status} theme={s.statusTheme}></c-dms-status-badge>
+                                </div>
+                                <p class="dms-scheme__desc">{s.desc}</p>
+                            </div>
+                            <div class="dms-scheme__meta">
+                                <span class="dms-scheme__date">
+                                    <lightning-icon icon-name="utility:clock" size="xx-small"></lightning-icon>
+                                    {s.date}
+                                </span>
+                                <lightning-icon icon-name="utility:chevronright" size="x-small"></lightning-icon>
+                            </div>
+                        </article>
+                    </template>
+                </div>
+            </template>
+        </div>
     </div>
 </template>

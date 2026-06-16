@@ -21,16 +21,41 @@ const formatLakh = (value) => `₹${(value / 100000).toFixed(2)}L`;
 
 /* ----------------------------- Catalog screens ---------------------------- */
 
-const PRODUCTS = [
-    { id: 'P-1001', name: 'Malkist Cheese Crackers 130g', category: 'Biscuit', sku: 'MLK-CHE-130', price: 1450, stock: 1240, unit: 'carton', status: 'In Stock' },
-    { id: 'P-1002', name: 'Beng-Beng Wafer Chocolate', category: 'Wafer', sku: 'BNG-CHOC-24', price: 1800, stock: 320, unit: 'carton', status: 'In Stock' },
-    { id: 'P-1003', name: 'Malkist Double Chocolatey 130g', category: 'Biscuit', sku: 'MLK-CHO-130', price: 1575, stock: 48, unit: 'carton', status: 'Low Stock' },
-    { id: 'P-1004', name: 'Danisa Butter Cookies 200g', category: 'Biscuit', sku: 'DAN-BUT-200', price: 6200, stock: 0, unit: 'carton', status: 'Out of Stock' },
-    { id: 'P-1005', name: 'Kopiko Coffee Candy Jar 140g', category: 'Confectionery', sku: 'KOP-JAR-140', price: 2780, stock: 860, unit: 'carton', status: 'In Stock' },
-    { id: 'P-1006', name: 'JoyMee Chicken Noodles 75g', category: 'Noodles', sku: 'JME-CHK-75', price: 2130, stock: 95, unit: 'carton', status: 'Low Stock' },
-    { id: 'P-1007', name: 'Coffee Joy Biscuit 45g', category: 'Biscuit', sku: 'CFJ-BIS-45', price: 1990, stock: 540, unit: 'carton', status: 'In Stock' },
-    { id: 'P-1008', name: 'Choki-Choki Chocolate Paste', category: 'Confectionery', sku: 'CHK-CHOC-50', price: 1320, stock: 12, unit: 'carton', status: 'Low Stock' }
+const CATALOG = [
+    { sku: 'MLK-CHE-130', name: 'Malkist Cheese Crackers', code: 'MAY-001', brand: 'Malkist', subBrand: 'Malkist Cheese', alias: 'Malkist Cracker Cheese', packSize: '130g', mrp: 30, dist: 576, units: 24 },
+    { sku: 'MLK-CHO-130', name: 'Malkist Double Chocolatey', code: 'MAY-002', brand: 'Malkist', subBrand: 'Malkist Choco', alias: 'Malkist Chocolate', packSize: '130g', mrp: 30, dist: 576, units: 24 },
+    { sku: 'MLK-CAP-130', name: 'Malkist Cappuccino Crackers', code: 'MAY-003', brand: 'Malkist', subBrand: 'Malkist Cappuccino', alias: 'Malkist Coffee', packSize: '130g', mrp: 30, dist: 576, units: 24 },
+    { sku: 'CFJ-100', name: 'Coffee Joy Thin Biscuit', code: 'MAY-004', brand: 'Coffee Joy', subBrand: 'Coffee Joy Thin', alias: 'Coffee Joy Biscuit', packSize: '100g', mrp: 20, dist: 576, units: 36 },
+    { sku: 'RMG-250', name: 'Roma Marie Gold', code: 'MAY-005', brand: 'Roma', subBrand: 'Roma Marie Gold', alias: 'Roma Marie', packSize: '250g', mrp: 35, dist: 672, units: 24 },
+    { sku: 'SOL-STR-90', name: "Slai O'lai Strawberry", code: 'MAY-006', brand: "Slai O'lai", subBrand: "Slai O'lai Strawberry", alias: 'Sla Olay', packSize: '90g', mrp: 15, dist: 432, units: 36 },
+    { sku: 'KOP-CDY-140', name: 'Kopiko Coffee Candy', code: 'MAY-007', brand: 'Kopiko', subBrand: 'Kopiko Classic', alias: 'Kopiko Candy', packSize: '140g', mrp: 25, dist: 600, units: 24 },
+    { sku: 'BNG-CHO-20', name: 'Beng-Beng Wafer Chocolate', code: 'MAY-008', brand: 'Beng-Beng', subBrand: 'Beng-Beng Original', alias: 'Beng Beng', packSize: '20g', mrp: 10, dist: 480, units: 48 },
+    { sku: 'JME-CHK-75', name: 'JoyMee Chicken Noodles', code: 'MAY-009', brand: 'JoyMee', subBrand: 'JoyMee Cup', alias: 'JoyMee Noodle', packSize: '75g', mrp: 12, dist: 432, units: 36 },
+    { sku: 'DAN-BUT-200', name: 'Danisa Butter Cookies', code: 'MAY-010', brand: 'Danisa', subBrand: 'Danisa Butter', alias: 'Danisa Cookies', packSize: '200g', mrp: 90, dist: 1080, units: 12 },
+    { sku: 'CHK-CHO-50', name: 'Choki-Choki Chocolate Paste', code: 'MAY-011', brand: 'Choki-Choki', subBrand: 'Choki-Choki Paste', alias: 'Choki Choki', packSize: '50g', mrp: 8, dist: 384, units: 48 },
+    { sku: 'MLK-CER-130', name: 'Malkist Gandum Sereal', code: 'MAY-012', brand: 'Malkist', subBrand: 'Malkist Cereal', alias: 'Malkist Wheat', packSize: '130g', mrp: 30, dist: 576, units: 24 },
+    { sku: 'KOP-BRN-30', name: 'Kopiko Brown Coffee', code: 'MAY-013', brand: 'Kopiko', subBrand: 'Kopiko Brown', alias: 'Kopiko Brown Coffee', packSize: '30g', mrp: 10, dist: 480, units: 48 },
+    { sku: 'RMG-300', name: 'Roma Sari Gandum', code: 'MAY-014', brand: 'Roma', subBrand: 'Roma Sari Gandum', alias: 'Roma Wheat', packSize: '300g', mrp: 40, dist: 720, units: 24 }
 ];
+
+const SCHEMES = [
+    { id: 's1', name: 'Malkist Buy 4 Get 1', type: 'Buy X Get Y', status: 'Expiring Soon', desc: 'Buy 4 cartons of any Malkist variant, get 1 carton free.', date: '31 May 2026' },
+    { id: 's2', name: 'Kopiko Volume Slab', type: 'Slab Discount', status: 'Active', desc: 'Tiered discount on Kopiko orders based on carton quantity.', date: '30 Jun 2026' },
+    { id: 's3', name: 'JoyMee Noodles Buy 10 Get 2', type: 'Buy X Get Y', status: 'Active', desc: 'Order 10 cartons of JoyMee Chicken Noodles, get 2 cartons free.', date: '15 Jun 2026' },
+    { id: 's4', name: 'Beng-Beng Pack Scheme', type: 'Buy X Get Y', status: 'Expiring Soon', desc: 'Buy 1 carton (48 packs) of Beng-Beng, get 6 packs free.', date: '31 May 2026' },
+    { id: 's5', name: 'Choki-Choki Value Slab', type: 'Slab Discount', status: 'Upcoming', desc: 'Discount on Choki-Choki orders above minimum carton thresholds.', date: '30 Jun 2026' },
+    { id: 's6', name: 'Danisa Festive Combo', type: 'Buy X Get Y', status: 'Upcoming', desc: 'Buy 6 cartons of Danisa, get a festive gift pack free.', date: '30 Jun 2026' },
+    { id: 's7', name: 'Coffee Joy Slab Discount', type: 'Slab Discount', status: 'Active', desc: 'Tiered discount on Coffee Joy orders based on carton quantity.', date: '30 Jun 2026' },
+    { id: 's8', name: 'Roma Marie Combo', type: 'Buy X Get Y', status: 'Active', desc: 'Buy 8 cartons of Roma Marie Gold, get 1 carton free.', date: '20 Jun 2026' }
+];
+
+export function getCatalog() {
+    return clone(CATALOG);
+}
+
+export function getSchemes() {
+    return clone(SCHEMES);
+}
 
 const ORDERS = [
     { id: 'SO-24001', customer: 'Toko Sumber Rejeki', date: '2026-06-14', items: 18, amount: 42500, status: 'Pending' },
@@ -50,10 +75,6 @@ const INVOICES = [
     { id: 'INV-90007', order: 'SO-23975', customer: 'Grosir Berkah', date: '2026-05-22', due: '2026-06-05', amount: 34200, status: 'Overdue' },
     { id: 'INV-90015', order: 'SO-24002', customer: 'UD Maju Jaya', date: '2026-06-13', due: '2026-06-27', amount: 91200, status: 'Pending' }
 ];
-
-export function getProducts() {
-    return clone(PRODUCTS);
-}
 
 export function getOrders() {
     return clone(ORDERS);
