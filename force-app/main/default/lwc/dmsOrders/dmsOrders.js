@@ -37,6 +37,8 @@ export default class DmsOrders extends LightningElement {
     orderSubBrand = ALL;
     orderSearch = '';
     cartOpen = false;
+    showConfirm = false;
+    confirmTitle = '';
     creditLimit = ORDER_CREDIT_LIMIT;
     activeSchemes = ORDER_ACTIVE_SCHEMES;
 
@@ -259,6 +261,31 @@ export default class DmsOrders extends LightningElement {
     }
     get orderTotalLabel() {
         return formatCurrency(this.currentOrderValue);
+    }
+
+    get confirmSummary() {
+        return `${this.cartCount} products · ${this.totalCases} cases · ${this.orderTotalLabel}`;
+    }
+
+    saveDraft() {
+        this.confirmTitle = 'Saved as Draft';
+        this.showConfirm = true;
+    }
+
+    submitOrder() {
+        this.confirmTitle = 'Submitted for Approval';
+        this.showConfirm = true;
+    }
+
+    // Done -> reset the cart and return to the order list view.
+    handleDone() {
+        this.showConfirm = false;
+        this.cartOpen = false;
+        this.showNewOrder = false;
+        this.orderProducts = this.orderProducts.map((p) => ({ ...p, qty: 0 }));
+        this.orderBrand = ALL;
+        this.orderSubBrand = ALL;
+        this.orderSearch = '';
     }
 
     handleOrderBrand(event) {

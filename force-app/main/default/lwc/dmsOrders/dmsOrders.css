@@ -554,6 +554,63 @@
     border: 1px solid var(--dms-navy);
 }
 
+/* Confirmation modal */
+.dms-modal__overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(22, 32, 44, 0.45);
+    z-index: 9100;
+}
+
+.dms-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9101;
+    width: min(380px, 92vw);
+    background: var(--dms-surface);
+    border-radius: 1rem;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.22);
+    padding: 2rem;
+    text-align: center;
+}
+
+.dms-modal__check {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    background: #c8ecd4;
+    color: #2e844a;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.dms-modal__check svg {
+    width: 1.8rem;
+    height: 1.8rem;
+}
+
+.dms-modal__title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--dms-navy);
+    margin: 0 0 0.4rem;
+}
+
+.dms-modal__summary {
+    font-size: 0.9rem;
+    color: var(--dms-text-muted);
+    margin: 0 0 1.5rem;
+}
+
+.dms-modal__done {
+    justify-content: center;
+    padding: 0.65rem 2rem;
+}
+
 /* Inline SVG icons */
 .dms-ic {
     width: 1.05rem;

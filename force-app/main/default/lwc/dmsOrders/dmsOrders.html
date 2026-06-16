@@ -293,10 +293,25 @@
                         </div>
 
                         <div class="dms-cart__actions">
-                            <button class="dms-btn dms-btn_outline" type="button">Save as Draft</button>
-                            <button class="dms-btn" type="button">Submit for Approval</button>
+                            <button class="dms-btn dms-btn_outline" type="button" onclick={saveDraft}>Save as Draft</button>
+                            <button class="dms-btn" type="button" onclick={submitOrder}>Submit for Approval</button>
                         </div>
                     </aside>
+                </template>
+
+                <!-- Confirmation modal -->
+                <template lwc:if={showConfirm}>
+                    <div class="dms-modal__overlay"></div>
+                    <div class="dms-modal" role="dialog">
+                        <div class="dms-modal__check">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </div>
+                        <h2 class="dms-modal__title">{confirmTitle}</h2>
+                        <p class="dms-modal__summary">{confirmSummary}</p>
+                        <button class="dms-btn dms-modal__done" type="button" onclick={handleDone}>Done</button>
+                    </div>
                 </template>
             </div>
         </template>

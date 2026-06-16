@@ -85,4 +85,30 @@ describe('c-dms-orders', () => {
             'Cart (1 products)'
         );
     });
+
+    it('shows the confirmation modal and returns to the list on Done', async () => {
+        const element = createElement('c-dms-orders', { is: DmsOrders });
+        document.body.appendChild(element);
+
+        element.shadowRoot.querySelector('.dms-btn').click();
+        await flush();
+        element.shadowRoot.querySelector('.dms-stepper__btn[data-dir="up"]').click();
+        await flush();
+        element.shadowRoot.querySelector('.dms-no__cart').click();
+        await flush();
+
+        element.shadowRoot.querySelector('.dms-btn_outline').click(); // Save as Draft
+        await flush();
+
+        expect(element.shadowRoot.querySelector('.dms-modal__title').textContent).toBe(
+            'Saved as Draft'
+        );
+
+        element.shadowRoot.querySelector('.dms-modal__done').click();
+        await flush();
+
+        // back on the list view
+        expect(element.shadowRoot.querySelector('.dms-neworder')).toBeNull();
+        expect(element.shadowRoot.querySelector('.dms-tbl_p1')).not.toBeNull();
+    });
 });
