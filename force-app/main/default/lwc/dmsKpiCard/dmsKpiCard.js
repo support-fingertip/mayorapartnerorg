@@ -1,14 +1,15 @@
 import { LightningElement, api } from 'lwc';
 
-/** A single KPI tile used on the Home dashboard. */
+/**
+ * KPI tile: label + large value. `variant` colors the value
+ * (default | accent | warning | danger).
+ */
 export default class DmsKpiCard extends LightningElement {
     @api label;
     @api value;
-    @api delta;
-    @api icon = 'utility:chart';
-    @api positive = false;
+    @api variant = 'default';
 
-    get deltaClass() {
-        return this.positive ? 'dms-kpi__delta dms-kpi__delta_up' : 'dms-kpi__delta dms-kpi__delta_down';
+    get valueClass() {
+        return `dms-kpi__value dms-kpi__value_${this.variant}`;
     }
 }

@@ -1,78 +1,53 @@
 /* Mayora DMS brand tokens — keep in sync across DMS components. */
 :host {
-    --dms-brand: #e2231a;
-    --dms-brand-dark: #b71c13;
-    --dms-navy: #1b2a4a;
-    --dms-accent: #f5a623;
-    --dms-bg: #f4f6f9;
+    --dms-navy: #16202c;
+    --dms-accent: #6d28d9;
+    --dms-warning: #c47d00;
+    --dms-danger: #ba0517;
     --dms-surface: #ffffff;
-    --dms-text: #16202c;
     --dms-text-muted: #5c6b7a;
     --dms-border: #e1e5eb;
-    --dms-success: #2e844a;
-    --dms-success-bg: #ddf0e4;
-    --dms-warning: #c47d00;
-    --dms-warning-bg: #fcefc7;
-    --dms-danger: #ba0517;
-    --dms-danger-bg: #fcdcdc;
-    --dms-info: #1b96ff;
-    --dms-info-bg: #d8e6fe;
-    --dms-neutral: #5c6b7a;
-    --dms-neutral-bg: #eceff3;
     --dms-radius: 0.75rem;
-    --dms-radius-sm: 0.5rem;
     --dms-shadow: 0 1px 3px rgba(22, 32, 44, 0.08), 0 1px 2px rgba(22, 32, 44, 0.06);
-    --dms-font: 'Salesforce Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    display: block;
+    height: 100%;
 }
 
 .dms-kpi {
-    display: flex;
-    align-items: center;
-    gap: 0.85rem;
-    padding: 1.1rem;
     background: var(--dms-surface);
     border: 1px solid var(--dms-border);
     border-radius: var(--dms-radius);
     box-shadow: var(--dms-shadow);
+    padding: 1.1rem 1.2rem;
     height: 100%;
     box-sizing: border-box;
 }
 
-.dms-kpi__icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.75rem;
-    height: 2.75rem;
-    border-radius: var(--dms-radius-sm);
-    background: var(--dms-brand);
-    flex-shrink: 0;
-}
-
 .dms-kpi__label {
-    font-size: 0.78rem;
+    font-size: 0.8rem;
     color: var(--dms-text-muted);
-    margin: 0;
+    margin: 0 0 0.55rem;
 }
 
 .dms-kpi__value {
-    font-size: 1.35rem;
+    font-size: 1.5rem;
     font-weight: 700;
-    color: var(--dms-text);
-    margin: 0.1rem 0;
-    line-height: 1.2;
-}
-
-.dms-kpi__delta {
-    font-size: 0.75rem;
-    font-weight: 600;
+    line-height: 1.1;
     margin: 0;
 }
 
-.dms-kpi__delta_up {
-    color: var(--dms-success);
+.dms-kpi__value_default {
+    color: var(--dms-navy);
 }
 
-.dms-kpi__delta_down {
+.dms-kpi__value_accent {
+    color: var(--dms-accent);
+}
+
+.dms-kpi__value_warning {
+    color: var(--dms-warning);
+}
+
+.dms-kpi__value_danger {
     color: var(--dms-danger);
 }

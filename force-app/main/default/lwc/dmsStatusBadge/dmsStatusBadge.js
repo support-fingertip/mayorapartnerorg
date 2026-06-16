@@ -9,6 +9,7 @@ const THEME_MAP = {
     paid: 'success',
     delivered: 'success',
     confirmed: 'success',
+    approved: 'success',
     'in stock': 'success',
     // warning
     pending: 'warning',
@@ -17,6 +18,8 @@ const THEME_MAP = {
     // danger
     overdue: 'danger',
     cancelled: 'danger',
+    rejected: 'danger',
+    'no sales': 'danger',
     'out of stock': 'danger'
 };
 

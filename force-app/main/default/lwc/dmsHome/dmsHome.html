@@ -1,63 +1,224 @@
 <template>
-    <div class="dms-page">
-        <c-dms-page-header
-            title="Welcome back, Distributor"
-            subtitle="Here's what's happening across your business today"
-        ></c-dms-page-header>
-
-        <!-- KPI tiles -->
-        <div class="slds-grid slds-wrap dms-kpi-grid">
-            <template for:each={kpis} for:item="kpi">
-                <div
-                    key={kpi.id}
-                    class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-4 dms-kpi-col"
+    <div class="dms-home">
+        <!-- Dashboard sub-tabs -->
+        <div class="dms-subtabs" role="tablist">
+            <template for:each={subTabs} for:item="tab">
+                <button
+                    key={tab.id}
+                    class={tab.class}
+                    data-dash={tab.id}
+                    onclick={handleDashTab}
+                    type="button"
                 >
-                    <c-dms-kpi-card
-                        label={kpi.label}
-                        value={kpi.value}
-                        delta={kpi.delta}
-                        icon={kpi.icon}
-                        positive={kpi.positive}
-                    ></c-dms-kpi-card>
-                </div>
+                    {tab.label}
+                </button>
             </template>
         </div>
 
-        <!-- Two-column panels -->
-        <div class="slds-grid slds-wrap dms-panel-grid">
-            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2 dms-panel-col">
-                <article class="dms-panel">
-                    <h2 class="dms-panel__title">Recent Orders</h2>
-                    <ul class="dms-list">
-                        <template for:each={recentOrders} for:item="order">
-                            <li key={order.id} class="dms-list__row">
-                                <div class="dms-list__main">
-                                    <span class="dms-list__primary">{order.id}</span>
-                                    <span class="dms-list__secondary">{order.customer}</span>
-                                </div>
-                                <c-dms-status-badge status={order.status}></c-dms-status-badge>
-                            </li>
-                        </template>
-                    </ul>
-                </article>
+        <div class="dms-body">
+            <!-- Period selector -->
+            <div class="dms-period">
+                <span class="dms-period__label">Period:</span>
+                <lightning-combobox
+                    class="dms-period__select"
+                    variant="label-hidden"
+                    value={period}
+                    options={periodOptions}
+                    onchange={handlePeriod}
+                ></lightning-combobox>
             </div>
 
-            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2 dms-panel-col">
-                <article class="dms-panel">
-                    <h2 class="dms-panel__title">Outstanding Invoices</h2>
-                    <ul class="dms-list">
-                        <template for:each={recentInvoices} for:item="inv">
-                            <li key={inv.id} class="dms-list__row">
-                                <div class="dms-list__main">
-                                    <span class="dms-list__primary">{inv.id}</span>
-                                    <span class="dms-list__secondary">{inv.customer}</span>
-                                </div>
-                                <c-dms-status-badge status={inv.status}></c-dms-status-badge>
-                            </li>
+            <!-- ============================ P1 ============================ -->
+            <template lwc:if={isP1}>
+                <div class="dms-kpis">
+                    <template for:each={p1Kpis} for:item="kpi">
+                        <c-dms-kpi-card
+                            key={kpi.id}
+                            label={kpi.label}
+                            value={kpi.value}
+                            variant={kpi.variant}
+                        ></c-dms-kpi-card>
+                    </template>
+                </div>
+
+                <!-- Order Analysis -->
+                <section class="dms-panel">
+                    <div class="dms-panel__head">
+                        <h2 class="dms-panel__title">Order Analysis</h2>
+                        <div class="dms-toggle">
+                            <template for:each={orderDimButtons} for:item="btn">
+                                <button
+                                    key={btn.dim}
+                                    class={btn.class}
+                                    data-dim={btn.dim}
+                                    onclick={handleOrderDim}
+                                    type="button"
+                                >
+                                    {btn.label}
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+                    <div class="slds-grid slds-wrap dms-charts">
+                        <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2 dms-charts__col">
+                            <c-dms-bar-chart
+                                title="No. of Orders"
+                                scheme="blue"
+                                max={ordersMax}
+                                ticks={ordersTicks}
+                                items={ordersChartItems}
+                            ></c-dms-bar-chart>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2 dms-charts__col">
+                            <c-dms-bar-chart
+                                title="Order Value (₹ L)"
+                                scheme="green"
+                                max={valueMax}
+                                ticks={valueTicks}
+                                items={valueChartItems}
+                            ></c-dms-bar-chart>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SKU-wise Return Qty -->
+                <section class="dms-panel">
+                    <h2 class="dms-panel__title">SKU-wise Return Qty</h2>
+                    <div class="dms-tbl dms-tbl_sku">
+                        <div class="dms-thead">
+                            <span>SKU Code</span><span>SKU Name</span><span class="dms-num">Return Qty</span>
+                        </div>
+                        <template for:each={skuReturns} for:item="row">
+                            <div key={row.key} class="dms-trow">
+                                <span class="dms-strong" data-label="SKU Code">{row.code}</span>
+                                <span data-label="SKU Name">{row.name}</span>
+                                <span class="dms-num" data-label="Return Qty">{row.qty}</span>
+                            </div>
                         </template>
-                    </ul>
-                </article>
-            </div>
+                    </div>
+                </section>
+
+                <!-- Scheme-wise Claims -->
+                <section class="dms-panel">
+                    <h2 class="dms-panel__title">Scheme-wise Claims</h2>
+                    <div class="dms-tbl dms-tbl_scheme">
+                        <div class="dms-thead">
+                            <span>Scheme Name</span><span class="dms-num">Claim Value</span><span>Status</span>
+                        </div>
+                        <template for:each={schemeClaims} for:item="row">
+                            <div key={row.key} class="dms-trow">
+                                <span class="dms-strong" data-label="Scheme Name">{row.name}</span>
+                                <span class="dms-num" data-label="Claim Value">{row.value}</span>
+                                <span data-label="Status">
+                                    <c-dms-status-badge status={row.status}></c-dms-status-badge>
+                                </span>
+                            </div>
+                        </template>
+                    </div>
+                </section>
+            </template>
+
+            <!-- ============================ P2 ============================ -->
+            <template lwc:if={isP2}>
+                <div class="dms-kpis">
+                    <template for:each={p2Kpis} for:item="kpi">
+                        <c-dms-kpi-card
+                            key={kpi.id}
+                            label={kpi.label}
+                            value={kpi.value}
+                            variant={kpi.variant}
+                        ></c-dms-kpi-card>
+                    </template>
+                </div>
+
+                <!-- Top 5 SDs -->
+                <section class="dms-panel">
+                    <h2 class="dms-panel__title">Top 5 SDs by Sales Value (₹ L)</h2>
+                    <c-dms-bar-chart
+                        scheme="purple"
+                        max={valueMax}
+                        ticks={valueTicks}
+                        items={topSDs}
+                    ></c-dms-bar-chart>
+                </section>
+
+                <!-- All SDs -->
+                <section class="dms-panel">
+                    <h2 class="dms-panel__title">All SDs</h2>
+                    <div class="dms-tbl dms-tbl_sd">
+                        <div class="dms-thead">
+                            <span>SD Name</span><span class="dms-num">Orders</span>
+                            <span class="dms-num">Invoices</span><span class="dms-num">Returns</span>
+                            <span class="dms-num">Order Value</span><span class="dms-num">Invoice Value</span>
+                            <span class="dms-num">Return Value</span>
+                        </div>
+                        <template for:each={allSDs} for:item="sd">
+                            <div key={sd.key} class={sd.rowClass}>
+                                <span class="dms-strong" data-label="SD Name">
+                                    {sd.name}
+                                    <template lwc:if={sd.noSales}>
+                                        <c-dms-status-badge status="No Sales"></c-dms-status-badge>
+                                    </template>
+                                </span>
+                                <span class="dms-num" data-label="Orders">{sd.orders}</span>
+                                <span class="dms-num" data-label="Invoices">{sd.invoices}</span>
+                                <span class="dms-num" data-label="Returns">{sd.returns}</span>
+                                <span class="dms-num" data-label="Order Value">{sd.ov}</span>
+                                <span class="dms-num" data-label="Invoice Value">{sd.iv}</span>
+                                <span class="dms-num" data-label="Return Value">{sd.rv}</span>
+                            </div>
+                        </template>
+                    </div>
+                </section>
+
+                <!-- Range Selling -->
+                <section class="dms-panel">
+                    <div class="dms-panel__head">
+                        <h2 class="dms-panel__title">Range Selling</h2>
+                        <div class="dms-toggle">
+                            <template for:each={rangeDimButtons} for:item="btn">
+                                <button
+                                    key={btn.dim}
+                                    class={btn.class}
+                                    data-dim={btn.dim}
+                                    onclick={handleRangeDim}
+                                    type="button"
+                                >
+                                    {btn.label}
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+                    <div class="dms-tbl dms-tbl_range">
+                        <div class="dms-thead">
+                            <span>Name</span><span>Outlets Covered</span><span>Coverage %</span>
+                        </div>
+                        <template for:each={rangeRows} for:item="row">
+                            <div key={row.key} class="dms-trow">
+                                <span class="dms-strong" data-label="Name">{row.name}</span>
+                                <span data-label="Outlets Covered">{row.covered}</span>
+                                <span class="dms-coverage" data-label="Coverage %">
+                                    <span class="dms-coverage__track">
+                                        <span class="dms-coverage__bar" style={row.barStyle}></span>
+                                    </span>
+                                    <span class="dms-coverage__pct">{row.pctLabel}</span>
+                                </span>
+                            </div>
+                        </template>
+                    </div>
+                </section>
+            </template>
+
+            <!-- ======================== Secondary ======================== -->
+            <template lwc:if={isSecondary}>
+                <section class="dms-panel dms-placeholder">
+                    <h2 class="dms-panel__title">Secondary Dashboard</h2>
+                    <p class="dms-placeholder__text">
+                        This dashboard is reserved for secondary-sales analytics. Share the
+                        reference screen and it will be built out to match P1 / P2.
+                    </p>
+                </section>
+            </template>
         </div>
     </div>
 </template>
