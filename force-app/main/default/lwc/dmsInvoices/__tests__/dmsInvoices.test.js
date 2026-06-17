@@ -56,8 +56,24 @@ describe('c-dms-invoices', () => {
         expect(orders.length).toBe(2);
 
         orders[0].click(); // select SO-6432
+        orders[1].click(); // select SO-6418
         await flush();
-        expect(element.shadowRoot.querySelector('.dms-wizard__count').textContent).toBe('1 selected');
+        expect(element.shadowRoot.querySelector('.dms-wizard__count').textContent).toBe('2 selected');
+
+        // step 3: review aggregated lines (5 distinct products) + total
+        element.shadowRoot.querySelectorAll('.dms-wizard__foot .dms-btn')[1].click();
+        await flush();
+        expect(element.shadowRoot.querySelectorAll('.dms-tbl_review .dms-trow').length).toBe(5);
+        expect(element.shadowRoot.querySelector('.dms-invtotal__value').textContent).toContain(
+            '15,456'
+        );
+
+        // Generate Invoice -> success modal
+        element.shadowRoot.querySelectorAll('.dms-wizard__foot .dms-btn')[1].click();
+        await flush();
+        expect(element.shadowRoot.querySelector('.dms-modal__title').textContent).toBe(
+            'Invoice Generated'
+        );
     });
 
     it('disables Next until a customer is selected', async () => {

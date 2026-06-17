@@ -15,7 +15,7 @@ const GRN_OPTIONS = [
 ];
 const DATE_OPTIONS = [{ label: 'All Dates', value: ALL }];
 const TYPE_THEME = { Retailer: 'info', 'Sub-Dist.': 'purple' };
-const STEP_LABELS = { 1: 'Select Customer', 2: 'Select Orders', 3: 'Review & Create' };
+const STEP_LABELS = { 1: 'Select Customer', 2: 'Select Orders', 3: 'Review & Save' };
 
 export default class DmsInvoices extends LightningElement {
     activeTab = 'primary';
@@ -35,6 +35,8 @@ export default class DmsInvoices extends LightningElement {
     selectedCustomer = null;
     selectedOrderIds = [];
     customers = {};
+    reviewItems = [];
+    showSuccess = false;
 
     connectedCallback() {
         this.primary = getPrimaryInvoices();
@@ -190,19 +192,68 @@ export default class DmsInvoices extends LightningElement {
         return `${this.selectedOrderIds.length} selected`;
     }
 
-    get reviewOrders() {
-        const orders = this.selectedCustomer ? getCustomerOrders(this.selectedCustomer) : [];
-        return orders
-            .filter((o) => this.selectedOrderIds.includes(o.id))
-            .map((o) => ({ ...o, key: o.id, amountLabel: formatCurrency(o.amount) }));
+    // Aggregate the selected orders' product lines for the review step.
+    buildReview() {
+        const orders = getCustomerOrders(this.selectedCustomer).filter((o) =>
+            this.selectedOrderIds.includes(o.id)
+        );
+        const map = new Map();
+        orders.forEach((o) => {
+            o.lines.forEach((l) => {
+                const existing = map.get(l.name);
+                if (existing) {
+                    existing.ordered += l.qty;
+                } else {
+                    map.set(l.name, { name: l.name, ordered: l.qty, rate: l.rate });
+                }
+            });
+        });
+        this.reviewItems = [...map.values()].map((it, i) => ({
+            ...it,
+            id: `r${i}`,
+            qty: it.ordered
+        }));
     }
 
-    get reviewTotalLabel() {
-        const orders = this.selectedCustomer ? getCustomerOrders(this.selectedCustomer) : [];
-        const total = orders
-            .filter((o) => this.selectedOrderIds.includes(o.id))
-            .reduce((s, o) => s + o.amount, 0);
-        return formatCurrency(total);
+    get reviewRows() {
+        return this.reviewItems.map((it) => ({
+            ...it,
+            key: it.id,
+            rateLabel: `${formatCurrency(it.rate)}/ctn`,
+            amountLabel: formatCurrency(it.qty * it.rate)
+        }));
+    }
+
+    get invoiceTotalLabel() {
+        return formatCurrency(this.reviewItems.reduce((s, it) => s + it.qty * it.rate, 0));
+    }
+
+    get successSummary() {
+        const items = this.reviewItems.length;
+        return `${items} products · ${this.invoiceTotalLabel}`;
+    }
+
+    handleQty(event) {
+        const id = event.currentTarget.dataset.id;
+        let val = parseInt(event.target.value, 10);
+        this.reviewItems = this.reviewItems.map((it) => {
+            if (it.id !== id) {
+                return it;
+            }
+            if (Number.isNaN(val) || val < 0) {
+                val = 0;
+            }
+            return { ...it, qty: Math.min(val, it.ordered) };
+        });
+    }
+
+    generateInvoice() {
+        this.wizardOpen = false;
+        this.showSuccess = true;
+    }
+
+    handleDone() {
+        this.showSuccess = false;
     }
 
     get nextDisabled() {
@@ -237,10 +288,13 @@ export default class DmsInvoices extends LightningElement {
         if (this.nextDisabled) {
             return;
         }
-        if (this.step < 3) {
-            this.step += 1;
+        if (this.step === 2) {
+            this.buildReview();
+            this.step = 3;
+        } else if (this.step === 3) {
+            this.generateInvoice();
         } else {
-            this.closeWizard();
+            this.step += 1;
         }
     }
 

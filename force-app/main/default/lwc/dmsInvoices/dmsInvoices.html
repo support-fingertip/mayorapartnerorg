@@ -206,22 +206,32 @@
                         </div>
                     </template>
 
-                    <!-- Step 3: Review & Create -->
+                    <!-- Step 3: Review & Save -->
                     <template lwc:if={isStep3}>
-                        <div class="dms-wizard__subhead">
-                            <span class="dms-wizard__cust">{selectedCustomer}</span>
-                        </div>
-                        <div class="dms-review">
-                            <template for:each={reviewOrders} for:item="o">
-                                <div key={o.key} class="dms-review__row">
-                                    <span class="dms-ordrow__id">{o.id}</span>
-                                    <span class="dms-ordrow__amt">{o.amountLabel}</span>
+                        <p class="dms-review__hint">
+                            Review quantities. You can reduce invoice quantity below ordered quantity.
+                        </p>
+                        <div class="dms-tbl dms-tbl_review">
+                            <div class="dms-thead">
+                                <span>Product</span><span class="dms-num">Ordered Qty</span>
+                                <span>Invoice Qty</span><span class="dms-num">Rate</span>
+                                <span class="dms-num">Amount</span>
+                            </div>
+                            <template for:each={reviewRows} for:item="r">
+                                <div key={r.key} class="dms-trow">
+                                    <span class="dms-strong" data-label="Product">{r.name}</span>
+                                    <span class="dms-num" data-label="Ordered Qty">{r.ordered}</span>
+                                    <span data-label="Invoice Qty">
+                                        <input class="dms-qtyinput" type="number" min="0" max={r.ordered} value={r.qty} data-id={r.id} onchange={handleQty} />
+                                    </span>
+                                    <span class="dms-num dms-muted" data-label="Rate">{r.rateLabel}</span>
+                                    <span class="dms-num dms-strong" data-label="Amount">{r.amountLabel}</span>
                                 </div>
                             </template>
-                            <div class="dms-review__total">
-                                <span>Invoice Total</span>
-                                <span>{reviewTotalLabel}</span>
-                            </div>
+                        </div>
+                        <div class="dms-invtotal">
+                            <span class="dms-invtotal__label">Invoice Total</span>
+                            <span class="dms-invtotal__value">{invoiceTotalLabel}</span>
                         </div>
                     </template>
                 </div>
@@ -231,10 +241,25 @@
                         ‹ <template lwc:if={isStep1}>Cancel</template><template lwc:else>Back</template>
                     </button>
                     <button class="dms-btn" type="button" onclick={nextStep} disabled={nextDisabled}>
-                        <template lwc:if={isStep3}>Create Invoice</template>
+                        <template lwc:if={isStep3}>Generate Invoice</template>
                         <template lwc:else>Next ›</template>
                     </button>
                 </footer>
+            </div>
+        </template>
+
+        <!-- Invoice generated confirmation -->
+        <template lwc:if={showSuccess}>
+            <div class="dms-modal__overlay"></div>
+            <div class="dms-modal" role="dialog">
+                <div class="dms-modal__check">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </div>
+                <h2 class="dms-modal__title">Invoice Generated</h2>
+                <p class="dms-modal__summary">{successSummary}</p>
+                <button class="dms-btn dms-modal__done" type="button" onclick={handleDone}>Done</button>
             </div>
         </template>
     </div>

@@ -185,37 +185,49 @@ const SECONDARY_INVOICES = [
     { id: 'INV-1021', date: '20 May 2026', customer: 'Fresh Mart', type: 'Retailer', orderRef: 'SO-6402', amount: 12672 }
 ];
 
-// Customers + their open orders for the Create Invoice wizard.
+// Customers + their open orders for the Create Invoice wizard. Each order
+// carries product lines (qty + rate); product names and the order amount are
+// derived so the wizard's order list and review step reconcile.
 const INVOICE_RETAILERS = ['ABC Mart', 'City Grocery', 'Fresh Mart', 'Metro General Store', 'Sharma Kirana'];
 const INVOICE_SUBDISTS = ['North Zone SD', 'East Zone SD', 'West Zone SD'];
 
-const CUSTOMER_ORDERS = {
+const RAW_CUSTOMER_ORDERS = {
     'ABC Mart': [
-        { id: 'SO-6432', date: '29 May 2026', amount: 11136, products: ['Malkist Cheese Crackers 130g', 'Kopiko Coffee Candy Jar 140g', 'Beng-Beng Wafer Chocolate 22g'] },
-        { id: 'SO-6418', date: '22 May 2026', amount: 4320, products: ['Coffee Joy Thin Biscuit 100g', 'KIS Mint Candy 18.4g'] }
+        { id: 'SO-6432', date: '29 May 2026', lines: [{ name: 'Malkist Cheese Crackers 130g', qty: 8, rate: 576 }, { name: 'Kopiko Coffee Candy Jar 140g', qty: 4, rate: 768 }, { name: 'Beng-Beng Wafer Chocolate 22g', qty: 6, rate: 576 }] },
+        { id: 'SO-6418', date: '22 May 2026', lines: [{ name: 'Coffee Joy Thin Biscuit 100g', qty: 5, rate: 576 }, { name: 'KIS Mint Candy 18.4g', qty: 3, rate: 480 }] }
     ],
     'City Grocery': [
-        { id: 'SO-6431', date: '28 May 2026', amount: 7488, products: ["Slai O'lai Strawberry 90g", 'Roma Marie Gold 250g'] }
+        { id: 'SO-6431', date: '28 May 2026', lines: [{ name: "Slai O'lai Strawberry 90g", qty: 8, rate: 432 }, { name: 'Roma Marie Gold 250g', qty: 6, rate: 672 }] }
     ],
     'Fresh Mart': [
-        { id: 'SO-6424', date: '24 May 2026', amount: 4032, products: ['Coffee Joy Thin Biscuit 100g', 'Roma Marie Gold 250g'] }
+        { id: 'SO-6424', date: '24 May 2026', lines: [{ name: 'Coffee Joy Thin Biscuit 100g', qty: 4, rate: 576 }, { name: 'Roma Marie Gold 250g', qty: 3, rate: 672 }] }
     ],
     'Metro General Store': [
-        { id: 'SO-6420', date: '23 May 2026', amount: 7392, products: ["Slai O'lai Strawberry 90g", 'Choki-Choki 10g'] }
+        { id: 'SO-6420', date: '23 May 2026', lines: [{ name: "Slai O'lai Strawberry 90g", qty: 5, rate: 432 }, { name: 'Choki-Choki 10g', qty: 3, rate: 960 }] }
     ],
     'Sharma Kirana': [
-        { id: 'SO-6412', date: '21 May 2026', amount: 5280, products: ['Malkist Cheese Crackers 130g', 'JoyMee Noodles 75g'] }
+        { id: 'SO-6412', date: '21 May 2026', lines: [{ name: 'Malkist Cheese Crackers 130g', qty: 4, rate: 576 }, { name: 'JoyMee Noodles 75g', qty: 3, rate: 432 }] }
     ],
     'North Zone SD': [
-        { id: 'SO-6428', date: '25 May 2026', amount: 32832, products: ['Malkist Cheese Crackers 130g', 'Kopiko Jar 140g', 'Danisa Butter 200g'] }
+        { id: 'SO-6428', date: '25 May 2026', lines: [{ name: 'Malkist Cheese Crackers 130g', qty: 20, rate: 576 }, { name: 'Kopiko Jar 140g', qty: 15, rate: 768 }, { name: 'Danisa Butter 200g', qty: 10, rate: 1440 }] }
     ],
     'East Zone SD': [
-        { id: 'SO-6416', date: '22 May 2026', amount: 49968, products: ['Malkist Double Chocolatey 130g', "Slai O'lai Strawberry 90g", 'KIS Mint Candy 18.4g', 'JuizyMilk Candy 50g'] }
+        { id: 'SO-6416', date: '22 May 2026', lines: [{ name: 'Malkist Double Chocolatey 130g', qty: 18, rate: 576 }, { name: "Slai O'lai Strawberry 90g", qty: 25, rate: 432 }, { name: 'KIS Mint Candy 18.4g', qty: 30, rate: 480 }, { name: 'JuizyMilk Candy 50g', qty: 15, rate: 960 }] }
     ],
     'West Zone SD': [
-        { id: 'SO-6414', date: '20 May 2026', amount: 8640, products: ['Beng-Beng Wafer Chocolate 22g', 'Coffee Joy Thin Biscuit 100g'] }
+        { id: 'SO-6414', date: '20 May 2026', lines: [{ name: 'Beng-Beng Wafer Chocolate 22g', qty: 12, rate: 480 }, { name: 'Coffee Joy Thin Biscuit 100g', qty: 5, rate: 576 }] }
     ]
 };
+
+const buildCustomerOrder = (o) => ({
+    ...o,
+    products: o.lines.map((l) => l.name),
+    amount: o.lines.reduce((s, l) => s + l.qty * l.rate, 0)
+});
+
+const CUSTOMER_ORDERS = Object.fromEntries(
+    Object.entries(RAW_CUSTOMER_ORDERS).map(([cust, orders]) => [cust, orders.map(buildCustomerOrder)])
+);
 
 export function getPrimaryInvoices() {
     return clone(PRIMARY_INVOICES);
