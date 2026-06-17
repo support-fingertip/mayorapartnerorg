@@ -170,18 +170,72 @@ export function getOrderBrands() {
     return [...ORDER_BRANDS];
 }
 
-const INVOICES = [
-    { id: 'INV-90012', order: 'SO-24004', customer: 'Toko Anugerah', date: '2026-06-12', due: '2026-06-26', amount: 64800, status: 'Paid' },
-    { id: 'INV-90013', order: 'SO-24006', customer: 'Toko Makmur Abadi', date: '2026-06-11', due: '2026-06-25', amount: 117500, status: 'Pending' },
-    { id: 'INV-90014', order: 'SO-24007', customer: 'Warung Bu Tini', date: '2026-06-10', due: '2026-06-24', amount: 13400, status: 'Paid' },
-    { id: 'INV-90009', order: 'SO-23988', customer: 'UD Maju Jaya', date: '2026-05-28', due: '2026-06-11', amount: 89000, status: 'Overdue' },
-    { id: 'INV-90007', order: 'SO-23975', customer: 'Grosir Berkah', date: '2026-05-22', due: '2026-06-05', amount: 34200, status: 'Overdue' },
-    { id: 'INV-90015', order: 'SO-24002', customer: 'UD Maju Jaya', date: '2026-06-13', due: '2026-06-27', amount: 91200, status: 'Pending' }
+const PRIMARY_INVOICES = [
+    { id: 'PI-SAP-0892', date: '29 May 2026', supplier: 'Mayora India Ltd.', orderRef: 'PO-2847', amount: 74880, grnDone: false },
+    { id: 'PI-SAP-0885', date: '26 May 2026', supplier: 'Mayora India Ltd.', orderRef: 'PO-2841', amount: 89280, grnDone: true },
+    { id: 'PI-SAP-0871', date: '22 May 2026', supplier: 'Mayora India Ltd.', orderRef: 'PO-2835', amount: 89280, grnDone: false },
+    { id: 'PI-SAP-0858', date: '14 May 2026', supplier: 'Mayora India Ltd.', orderRef: 'PO-2828', amount: 57600, grnDone: true },
+    { id: 'PI-SAP-0841', date: '05 May 2026', supplier: 'Mayora India Ltd.', orderRef: 'PO-2820', amount: 57600, grnDone: true }
 ];
 
-export function getInvoices() {
-    return clone(INVOICES);
+const SECONDARY_INVOICES = [
+    { id: 'INV-1024', date: '27 May 2026', customer: 'City Grocery', type: 'Retailer', orderRef: 'SO-6425', amount: 24768 },
+    { id: 'INV-1023', date: '25 May 2026', customer: 'North Zone SD', type: 'Sub-Dist.', orderRef: 'SO-6416', amount: 89280 },
+    { id: 'INV-1022', date: '22 May 2026', customer: 'ABC Mart', type: 'Retailer', orderRef: 'SO-6410, SO-6405', amount: 38016 },
+    { id: 'INV-1021', date: '20 May 2026', customer: 'Fresh Mart', type: 'Retailer', orderRef: 'SO-6402', amount: 12672 }
+];
+
+// Customers + their open orders for the Create Invoice wizard.
+const INVOICE_RETAILERS = ['ABC Mart', 'City Grocery', 'Fresh Mart', 'Metro General Store', 'Sharma Kirana'];
+const INVOICE_SUBDISTS = ['North Zone SD', 'East Zone SD', 'West Zone SD'];
+
+const CUSTOMER_ORDERS = {
+    'ABC Mart': [
+        { id: 'SO-6432', date: '29 May 2026', amount: 11136, products: ['Malkist Cheese Crackers 130g', 'Kopiko Coffee Candy Jar 140g', 'Beng-Beng Wafer Chocolate 22g'] },
+        { id: 'SO-6418', date: '22 May 2026', amount: 4320, products: ['Coffee Joy Thin Biscuit 100g', 'KIS Mint Candy 18.4g'] }
+    ],
+    'City Grocery': [
+        { id: 'SO-6431', date: '28 May 2026', amount: 7488, products: ["Slai O'lai Strawberry 90g", 'Roma Marie Gold 250g'] }
+    ],
+    'Fresh Mart': [
+        { id: 'SO-6424', date: '24 May 2026', amount: 4032, products: ['Coffee Joy Thin Biscuit 100g', 'Roma Marie Gold 250g'] }
+    ],
+    'Metro General Store': [
+        { id: 'SO-6420', date: '23 May 2026', amount: 7392, products: ["Slai O'lai Strawberry 90g", 'Choki-Choki 10g'] }
+    ],
+    'Sharma Kirana': [
+        { id: 'SO-6412', date: '21 May 2026', amount: 5280, products: ['Malkist Cheese Crackers 130g', 'JoyMee Noodles 75g'] }
+    ],
+    'North Zone SD': [
+        { id: 'SO-6428', date: '25 May 2026', amount: 32832, products: ['Malkist Cheese Crackers 130g', 'Kopiko Jar 140g', 'Danisa Butter 200g'] }
+    ],
+    'East Zone SD': [
+        { id: 'SO-6416', date: '22 May 2026', amount: 49968, products: ['Malkist Double Chocolatey 130g', "Slai O'lai Strawberry 90g", 'KIS Mint Candy 18.4g', 'JuizyMilk Candy 50g'] }
+    ],
+    'West Zone SD': [
+        { id: 'SO-6414', date: '20 May 2026', amount: 8640, products: ['Beng-Beng Wafer Chocolate 22g', 'Coffee Joy Thin Biscuit 100g'] }
+    ]
+};
+
+export function getPrimaryInvoices() {
+    return clone(PRIMARY_INVOICES);
 }
+
+export function getSecondaryInvoices() {
+    return clone(SECONDARY_INVOICES);
+}
+
+export function getInvoiceCustomers() {
+    return {
+        Retailer: INVOICE_RETAILERS.map((name) => ({ name, type: 'Retailer' })),
+        'Sub-Distributor': INVOICE_SUBDISTS.map((name) => ({ name, type: 'Sub-Dist.' }))
+    };
+}
+
+export function getCustomerOrders(name) {
+    return clone(CUSTOMER_ORDERS[name] || []);
+}
+
 
 /* --------------------------- Home: P1 Dashboard --------------------------- */
 

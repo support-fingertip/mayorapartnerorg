@@ -1,71 +1,241 @@
 <template>
-    <div class="dms-page">
-        <c-dms-page-header title="Invoices" subtitle="Monitor billing and collections"></c-dms-page-header>
-
-        <!-- Totals summary -->
-        <div class="slds-grid slds-wrap dms-summary">
-            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 dms-summary__col">
-                <div class="dms-summary__tile">
-                    <p class="dms-summary__label">Total Billed</p>
-                    <p class="dms-summary__value">{totalLabel}</p>
-                </div>
-            </div>
-            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 dms-summary__col">
-                <div class="dms-summary__tile dms-summary__tile_paid">
-                    <p class="dms-summary__label">Paid</p>
-                    <p class="dms-summary__value">{paidLabel}</p>
-                </div>
-            </div>
-            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 dms-summary__col">
-                <div class="dms-summary__tile dms-summary__tile_outstanding">
-                    <p class="dms-summary__label">Outstanding</p>
-                    <p class="dms-summary__value">{outstandingLabel}</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Status filter tabs -->
-        <div class="dms-tabs" role="tablist">
-            <template for:each={statusTabs} for:item="tab">
-                <button
-                    key={tab.status}
-                    class={tab.class}
-                    data-status={tab.status}
-                    onclick={handleTab}
-                    type="button"
-                >
-                    {tab.status}
+    <div class="dms-invoices">
+        <!-- Sub-tabs -->
+        <div class="dms-subtabs" role="tablist">
+            <template for:each={subTabs} for:item="tab">
+                <button key={tab.id} class={tab.class} data-tab={tab.id} onclick={handleTab} type="button">
+                    {tab.label}
                 </button>
             </template>
         </div>
 
-        <!-- Responsive table -->
-        <div class="dms-table" role="table">
-            <div class="dms-table__head" role="row">
-                <span class="dms-th">Invoice #</span>
-                <span class="dms-th">Customer</span>
-                <span class="dms-th">Issued</span>
-                <span class="dms-th">Due</span>
-                <span class="dms-th">Amount</span>
-                <span class="dms-th">Status</span>
-            </div>
-
-            <template for:each={filteredInvoices} for:item="inv">
-                <div key={inv.id} class="dms-table__row" role="row">
-                    <span class="dms-td dms-td_id" data-label="Invoice #">{inv.id}</span>
-                    <span class="dms-td" data-label="Customer">{inv.customer}</span>
-                    <span class="dms-td" data-label="Issued">{inv.date}</span>
-                    <span class="dms-td" data-label="Due">{inv.due}</span>
-                    <span class="dms-td dms-td_amount" data-label="Amount">{inv.amountLabel}</span>
-                    <span class="dms-td" data-label="Status">
-                        <c-dms-status-badge status={inv.status}></c-dms-status-badge>
+        <div class="dms-body">
+            <!-- ====================== Primary ====================== -->
+            <template lwc:if={isPrimary}>
+                <div class="dms-toolbar">
+                    <div class="dms-filters">
+                        <div class="dms-filter">
+                            <span class="dms-filter__label">List:</span>
+                            <lightning-combobox variant="label-hidden" value={grnFilter} options={grnOptions} onchange={handleGrnFilter}></lightning-combobox>
+                        </div>
+                        <div class="dms-filter">
+                            <span class="dms-filter__label">Date:</span>
+                            <lightning-combobox variant="label-hidden" value={dateFilter} options={dateOptions} onchange={handleDateFilter}></lightning-combobox>
+                        </div>
+                    </div>
+                    <span class="dms-readonly">
+                        <svg class="dms-ic dms-ic_sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
+                        Read-only — synced from SAP / Mayora India
                     </span>
+                </div>
+
+                <div class="dms-chips">
+                    <template for:each={primarySummary} for:item="c">
+                        <div key={c.id} class="dms-chip">
+                            <span class="dms-chip__label">{c.label}</span>
+                            <span class={c.cls}>{c.value}</span>
+                        </div>
+                    </template>
+                </div>
+
+                <div class="dms-tbl dms-tbl_primary">
+                    <div class="dms-thead">
+                        <span>Invoice No. (SAP)</span><span>Date</span><span>Supplier</span>
+                        <span>Order Ref</span><span class="dms-num">Amount</span>
+                        <span>GRN Status</span><span>Action</span>
+                    </div>
+                    <template for:each={primaryInvoices} for:item="i">
+                        <div key={i.key} class="dms-trow">
+                            <span class="dms-link" data-label="Invoice No. (SAP)">{i.id}</span>
+                            <span data-label="Date">{i.date}</span>
+                            <span data-label="Supplier">{i.supplier}</span>
+                            <span class="dms-muted" data-label="Order Ref">{i.orderRef}</span>
+                            <span class="dms-num dms-strong" data-label="Amount">{i.amountLabel}</span>
+                            <span data-label="GRN Status">
+                                <span class={i.grnClass}>
+                                    <svg class="dms-ic dms-ic_xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <template lwc:if={i.grnDone}>
+                                            <polyline points="20 6 9 17 4 12"></polyline>
+                                        </template>
+                                        <template lwc:else>
+                                            <circle cx="12" cy="12" r="9"></circle>
+                                            <polyline points="12 8 12 12 15 14"></polyline>
+                                        </template>
+                                    </svg>
+                                    {i.grnLabel}
+                                </span>
+                            </span>
+                            <span class="dms-action" data-label="Action">
+                                <svg class="dms-ic dms-ic_sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                                View
+                            </span>
+                        </div>
+                    </template>
+                </div>
+            </template>
+
+            <!-- ===================== Secondary ===================== -->
+            <template lwc:if={isSecondary}>
+                <div class="dms-toolbar">
+                    <div class="dms-filters">
+                        <div class="dms-filter">
+                            <span class="dms-filter__label">Date:</span>
+                            <lightning-combobox variant="label-hidden" value={dateFilter} options={dateOptions} onchange={handleDateFilter}></lightning-combobox>
+                        </div>
+                    </div>
+                    <button class="dms-btn" type="button" onclick={openWizard}>
+                        <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        New Invoice
+                    </button>
+                </div>
+
+                <div class="dms-chips">
+                    <template for:each={secondarySummary} for:item="c">
+                        <div key={c.id} class="dms-chip">
+                            <span class="dms-chip__label">{c.label}</span>
+                            <span class={c.cls}>{c.value}</span>
+                        </div>
+                    </template>
+                </div>
+
+                <div class="dms-tbl dms-tbl_secondary">
+                    <div class="dms-thead">
+                        <span>Invoice ID</span><span>Date</span><span>Customer</span>
+                        <span>Type</span><span>Order Ref</span>
+                        <span class="dms-num">Amount</span><span>Action</span>
+                    </div>
+                    <template for:each={secondaryInvoices} for:item="i">
+                        <div key={i.key} class="dms-trow">
+                            <span class="dms-link" data-label="Invoice ID">{i.id}</span>
+                            <span data-label="Date">{i.date}</span>
+                            <span class="dms-strong" data-label="Customer">{i.customer}</span>
+                            <span data-label="Type">
+                                <c-dms-status-badge label={i.type} theme={i.typeTheme}></c-dms-status-badge>
+                            </span>
+                            <span class="dms-muted" data-label="Order Ref">{i.orderRef}</span>
+                            <span class="dms-num dms-strong" data-label="Amount">{i.amountLabel}</span>
+                            <span class="dms-action" data-label="Action">
+                                <svg class="dms-ic dms-ic_sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                </svg>
+                                PDF
+                            </span>
+                        </div>
+                    </template>
                 </div>
             </template>
         </div>
 
-        <template lwc:if={isEmpty}>
-            <p class="dms-empty">No invoices with this status.</p>
+        <!-- ===================== Create Invoice wizard ===================== -->
+        <template lwc:if={wizardOpen}>
+            <div class="dms-modal__overlay" onclick={closeWizard}></div>
+            <div class="dms-wizard" role="dialog">
+                <header class="dms-wizard__head">
+                    <div class="dms-wizard__title">
+                        <h2>Create Invoice</h2>
+                        <div class="dms-steps">
+                            <template for:each={stepDots} for:item="d">
+                                <span key={d.n} class={d.class}>{d.n}</span>
+                            </template>
+                            <span class="dms-steps__label">{stepLabel}</span>
+                        </div>
+                    </div>
+                    <button class="dms-cart__close" type="button" onclick={closeWizard} title="Close">
+                        <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </header>
+
+                <div class="dms-wizard__body">
+                    <!-- Step 1: Select Customer -->
+                    <template lwc:if={isStep1}>
+                        <p class="dms-wizard__label">Customer Type</p>
+                        <div class="dms-segs">
+                            <template for:each={custTypeButtons} for:item="b">
+                                <button key={b.type} class={b.class} data-type={b.type} onclick={setCustType} type="button">
+                                    {b.type}
+                                </button>
+                            </template>
+                        </div>
+                        <p class="dms-wizard__label">Select Customer</p>
+                        <div class="dms-custlist">
+                            <template for:each={customerList} for:item="c">
+                                <button key={c.name} class={c.class} data-name={c.name} onclick={selectCustomer} type="button">
+                                    <span class="dms-custrow__name">{c.name}</span>
+                                    <c-dms-status-badge label={c.type} theme={c.typeTheme}></c-dms-status-badge>
+                                </button>
+                            </template>
+                        </div>
+                    </template>
+
+                    <!-- Step 2: Select Orders -->
+                    <template lwc:if={isStep2}>
+                        <div class="dms-wizard__subhead">
+                            <span class="dms-wizard__cust">{selectedCustomer}</span>
+                            <span class="dms-wizard__count">{selectedCountLabel}</span>
+                        </div>
+                        <div class="dms-ordlist">
+                            <template for:each={orderList} for:item="o">
+                                <button key={o.key} class={o.rowClass} data-id={o.id} onclick={toggleOrder} type="button">
+                                    <span class={o.boxClass}>
+                                        <svg class="dms-ic dms-ic_xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                            <polyline points="20 6 9 17 4 12"></polyline>
+                                        </svg>
+                                    </span>
+                                    <span class="dms-ordrow__main">
+                                        <span class="dms-ordrow__id">{o.id}</span>
+                                        <span class="dms-ordrow__meta">{o.metaLabel}</span>
+                                        <span class="dms-ordrow__prods">{o.productsLabel}</span>
+                                    </span>
+                                    <span class="dms-ordrow__amt">{o.amountLabel}</span>
+                                </button>
+                            </template>
+                        </div>
+                    </template>
+
+                    <!-- Step 3: Review & Create -->
+                    <template lwc:if={isStep3}>
+                        <div class="dms-wizard__subhead">
+                            <span class="dms-wizard__cust">{selectedCustomer}</span>
+                        </div>
+                        <div class="dms-review">
+                            <template for:each={reviewOrders} for:item="o">
+                                <div key={o.key} class="dms-review__row">
+                                    <span class="dms-ordrow__id">{o.id}</span>
+                                    <span class="dms-ordrow__amt">{o.amountLabel}</span>
+                                </div>
+                            </template>
+                            <div class="dms-review__total">
+                                <span>Invoice Total</span>
+                                <span>{reviewTotalLabel}</span>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <footer class="dms-wizard__foot">
+                    <button class="dms-btn dms-btn_outline" type="button" onclick={backStep}>
+                        ‹ <template lwc:if={isStep1}>Cancel</template><template lwc:else>Back</template>
+                    </button>
+                    <button class="dms-btn" type="button" onclick={nextStep} disabled={nextDisabled}>
+                        <template lwc:if={isStep3}>Create Invoice</template>
+                        <template lwc:else>Next ›</template>
+                    </button>
+                </footer>
+            </div>
         </template>
     </div>
 </template>
