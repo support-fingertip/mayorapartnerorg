@@ -287,6 +287,29 @@ export function getPendingGrnInvoices() {
     return clone(PENDING_GRN_INVOICES);
 }
 
+/* --------------------------------- Ledger --------------------------------- */
+
+// Running-balance account statement (Dr positive). balance is pre-computed.
+const LEDGER_TX = [
+    { date: '01 May 2026', type: 'Opening Bal.', narration: 'Opening Balance (brought forward)', ref: '', debit: 0, credit: 0, balance: 45000 },
+    { date: '05 May 2026', type: 'Primary Invoice', narration: 'Primary Invoice — PI-SAP-0871', ref: 'PI-SAP-0871', debit: 57600, credit: 0, balance: 102600 },
+    { date: '08 May 2026', type: 'Payment Received', narration: 'Payment Received — NEFT/HDFC', ref: 'PMT-4810', debit: 0, credit: 102600, balance: 0 },
+    { date: '14 May 2026', type: 'Primary Invoice', narration: 'Primary Invoice — PI-SAP-0878', ref: 'PI-SAP-0878', debit: 57600, credit: 0, balance: 57600 },
+    { date: '15 May 2026', type: 'Return Credit', narration: 'Return Credit Note — RET-043', ref: 'RET-043', debit: 0, credit: 5760, balance: 51840 },
+    { date: '17 May 2026', type: 'Scheme Claim', narration: 'Scheme Claim Credit Note — Choki-Choki Q4', ref: 'SCH-0041', debit: 0, credit: 2880, balance: 48960 },
+    { date: '20 May 2026', type: 'Payment Received', narration: 'Payment Received — NEFT/HDFC', ref: 'PMT-4825', debit: 0, credit: 48960, balance: 0 },
+    { date: '22 May 2026', type: 'Primary Invoice', narration: 'Primary Invoice — PI-SAP-0885', ref: 'PI-SAP-0885', debit: 89280, credit: 0, balance: 89280 },
+    { date: '24 May 2026', type: 'Payment Received', narration: 'Payment Received — NEFT/HDFC', ref: 'PMT-4830', debit: 0, credit: 89280, balance: 0 },
+    { date: '26 May 2026', type: 'Primary Invoice', narration: 'Primary Invoice — PI-SAP-0892', ref: 'PI-SAP-0892', debit: 74880, credit: 0, balance: 74880 },
+    { date: '28 May 2026', type: 'Primary Invoice', narration: 'Primary Invoice — PI-SAP-0896', ref: 'PI-SAP-0896', debit: 89280, credit: 0, balance: 164160 },
+    { date: '30 May 2026', type: 'Return Credit', narration: 'Return Credit Note — RET-046', ref: 'RET-046', debit: 0, credit: 5760, balance: 158400 },
+    { date: '31 May 2026', type: 'Payment Received', narration: 'Payment Received — NEFT/HDFC', ref: 'PMT-4842', debit: 0, credit: 6720, balance: 151680 }
+];
+
+export function getLedger() {
+    return clone(LEDGER_TX);
+}
+
 
 /* --------------------------- Home: P1 Dashboard --------------------------- */
 

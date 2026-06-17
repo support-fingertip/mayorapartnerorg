@@ -1,0 +1,65 @@
+<template>
+    <div class="dms-ledger">
+        <header class="dms-ledger__head">
+            <h1 class="dms-ledger__title">Account Statement — Mayora India Ltd.</h1>
+            <div class="dms-ledger__controls">
+                <span class="dms-ledger__lbl">From</span>
+                <lightning-input class="dms-date" type="date" variant="label-hidden" value={fromDate} onchange={handleFrom}></lightning-input>
+                <span class="dms-ledger__lbl">To</span>
+                <lightning-input class="dms-date" type="date" variant="label-hidden" value={toDate} onchange={handleTo}></lightning-input>
+                <button class="dms-btn" type="button" onclick={generate}>Generate Ledger</button>
+                <template lwc:if={generated}>
+                    <button class="dms-btn dms-btn_outline" type="button">
+                        <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Export
+                    </button>
+                </template>
+            </div>
+        </header>
+
+        <div class="dms-body">
+            <template lwc:if={generated}>
+                <div class="dms-ledger__bar">
+                    <span class="dms-ledger__range">{rangeLabel}</span>
+                    <span class="dms-ledger__closing">Closing Balance: <span class="dms-bal_dr">{closingLabel}</span></span>
+                </div>
+
+                <div class="dms-tbl dms-tbl_ledger">
+                    <div class="dms-thead">
+                        <span>Date</span><span>Type</span><span>Narration</span><span>Reference</span>
+                        <span class="dms-num">Debit (₹)</span><span class="dms-num">Credit (₹)</span>
+                        <span class="dms-num">Balance (₹)</span>
+                    </div>
+                    <template for:each={rows} for:item="r">
+                        <div key={r.key} class="dms-trow">
+                            <span data-label="Date">{r.date}</span>
+                            <span data-label="Type">
+                                <c-dms-status-badge label={r.type} theme={r.typeTheme}></c-dms-status-badge>
+                            </span>
+                            <span data-label="Narration">{r.narration}</span>
+                            <span data-label="Reference">
+                                <template lwc:if={r.hasRef}>
+                                    <span class="dms-link">{r.refLabel}</span>
+                                </template>
+                                <template lwc:else>{r.refLabel}</template>
+                            </span>
+                            <span class="dms-num dms-debit" data-label="Debit (₹)">{r.debitLabel}</span>
+                            <span class="dms-num dms-credit" data-label="Credit (₹)">{r.creditLabel}</span>
+                            <span class={r.balanceClass} data-label="Balance (₹)">{r.balanceLabel}</span>
+                        </div>
+                    </template>
+                </div>
+            </template>
+
+            <template lwc:else>
+                <div class="dms-empty">
+                    Select a date range and click <strong>Generate Ledger</strong> to fetch transactions from SAP.
+                </div>
+            </template>
+        </div>
+    </div>
+</template>

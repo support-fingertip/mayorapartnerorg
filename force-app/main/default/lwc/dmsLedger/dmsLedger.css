@@ -1,0 +1,208 @@
+/* Mayora DMS brand tokens — keep in sync across DMS components. */
+:host {
+    --dms-brand: #e2231a;
+    --dms-navy: #1b2a4a;
+    --dms-bg: #f4f6f9;
+    --dms-surface: #ffffff;
+    --dms-text: #16202c;
+    --dms-text-muted: #5c6b7a;
+    --dms-border: #e1e5eb;
+    --dms-success: #2e844a;
+    --dms-danger: #ba0517;
+    --dms-radius: 0.75rem;
+    --dms-shadow: 0 1px 3px rgba(22, 32, 44, 0.08), 0 1px 2px rgba(22, 32, 44, 0.06);
+    --dms-font: 'Salesforce Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    display: block;
+}
+
+.dms-ledger {
+    background: var(--dms-surface);
+    font-family: var(--dms-font);
+}
+
+.dms-ledger__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--dms-border);
+}
+.dms-ledger__title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--dms-text-muted);
+    margin: 0;
+}
+.dms-ledger__controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+.dms-ledger__lbl {
+    font-size: 0.82rem;
+    color: var(--dms-text-muted);
+}
+.dms-date {
+    width: 9.5rem;
+}
+
+.dms-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--dms-navy);
+    color: #fff;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.55rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.dms-btn_outline {
+    background: var(--dms-surface);
+    color: var(--dms-navy);
+    border: 1px solid var(--dms-border);
+}
+
+.dms-body {
+    background: var(--dms-bg);
+    padding: 1.25rem;
+    min-height: 55vh;
+    box-sizing: border-box;
+}
+
+.dms-empty {
+    text-align: center;
+    color: var(--dms-text-muted);
+    font-size: 0.95rem;
+    padding: 6rem 1rem;
+}
+
+.dms-ledger__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.75rem;
+}
+.dms-ledger__range {
+    font-size: 0.82rem;
+    color: var(--dms-text-muted);
+}
+.dms-ledger__closing {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--dms-text);
+}
+
+/* Table */
+.dms-tbl {
+    background: var(--dms-surface);
+    border: 1px solid var(--dms-border);
+    border-radius: var(--dms-radius);
+    box-shadow: var(--dms-shadow);
+    overflow: hidden;
+}
+.dms-thead,
+.dms-trow {
+    display: grid;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 0.8rem 1rem;
+}
+.dms-thead {
+    background: #f7f9fb;
+    color: var(--dms-text-muted);
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+.dms-trow {
+    border-top: 1px solid var(--dms-border);
+    font-size: 0.86rem;
+    color: var(--dms-text);
+}
+.dms-trow:nth-child(odd) {
+    background: #fbfcfd;
+}
+.dms-tbl_ledger .dms-thead,
+.dms-tbl_ledger .dms-trow {
+    grid-template-columns: 1fr 1.1fr 2fr 1.1fr 1fr 1fr 1.1fr;
+}
+.dms-num {
+    text-align: right;
+}
+.dms-link {
+    color: #0b6e99;
+    font-weight: 600;
+}
+.dms-debit {
+    color: var(--dms-danger);
+    font-weight: 600;
+}
+.dms-credit {
+    color: var(--dms-success);
+    font-weight: 600;
+}
+.dms-bal {
+    font-weight: 700;
+}
+.dms-bal_dr {
+    color: var(--dms-danger);
+}
+.dms-bal_nil {
+    color: var(--dms-success);
+}
+
+/* Inline SVG icons */
+.dms-ic {
+    width: 1.05rem;
+    height: 1.05rem;
+    flex-shrink: 0;
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+    .dms-thead {
+        display: none;
+    }
+    .dms-tbl {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+    }
+    .dms-trow,
+    .dms-trow:nth-child(odd) {
+        grid-template-columns: 1fr !important;
+        gap: 0.35rem;
+        background: var(--dms-surface);
+        border: 1px solid var(--dms-border);
+        border-radius: 0.6rem;
+        margin-bottom: 0.6rem;
+        padding: 0.85rem;
+    }
+    .dms-trow > span {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        align-items: center;
+    }
+    .dms-trow > span::before {
+        content: attr(data-label);
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: var(--dms-text-muted);
+    }
+    .dms-num {
+        text-align: right;
+    }
+}
