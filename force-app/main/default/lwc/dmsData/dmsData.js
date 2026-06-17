@@ -310,6 +310,43 @@ export function getLedger() {
     return clone(LEDGER_TX);
 }
 
+/* -------------------------------- Inventory ------------------------------- */
+
+const INVENTORY = [
+    { sku: 'MLK-CHE-130', name: 'Malkist Cheese Crackers', brand: 'Malkist', subBrand: 'Malkist Cheese', packSize: '130g', cases: 475, units: 11400, soldOut: 175, value: 274000, expired: 0, status: 'In Stock' },
+    { sku: 'MLK-CHO-130', name: 'Malkist Double Chocolatey', brand: 'Malkist', subBrand: 'Malkist Choco', packSize: '130g', cases: 320, units: 7680, soldOut: 150, value: 184000, expired: 0, status: 'In Stock' },
+    { sku: 'MLK-CAP-130', name: 'Malkist Cappuccino Crackers', brand: 'Malkist', subBrand: 'Malkist Cappuccino', packSize: '130g', cases: 270, units: 6480, soldOut: 130, value: 156000, expired: 0, status: 'In Stock' },
+    { sku: 'CFJ-100', name: 'Coffee Joy Thin Biscuit', brand: 'Coffee Joy', subBrand: 'Coffee Joy Thin', packSize: '100g', cases: 520, units: 18720, soldOut: 200, value: 300000, expired: 2, status: 'In Stock' },
+    { sku: 'RMG-250', name: 'Roma Marie Gold', brand: 'Roma', subBrand: 'Roma Marie Gold', packSize: '250g', cases: 180, units: 4320, soldOut: 90, value: 121000, expired: 0, status: 'In Stock' },
+    { sku: 'SOL-STR-90', name: "Slai O'lai Strawberry", brand: "Slai O'lai", subBrand: "Slai O'lai Strawberry", packSize: '90g', cases: 300, units: 10800, soldOut: 120, value: 130000, expired: 0, status: 'In Stock' },
+    { sku: 'KOP-JAR-140', name: 'Kopiko Jar', brand: 'Kopiko', subBrand: 'Kopiko Jar', packSize: '140g', cases: 260, units: 3120, soldOut: 100, value: 200000, expired: 0, status: 'In Stock' },
+    { sku: 'KOP-PCH-27', name: 'Kopiko Pouch', brand: 'Kopiko', subBrand: 'Kopiko Pouch', packSize: '27g', cases: 480, units: 23040, soldOut: 180, value: 369000, expired: 0, status: 'In Stock' },
+    { sku: 'BNG-CHO-20', name: 'Beng-Beng Wafer Chocolate', brand: 'Beng-Beng', subBrand: 'Beng-Beng Original', packSize: '20g', cases: 540, units: 25920, soldOut: 210, value: 259000, expired: 0, status: 'In Stock' },
+    { sku: 'JME-CHK-75', name: 'JoyMee Chicken Noodles', brand: 'JoyMee', subBrand: 'JoyMee Cup', packSize: '75g', cases: 360, units: 12960, soldOut: 140, value: 156000, expired: 0, status: 'In Stock' },
+    { sku: 'DAN-BUT-200', name: 'Danisa Butter Cookies', brand: 'Danisa', subBrand: 'Danisa Butter', packSize: '200g', cases: 220, units: 2640, soldOut: 80, value: 317000, expired: 0, status: 'In Stock' },
+    { sku: 'CHK-CHO-50', name: 'Choki-Choki Chocolate Paste', brand: 'Choki-Choki', subBrand: 'Choki-Choki Paste', packSize: '10g × 10', cases: 300, units: 7200, soldOut: 110, value: 288000, expired: 0, status: 'In Stock' },
+    { sku: 'KIS-MNT-18', name: 'KIS Mint Candy', brand: 'KIS', subBrand: 'KIS Mint', packSize: '18.4g', cases: 415, units: 24900, soldOut: 160, value: 199000, expired: 0, status: 'In Stock' },
+    { sku: 'JMK-50', name: 'JuizyMilk Candy', brand: 'JuizyMilk', subBrand: 'JuizyMilk', packSize: '50g', cases: 460, units: 27600, soldOut: 170, value: 307000, expired: 0, status: 'In Stock' }
+];
+
+const STOCK_ADJUSTMENTS = [
+    { id: 'ADJ-0011', date: '28 May 2026', product: 'Malkist Cheese', sku: 'MLK-CHE-130', type: 'Remove', reason: 'Damaged', qty: -2, notes: 'Cartons crushed during unloading from truck.', by: 'Ravi Kumar' },
+    { id: 'ADJ-0010', date: '27 May 2026', product: 'Kopiko Pouch', sku: 'KOP-PCH-27', type: 'Remove', reason: 'Expiry', qty: -3, notes: 'Expired batch – Best Before Apr 2026.', by: 'Ravi Kumar' },
+    { id: 'ADJ-0009', date: '25 May 2026', product: 'Beng-Beng', sku: 'BBG-22', type: 'Remove', reason: 'Missing', qty: -1, notes: 'Physical count short by 1 carton. Under investigation.', by: 'Sunil Patil' },
+    { id: 'ADJ-0008', date: '22 May 2026', product: "Slai O'lai Straw.", sku: 'SOL-STR-90', type: 'Remove', reason: 'Non-saleable', qty: -2, notes: 'Packaging torn; not fit for sale to retailer.', by: 'Ravi Kumar' },
+    { id: 'ADJ-0007', date: '20 May 2026', product: 'Danisa Butter', sku: 'DAN-BUT-200', type: 'Add', reason: 'Other', qty: 4, notes: 'Credit note received from Mayora – extra stock.', by: 'Sunil Patil' },
+    { id: 'ADJ-0006', date: '18 May 2026', product: 'Kopiko Jar', sku: 'KOP-JAR-140', type: 'Remove', reason: 'Damaged', qty: -2, notes: 'Leakage found in 2 cartons during storage.', by: 'Ravi Kumar' },
+    { id: 'ADJ-0005', date: '15 May 2026', product: 'JoyMee Noodles', sku: 'JME-CHK-75', type: 'Remove', reason: 'Missing', qty: -1, notes: 'Short received against GRN; raised with transporter.', by: 'Sunil Patil' }
+];
+
+export function getInventory() {
+    return clone(INVENTORY);
+}
+
+export function getStockAdjustments() {
+    return clone(STOCK_ADJUSTMENTS);
+}
+
 
 /* --------------------------- Home: P1 Dashboard --------------------------- */
 

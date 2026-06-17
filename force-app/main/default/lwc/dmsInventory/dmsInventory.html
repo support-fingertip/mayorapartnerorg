@@ -1,0 +1,186 @@
+<template>
+    <div class="dms-inv">
+        <!-- Sub-tabs -->
+        <div class="dms-subtabs" role="tablist">
+            <button class={stockTabClass} data-tab="stock" onclick={handleTab} type="button">
+                <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                </svg>
+                Stock View
+            </button>
+            <button class={adjTabClass} data-tab="adjust" onclick={handleTab} type="button">
+                <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M9 2h6a1 1 0 0 1 1 1v1h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2V3a1 1 0 0 1 1-1z"></path>
+                    <line x1="9" y1="12" x2="15" y2="12"></line>
+                    <line x1="9" y1="16" x2="13" y2="16"></line>
+                </svg>
+                Stock Adjustments
+            </button>
+        </div>
+
+        <div class="dms-body">
+            <!-- ========================= Stock View ========================= -->
+            <template lwc:if={isStock}>
+                <div class="dms-toolbar">
+                    <div class="dms-filters">
+                        <div class="dms-filter"><span class="dms-filter__label">Brand:</span>
+                            <lightning-combobox variant="label-hidden" value={brand} options={brandOptions} onchange={handleBrand}></lightning-combobox>
+                        </div>
+                        <div class="dms-filter"><span class="dms-filter__label">Sub-Brand:</span>
+                            <lightning-combobox variant="label-hidden" value={subBrand} options={subBrandOptions} onchange={handleSubBrand}></lightning-combobox>
+                        </div>
+                        <div class="dms-filter"><span class="dms-filter__label">Alias:</span>
+                            <lightning-combobox variant="label-hidden" value={alias} options={aliasOptions} onchange={handleAlias}></lightning-combobox>
+                        </div>
+                        <div class="dms-filter"><span class="dms-filter__label">List:</span>
+                            <lightning-combobox variant="label-hidden" value={statusFilter} options={statusOptions} onchange={handleStatus}></lightning-combobox>
+                        </div>
+                    </div>
+                    <div class="dms-toolbar__right">
+                        <lightning-input class="dms-search" type="search" variant="label-hidden" placeholder="Search SKU or product..." value={stockSearch} onchange={handleStockSearch}></lightning-input>
+                        <button class="dms-btn" type="button">
+                            <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            Export
+                        </button>
+                    </div>
+                </div>
+
+                <div class="dms-cards">
+                    <div class="dms-card"><span class="dms-card__label">Total SKUs</span><span class="dms-card__value">{stockCount}</span></div>
+                    <div class="dms-card"><span class="dms-card__label">Total Cases</span><span class="dms-card__value">{totalCasesLabel}</span></div>
+                    <div class="dms-card dms-card_blue"><span class="dms-card__label">Stock Value</span><span class="dms-card__value">{stockValueLabel}</span></div>
+                    <div class="dms-card dms-card_green"><span class="dms-card__label">Out of Stock</span><span class="dms-card__value dms-card__value_green">{outOfStockCount}</span></div>
+                </div>
+
+                <div class="dms-panel">
+                    <p class="dms-asof">{stockCount} SKUs shown · as of 29 May 2026</p>
+                    <div class="dms-tbl dms-tbl_stock">
+                        <div class="dms-thead">
+                            <span>SKU</span><span>Product Name</span><span>Brand</span><span>Sub-Brand</span>
+                            <span>Pack Size</span><span class="dms-num">Avail. Cases</span><span class="dms-num">Avail. Units</span>
+                            <span class="dms-num">Sold Out</span><span class="dms-num">Value</span><span class="dms-num">Expired Ctns</span><span>Status</span>
+                        </div>
+                        <template for:each={stockRows} for:item="p">
+                            <div key={p.key} class="dms-trow">
+                                <span class="dms-code" data-label="SKU">{p.sku}</span>
+                                <span class="dms-strong" data-label="Product Name">{p.name}</span>
+                                <span data-label="Brand"><span class="dms-brand" style={p.brandStyle}>{p.brand}</span></span>
+                                <span data-label="Sub-Brand">{p.subBrand}</span>
+                                <span data-label="Pack Size">{p.packSize}</span>
+                                <span class="dms-num dms-strong" data-label="Avail. Cases">{p.casesLabel}</span>
+                                <span class="dms-num" data-label="Avail. Units">{p.unitsLabel}</span>
+                                <span class="dms-num dms-soldout" data-label="Sold Out">{p.soldOut}</span>
+                                <span class="dms-num" data-label="Value">{p.valueLabel}</span>
+                                <span class="dms-num" data-label="Expired Ctns">{p.expiredLabel}</span>
+                                <span data-label="Status"><c-dms-status-badge label={p.status} theme={p.statusTheme}></c-dms-status-badge></span>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </template>
+
+            <!-- ====================== Stock Adjustments ====================== -->
+            <template lwc:if={isAdjust}>
+                <div class="dms-toolbar">
+                    <div class="dms-filters">
+                        <div class="dms-filter"><span class="dms-filter__label">List:</span>
+                            <lightning-combobox variant="label-hidden" value={adjFilter} options={adjListOptions} onchange={handleAdjFilter}></lightning-combobox>
+                        </div>
+                        <div class="dms-filter"><span class="dms-filter__label">Reason:</span>
+                            <lightning-combobox variant="label-hidden" value={reasonFilter} options={reasonFilterOptions} onchange={handleReasonFilter}></lightning-combobox>
+                        </div>
+                    </div>
+                    <div class="dms-toolbar__right">
+                        <lightning-input class="dms-search" type="search" variant="label-hidden" placeholder="Search product or reason..." value={adjSearch} onchange={handleAdjSearch}></lightning-input>
+                        <button class="dms-btn" type="button" onclick={openModal}>
+                            <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            New Adjustment
+                        </button>
+                    </div>
+                </div>
+
+                <div class="dms-chips">
+                    <template for:each={adjSummary} for:item="c">
+                        <div key={c.id} class="dms-chip">
+                            <span class="dms-chip__label">{c.label}:</span>
+                            <span class={c.cls}>{c.value}</span>
+                        </div>
+                    </template>
+                </div>
+
+                <div class="dms-tbl dms-tbl_adj">
+                    <div class="dms-thead">
+                        <span>Adj. ID</span><span>Date</span><span>Product</span><span>Type</span>
+                        <span>Reason</span><span class="dms-num">Qty (Units)</span><span>Notes</span><span>Created By</span>
+                    </div>
+                    <template for:each={adjRows} for:item="a">
+                        <div key={a.key} class="dms-trow">
+                            <span class="dms-link" data-label="Adj. ID">{a.id}</span>
+                            <span data-label="Date">{a.date}</span>
+                            <span class="dms-prodcell" data-label="Product">
+                                <span class="dms-strong">{a.product}</span>
+                                <span class="dms-code">{a.sku}</span>
+                            </span>
+                            <span data-label="Type"><c-dms-status-badge label={a.type} theme={a.typeTheme}></c-dms-status-badge></span>
+                            <span data-label="Reason"><c-dms-status-badge label={a.reason} theme={a.reasonTheme}></c-dms-status-badge></span>
+                            <span class={a.qtyClass} data-label="Qty (Units)">{a.qtyLabel}</span>
+                            <span class="dms-notes" data-label="Notes">{a.notes}</span>
+                            <span data-label="Created By">{a.by}</span>
+                        </div>
+                    </template>
+                </div>
+            </template>
+        </div>
+
+        <!-- ===================== New Stock Adjustment ===================== -->
+        <template lwc:if={modalOpen}>
+            <div class="dms-modal__overlay" onclick={closeModal}></div>
+            <div class="dms-modal" role="dialog">
+                <header class="dms-modal__head">
+                    <h2>New Stock Adjustment</h2>
+                    <button class="dms-iconbtn" type="button" onclick={closeModal} title="Close">
+                        <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </header>
+                <div class="dms-modal__body">
+                    <label class="dms-flabel">Product *</label>
+                    <lightning-combobox variant="label-hidden" placeholder="Select product..." value={formProduct} options={productOptions} onchange={handleFormProduct}></lightning-combobox>
+
+                    <label class="dms-flabel">Adjustment Type *</label>
+                    <div class="dms-segs">
+                        <template for:each={typeButtons} for:item="t">
+                            <button key={t.type} class={t.class} data-type={t.type} onclick={setFormType} type="button">{t.label}</button>
+                        </template>
+                    </div>
+
+                    <label class="dms-flabel">Reason *</label>
+                    <div class="dms-rchips">
+                        <template for:each={reasonChips} for:item="r">
+                            <button key={r.reason} class={r.class} data-reason={r.reason} onclick={setFormReason} type="button">{r.reason}</button>
+                        </template>
+                    </div>
+
+                    <label class="dms-flabel">Quantity (Units) *</label>
+                    <lightning-input class="dms-qtyfield" type="number" variant="label-hidden" placeholder="e.g. 2" value={formQty} onchange={handleFormQty}></lightning-input>
+
+                    <label class="dms-flabel">Notes</label>
+                    <lightning-textarea variant="label-hidden" placeholder="Describe the reason for adjustment..." value={formNotes} onchange={handleFormNotes}></lightning-textarea>
+                </div>
+                <footer class="dms-modal__foot">
+                    <button class="dms-btn dms-btn_outline" type="button" onclick={closeModal}>Cancel</button>
+                    <button class="dms-btn" type="button" onclick={saveAdjustment} disabled={saveDisabled}>Save Adjustment</button>
+                </footer>
+            </div>
+        </template>
+    </div>
+</template>
