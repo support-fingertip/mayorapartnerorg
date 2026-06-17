@@ -347,6 +347,43 @@ export function getStockAdjustments() {
     return clone(STOCK_ADJUSTMENTS);
 }
 
+/* --------------------------------- Returns -------------------------------- */
+
+const P1_RETURNS = [
+    { id: 'RET-045', date: '28 May 2026', qty: 5, status: 'Approved' },
+    { id: 'RET-043', date: '20 May 2026', qty: 5, status: 'Approved' },
+    { id: 'RET-040', date: '10 May 2026', qty: 4, status: 'Approved' },
+    { id: 'RET-038', date: '02 May 2026', qty: 11, status: 'Rejected' }
+];
+
+const P2_RETURNS = [
+    { id: 'P2RET-012', date: '25 May 2026', qty: 3, status: 'Pending' },
+    { id: 'P2RET-011', date: '14 May 2026', qty: 5, status: 'Approved' },
+    { id: 'P2RET-010', date: '02 Apr 2026', qty: 2, status: 'Approved' }
+];
+
+const SECONDARY_RETURNS = [
+    { id: 'SRET-012', date: '27 May 2026', customer: 'ABC Mart', type: 'Retailer', qty: 5, status: 'Pending' },
+    { id: 'SRET-011', date: '24 May 2026', customer: 'North Zone SD', type: 'Sub-Dist.', qty: 18, status: 'Approved' },
+    { id: 'SRET-010', date: '20 May 2026', customer: 'City Grocery', type: 'Retailer', qty: 2, status: 'Approved' },
+    { id: 'SRET-009', date: '15 May 2026', customer: 'East Zone SD', type: 'Sub-Dist.', qty: 9, status: 'Approved' },
+    { id: 'SRET-008', date: '10 May 2026', customer: 'Fresh Mart', type: 'Retailer', qty: 3, status: 'Pending' }
+];
+
+// GRN-done SAP invoices that can be returned against (Create Primary Return).
+const RETURNABLE_INVOICES = [
+    { id: 'PI-SAP-0885', date: '26 May 2026', lines: [{ name: 'Malkist Cheese Crackers 130g', delivered: 50 }, { name: 'Kopiko Coffee Candy Jar 140g', delivered: 20 }, { name: 'JoyMee Chicken Noodles 75g', delivered: 40 }] },
+    { id: 'PI-SAP-0858', date: '14 May 2026', lines: [{ name: 'Malkist Double Chocolatey 130g', delivered: 60 }, { name: 'Danisa Butter Cookies 200g', delivered: 8 }, { name: 'Beng-Beng Wafer Chocolate 22g', delivered: 100 }] }
+];
+
+export function getReturns() {
+    return { p1: clone(P1_RETURNS), p2: clone(P2_RETURNS), secondary: clone(SECONDARY_RETURNS) };
+}
+
+export function getReturnableInvoices() {
+    return clone(RETURNABLE_INVOICES);
+}
+
 
 /* --------------------------- Home: P1 Dashboard --------------------------- */
 

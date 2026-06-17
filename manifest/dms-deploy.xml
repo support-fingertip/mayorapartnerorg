@@ -15,6 +15,7 @@
         <members>dmsGrn</members>
         <members>dmsLedger</members>
         <members>dmsInventory</members>
+        <members>dmsReturns</members>
         <name>LightningComponentBundle</name>
     </types>
     <version>59.0</version>
