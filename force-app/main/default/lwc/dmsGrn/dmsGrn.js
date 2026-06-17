@@ -27,8 +27,6 @@ export default class DmsGrn extends LightningElement {
     connectedCallback() {
         this.grns = getGrnList();
         this.pendingInvoices = getPendingGrnInvoices();
-        // pre-select all pending invoices (matches the prototype)
-        this.selectedInvoiceIds = this.pendingInvoices.map((i) => i.id);
     }
 
     /* ------------------------------- list -------------------------------- */
@@ -55,7 +53,7 @@ export default class DmsGrn extends LightningElement {
     openWizard() {
         this.wizardOpen = true;
         this.step = 1;
-        this.selectedInvoiceIds = this.pendingInvoices.map((i) => i.id);
+        this.selectedInvoiceIds = [];
     }
     closeWizard() {
         this.wizardOpen = false;

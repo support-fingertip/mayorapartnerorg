@@ -27,7 +27,13 @@ describe('c-dms-grn', () => {
         await flush();
         expect(element.shadowRoot.querySelector('.dms-wizard')).not.toBeNull();
 
-        // both invoices pre-selected -> Next builds the item list (8 SKUs)
+        // nothing selected by default -> Next disabled
+        const nextBtn = element.shadowRoot.querySelectorAll('.dms-wizard__foot .dms-btn')[1];
+        expect(nextBtn.disabled).toBe(true);
+
+        // select both invoices, then Next builds the item list (8 SKUs)
+        element.shadowRoot.querySelectorAll('.dms-pick').forEach((p) => p.click());
+        await flush();
         element.shadowRoot.querySelectorAll('.dms-wizard__foot .dms-btn')[1].click();
         await flush();
         const rows = element.shadowRoot.querySelectorAll('.dms-tbl_items .dms-trow');
