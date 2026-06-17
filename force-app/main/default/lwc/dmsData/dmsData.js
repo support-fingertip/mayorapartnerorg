@@ -248,6 +248,45 @@ export function getCustomerOrders(name) {
     return clone(CUSTOMER_ORDERS[name] || []);
 }
 
+/* ---------------------------------- GRN ----------------------------------- */
+
+const GRN_LIST = [
+    { id: 'GRN-0391', date: '26 May 2026', invoiceRef: 'PI-SAP-0885', skus: 6, officer: 'Rajesh K.', status: 'Complete' },
+    { id: 'GRN-0385', date: '20 May 2026', invoiceRef: 'PI-SAP-0878', skus: 5, officer: 'Suresh M.', status: 'Complete' },
+    { id: 'GRN-0378', date: '14 May 2026', invoiceRef: 'PI-SAP-0858', skus: 4, officer: 'Rajesh K.', status: 'Complete' },
+    { id: 'GRN-0370', date: '07 May 2026', invoiceRef: 'PI-SAP-0841', skus: 4, officer: 'Amit S.', status: 'Complete' }
+];
+
+// Pending SAP invoices available to GRN (the "GRN Not Done" primary invoices).
+const PENDING_GRN_INVOICES = [
+    {
+        id: 'PI-SAP-0892', date: '29 May 2026', amount: 74880,
+        lines: [
+            { sku: 'MLK-CHE-130', name: 'Malkist Cheese Crackers 130g', qty: 50, mfg: '01 Feb 2026', expiry: '29 Oct 2026', shelf: '270d shelf life' },
+            { sku: 'KOP-JAR-140', name: 'Kopiko Coffee Candy Jar 140g', qty: 20, mfg: '15 Nov 2025', expiry: '15 Nov 2026', shelf: '365d shelf life' },
+            { sku: 'JME-CHK-75', name: 'JoyMee Chicken Noodles 75g', qty: 40, mfg: '10 Mar 2026', expiry: '06 Sept 2026', shelf: '180d shelf life' },
+            { sku: 'DAN-BUT-200', name: 'Danisa Butter Cookies 200g', qty: 8, mfg: '20 Jan 2026', expiry: '17 Oct 2026', shelf: '270d shelf life' }
+        ]
+    },
+    {
+        id: 'PI-SAP-0871', date: '22 May 2026', amount: 89280,
+        lines: [
+            { sku: 'MLK-CHO-130', name: 'Malkist Double Chocolatey 130g', qty: 60, mfg: '05 Feb 2026', expiry: '01 Nov 2026', shelf: '270d shelf life' },
+            { sku: 'MLK-CAP-130', name: 'Malkist Cappuccino Crackers 130g', qty: 40, mfg: '05 Feb 2026', expiry: '01 Nov 2026', shelf: '270d shelf life' },
+            { sku: 'BNG-CHO-20', name: 'Beng-Beng Wafer Chocolate 22g', qty: 100, mfg: '12 Mar 2026', expiry: '08 Sept 2026', shelf: '180d shelf life' },
+            { sku: 'CHK-CHO-50', name: 'Choki-Choki Chocolate Paste (10g×10)', qty: 30, mfg: '18 Jan 2026', expiry: '15 Oct 2026', shelf: '270d shelf life' }
+        ]
+    }
+];
+
+export function getGrnList() {
+    return clone(GRN_LIST);
+}
+
+export function getPendingGrnInvoices() {
+    return clone(PENDING_GRN_INVOICES);
+}
+
 
 /* --------------------------- Home: P1 Dashboard --------------------------- */
 

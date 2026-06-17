@@ -1,0 +1,173 @@
+<template>
+    <div class="dms-grn">
+        <div class="dms-body">
+            <div class="dms-toolbar">
+                <div class="dms-filter">
+                    <span class="dms-filter__label">List:</span>
+                    <lightning-combobox variant="label-hidden" value={listFilter} options={listOptions} onchange={handleListFilter}></lightning-combobox>
+                </div>
+                <button class="dms-btn" type="button" onclick={openWizard}>
+                    <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    New GRN
+                </button>
+            </div>
+
+            <div class="dms-chips">
+                <template for:each={summary} for:item="c">
+                    <div key={c.id} class="dms-chip">
+                        <span class="dms-chip__label">{c.label}</span>
+                        <span class={c.cls}>{c.value}</span>
+                    </div>
+                </template>
+                <div class="dms-chip dms-chip_warn">
+                    <span class="dms-chip__label">Pending GRN (Invoices)</span>
+                    <span class="dms-chip__value dms-chip__value_pending">{pendingCount}</span>
+                </div>
+            </div>
+
+            <div class="dms-tbl dms-tbl_grn">
+                <div class="dms-thead">
+                    <span>GRN ID</span><span>Date</span><span>Invoice Ref (SAP)</span>
+                    <span class="dms-num">SKUs Received</span><span>JC Officer</span>
+                    <span>Status</span><span>Action</span>
+                </div>
+                <template for:each={grnRows} for:item="g">
+                    <div key={g.key} class="dms-trow">
+                        <span class="dms-link" data-label="GRN ID">{g.id}</span>
+                        <span data-label="Date">{g.date}</span>
+                        <span class="dms-link" data-label="Invoice Ref (SAP)">{g.invoiceRef}</span>
+                        <span class="dms-num" data-label="SKUs Received">{g.skus}</span>
+                        <span data-label="JC Officer">{g.officer}</span>
+                        <span data-label="Status">
+                            <c-dms-status-badge label={g.status} theme="success"></c-dms-status-badge>
+                        </span>
+                        <span class="dms-link" data-label="Action">View</span>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- ===================== Create GRN wizard ===================== -->
+        <template lwc:if={wizardOpen}>
+            <div class="dms-modal__overlay" onclick={closeWizard}></div>
+            <div class="dms-wizard" role="dialog">
+                <header class="dms-wizard__head">
+                    <div class="dms-wizard__title">
+                        <h2>Create GRN</h2>
+                        <div class="dms-steps">
+                            <template for:each={stepDots} for:item="d">
+                                <span key={d.n} class={d.class}>{d.n}</span>
+                            </template>
+                            <span class="dms-steps__label">{stepLabel}</span>
+                        </div>
+                    </div>
+                    <button class="dms-iconbtn" type="button" onclick={closeWizard} title="Close">
+                        <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </header>
+
+                <div class="dms-wizard__body">
+                    <!-- Step 1: select invoices -->
+                    <template lwc:if={isStep1}>
+                        <p class="dms-wizard__hint">Select pending SAP invoices to create a GRN.</p>
+                        <div class="dms-picklist">
+                            <template for:each={invoiceCards} for:item="inv">
+                                <button key={inv.key} class={inv.rowClass} data-id={inv.id} onclick={toggleInvoice} type="button">
+                                    <span class={inv.boxClass}>
+                                        <svg class="dms-ic dms-ic_xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                            <polyline points="20 6 9 17 4 12"></polyline>
+                                        </svg>
+                                    </span>
+                                    <span class="dms-pick__main">
+                                        <span class="dms-pick__top">
+                                            <span class="dms-pick__id">{inv.id}</span>
+                                            <span class="dms-pick__amt">{inv.amountLabel}</span>
+                                        </span>
+                                        <span class="dms-pick__meta">{inv.metaLabel}</span>
+                                        <span class="dms-pick__prods">{inv.productsLabel}</span>
+                                    </span>
+                                </button>
+                            </template>
+                        </div>
+                    </template>
+
+                    <!-- Step 2: review items -->
+                    <template lwc:if={isStep2}>
+                        <p class="dms-wizard__hint">MFG and expiry dates are pre-filled from the invoice. Enter damage/missing qty if any.</p>
+                        <div class="dms-tbl dms-tbl_items">
+                            <div class="dms-thead">
+                                <span>SKU / Product</span><span class="dms-num">Invoiced Qty</span>
+                                <span>MFG Date</span><span>Expiry Date</span>
+                                <span>Damage/Missing Qty</span><span>Reason</span>
+                            </div>
+                            <template for:each={itemRows} for:item="it">
+                                <div key={it.id} class="dms-trow">
+                                    <span class="dms-itemcell" data-label="SKU / Product">
+                                        <span class="dms-strong">{it.name}</span>
+                                        <span class="dms-itemmeta">{it.skuMeta}</span>
+                                    </span>
+                                    <span class="dms-num" data-label="Invoiced Qty">{it.qty}</span>
+                                    <span data-label="MFG Date">{it.mfg}</span>
+                                    <span class="dms-expiry" data-label="Expiry Date">{it.expiry}</span>
+                                    <span data-label="Damage/Missing Qty">
+                                        <input class="dms-qtyinput" type="number" min="0" max={it.qty} value={it.damage} data-id={it.id} onchange={handleDamage} />
+                                    </span>
+                                    <span data-label="Reason">
+                                        <lightning-combobox
+                                            variant="label-hidden"
+                                            value={it.reason}
+                                            options={reasonOptions}
+                                            data-id={it.id}
+                                            disabled={it.reasonDisabled}
+                                            onchange={handleReason}
+                                        ></lightning-combobox>
+                                    </span>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+
+                <footer class="dms-wizard__foot">
+                    <button class="dms-btn dms-btn_outline" type="button" onclick={backStep}>
+                        ‹ <template lwc:if={isStep1}>Cancel</template><template lwc:else>Back</template>
+                    </button>
+                    <button class="dms-btn" type="button" onclick={nextStep} disabled={nextDisabled}>
+                        <template lwc:if={isStep2}>Save GRN</template>
+                        <template lwc:else>Next ›</template>
+                    </button>
+                </footer>
+            </div>
+        </template>
+
+        <!-- ===================== GRN saved confirmation ===================== -->
+        <template lwc:if={showSuccess}>
+            <div class="dms-modal__overlay"></div>
+            <div class="dms-modal" role="dialog">
+                <div class="dms-modal__check">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </div>
+                <h2 class="dms-modal__title">GRN Saved</h2>
+                <p class="dms-modal__summary">{successInfo.grnId} recorded for {successInfo.refs}</p>
+                <p class="dms-modal__summary">Total received: {successInfo.totalLabel}</p>
+                <template lwc:if={successInfo.hasReturns}>
+                    <div class="dms-returnbox">
+                        <p class="dms-returnbox__title">Auto-created Return: {successInfo.returnId}</p>
+                        <template for:each={successInfo.returns} for:item="r">
+                            <p key={r.key} class="dms-returnbox__line">{r.label}</p>
+                        </template>
+                    </div>
+                </template>
+                <button class="dms-btn dms-modal__done" type="button" onclick={closeSuccess}>Close</button>
+            </div>
+        </template>
+    </div>
+</template>

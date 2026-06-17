@@ -12,6 +12,7 @@
         <members>dmsProducts</members>
         <members>dmsOrders</members>
         <members>dmsInvoices</members>
+        <members>dmsGrn</members>
         <name>LightningComponentBundle</name>
     </types>
     <version>59.0</version>
