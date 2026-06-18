@@ -33,6 +33,23 @@ describe('c-dms-returns', () => {
         expect(element.shadowRoot.querySelector('.dms-btn')).toBeNull();
     });
 
+    it('opens the return detail modal from a View link', async () => {
+        const element = createElement('c-dms-returns', { is: DmsReturns });
+        document.body.appendChild(element);
+
+        const view = [...element.shadowRoot.querySelectorAll('.dms-view, .dms-tbl_pr .dms-link')].find(
+            (v) => v.dataset.id === 'RET-045'
+        );
+        view.click();
+        await flush();
+
+        expect(element.shadowRoot.querySelector('.dms-detail__head h2').textContent).toBe('RET-045');
+        expect(element.shadowRoot.querySelectorAll('.dms-tbl_rdetail .dms-trow').length).toBe(2);
+        expect(element.shadowRoot.querySelector('.dms-detail__total').textContent).toContain(
+            '5 units'
+        );
+    });
+
     it('creates a primary return via the wizard and prepends it to P1', async () => {
         const element = createElement('c-dms-returns', { is: DmsReturns });
         document.body.appendChild(element);

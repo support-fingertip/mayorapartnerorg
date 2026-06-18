@@ -350,24 +350,24 @@ export function getStockAdjustments() {
 /* --------------------------------- Returns -------------------------------- */
 
 const P1_RETURNS = [
-    { id: 'RET-045', date: '28 May 2026', qty: 5, status: 'Approved' },
-    { id: 'RET-043', date: '20 May 2026', qty: 5, status: 'Approved' },
-    { id: 'RET-040', date: '10 May 2026', qty: 4, status: 'Approved' },
-    { id: 'RET-038', date: '02 May 2026', qty: 11, status: 'Rejected' }
+    { id: 'RET-045', date: '28 May 2026', qty: 5, status: 'Approved', ref: 'PI-SAP-0885', lines: [{ product: 'Malkist Cheese Crackers 130g', qty: 3, reason: 'Damaged goods' }, { product: 'JoyMee Chicken Noodles 75g', qty: 2, reason: 'Damaged goods' }] },
+    { id: 'RET-043', date: '20 May 2026', qty: 5, status: 'Approved', ref: 'PI-SAP-0878', lines: [{ product: 'Kopiko Coffee Candy Jar 140g', qty: 5, reason: 'Quality issue' }] },
+    { id: 'RET-040', date: '10 May 2026', qty: 4, status: 'Approved', ref: 'PI-SAP-0858', lines: [{ product: 'Danisa Butter Cookies 200g', qty: 4, reason: 'Expired stock' }] },
+    { id: 'RET-038', date: '02 May 2026', qty: 11, status: 'Rejected', ref: 'PI-SAP-0841', lines: [{ product: 'Beng-Beng Wafer Chocolate 22g', qty: 6, reason: 'Damaged goods' }, { product: 'Choki-Choki Chocolate Paste', qty: 5, reason: 'Near-expiry' }] }
 ];
 
 const P2_RETURNS = [
-    { id: 'P2RET-012', date: '25 May 2026', qty: 3, status: 'Pending' },
-    { id: 'P2RET-011', date: '14 May 2026', qty: 5, status: 'Approved' },
-    { id: 'P2RET-010', date: '02 Apr 2026', qty: 2, status: 'Approved' }
+    { id: 'P2RET-012', date: '25 May 2026', qty: 3, status: 'Pending', ref: 'PO-2835', lines: [{ product: 'Malkist Double Chocolatey 130g', qty: 3, reason: 'Damaged goods' }] },
+    { id: 'P2RET-011', date: '14 May 2026', qty: 5, status: 'Approved', ref: 'PO-2820', lines: [{ product: "Slai O'lai Strawberry 90g", qty: 5, reason: 'Quality issue' }] },
+    { id: 'P2RET-010', date: '02 Apr 2026', qty: 2, status: 'Approved', ref: 'PO-2810', lines: [{ product: 'Coffee Joy Thin Biscuit 100g', qty: 2, reason: 'Wrong product' }] }
 ];
 
 const SECONDARY_RETURNS = [
-    { id: 'SRET-012', date: '27 May 2026', customer: 'ABC Mart', type: 'Retailer', qty: 5, status: 'Pending' },
-    { id: 'SRET-011', date: '24 May 2026', customer: 'North Zone SD', type: 'Sub-Dist.', qty: 18, status: 'Approved' },
-    { id: 'SRET-010', date: '20 May 2026', customer: 'City Grocery', type: 'Retailer', qty: 2, status: 'Approved' },
-    { id: 'SRET-009', date: '15 May 2026', customer: 'East Zone SD', type: 'Sub-Dist.', qty: 9, status: 'Approved' },
-    { id: 'SRET-008', date: '10 May 2026', customer: 'Fresh Mart', type: 'Retailer', qty: 3, status: 'Pending' }
+    { id: 'SRET-012', date: '27 May 2026', customer: 'ABC Mart', type: 'Retailer', qty: 5, status: 'Pending', lines: [{ product: 'Malkist Cheese Crackers 130g', qty: 5, reason: 'Damaged goods' }] },
+    { id: 'SRET-011', date: '24 May 2026', customer: 'North Zone SD', type: 'Sub-Dist.', qty: 18, status: 'Approved', lines: [{ product: 'Kopiko Jar 140g', qty: 10, reason: 'Near-expiry' }, { product: 'Danisa Butter 200g', qty: 8, reason: 'Expired stock' }] },
+    { id: 'SRET-010', date: '20 May 2026', customer: 'City Grocery', type: 'Retailer', qty: 2, status: 'Approved', lines: [{ product: 'Roma Marie Gold 250g', qty: 2, reason: 'Quality issue' }] },
+    { id: 'SRET-009', date: '15 May 2026', customer: 'East Zone SD', type: 'Sub-Dist.', qty: 9, status: 'Approved', lines: [{ product: 'KIS Mint Candy 18.4g', qty: 9, reason: 'Damaged goods' }] },
+    { id: 'SRET-008', date: '10 May 2026', customer: 'Fresh Mart', type: 'Retailer', qty: 3, status: 'Pending', lines: [{ product: 'Coffee Joy Thin Biscuit 100g', qty: 3, reason: 'Wrong product' }] }
 ];
 
 // GRN-done SAP invoices that can be returned against (Create Primary Return).
