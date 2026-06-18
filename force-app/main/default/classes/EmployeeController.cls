@@ -77,6 +77,7 @@ public with sharing class EmployeeController {
                    Profile_Photo_URL__c, Address__c, User__c, User__r.Name, Week_Off_Days__c, Gross_Salary__c,
                    Channels__c, L1_Approver__c, L1_Approver__r.Name, L2_Approver__c, L2_Approver__r.Name,
                    Territory__c, Territory__r.Name,
+                   Position__c, Position__r.Name, Position__r.Position_Code__c,
                    Reporting_Manager__c, Reporting_Manager__r.First_Name__c,
                    Reporting_Manager__r.Last_Name__c, Reporting_Manager__r.Employee_Code__c
             FROM Employee__c
@@ -97,6 +98,11 @@ public with sharing class EmployeeController {
     @AuraEnabled
     public static Employee__c saveEmployee(Employee__c employee) {
         try {
+            // Position Code is mandatory when creating/editing from the
+            // Employee Manager tab (BRD §5 — every employee holds a position).
+            if (employee.Position__c == null) {
+                throw new AuraHandledException('Position Code is required.');
+            }
             upsert employee;
 
             return [
@@ -106,6 +112,7 @@ public with sharing class EmployeeController {
                        Profile_Photo_URL__c, Address__c, User__c, User__r.Name, Week_Off_Days__c, Gross_Salary__c,
                        Channels__c, L1_Approver__c, L1_Approver__r.Name, L2_Approver__c, L2_Approver__r.Name,
                    Territory__c, Territory__r.Name,
+                       Position__c, Position__r.Name, Position__r.Position_Code__c,
                        Reporting_Manager__c, Reporting_Manager__r.First_Name__c,
                        Reporting_Manager__r.Last_Name__c, Reporting_Manager__r.Employee_Code__c
                 FROM Employee__c
@@ -211,6 +218,23 @@ public with sharing class EmployeeController {
             }
         }
         return options;
+    }
+
+    // ── Get Positions ────────────────────────────────────────────────────────────
+
+    /**
+     * @description Returns active positions for the mandatory Position Code
+     *              picklist in the Employee Manager tab.
+     * @return List of active Position__c records (Code + Name).
+     */
+    @AuraEnabled(cacheable=true)
+    public static List<Position__c> getPositions() {
+        return [
+            SELECT Id, Name, Position_Code__c
+            FROM Position__c
+            WHERE Is_Active__c = true
+            ORDER BY Position_Code__c
+        ];
     }
 
     // ── Get Direct Reports ───────────────────────────────────────────────────────

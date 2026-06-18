@@ -484,6 +484,15 @@
                                             onchange={handleFormChange}></lightning-combobox>
                                     </div>
                                     <div class="slds-col slds-size_1-of-3 slds-m-bottom_small">
+                                        <lightning-combobox label="Position Code" value={employeeForm.Position__c}
+                                            options={positionOptions}
+                                            data-field="Position__c"
+                                            placeholder="Select a position"
+                                            required
+                                            field-level-help="Position the employee holds — drives their Salesforce Role"
+                                            onchange={handleFormChange}></lightning-combobox>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-3 slds-m-bottom_small">
                                         <lightning-combobox label="Band"
                                             value={employeeForm.Band__c}
                                             options={bandOptions}

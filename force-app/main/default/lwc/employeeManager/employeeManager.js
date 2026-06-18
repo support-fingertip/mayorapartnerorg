@@ -8,6 +8,7 @@ import saveEmployee from '@salesforce/apex/EmployeeController.saveEmployee';
 import deactivateEmployee from '@salesforce/apex/EmployeeController.deactivateEmployee';
 import getDepartmentOptions from '@salesforce/apex/EmployeeController.getDepartmentOptions';
 import getDesignationOptions from '@salesforce/apex/EmployeeController.getDesignationOptions';
+import getPositions from '@salesforce/apex/EmployeeController.getPositions';
 import getDirectReports from '@salesforce/apex/EmployeeController.getDirectReports';
 import getEmployeeLeaveBalances from '@salesforce/apex/EmployeeController.getEmployeeLeaveBalances';
 import getOrgHierarchy from '@salesforce/apex/EmployeeController.getOrgHierarchy';
@@ -40,6 +41,7 @@ const EMPTY_EMPLOYEE_FORM = {
     Region__c: '',
     Band__c: '',
     Territory__c: null,
+    Position__c: null,
     Is_Active__c: true,
     Profile_Photo_URL__c: '',
     Address__c: '',
@@ -54,6 +56,7 @@ export default class EmployeeManager extends NavigationMixin(LightningElement) {
     @track hierarchyTree = [];
     @track departmentOptions = [];
     @track designationOptions = [];
+    @track positionOptions = [];
     isLoading = false;
     showEmployeeForm = false;
     isEditMode = false;
@@ -405,12 +408,17 @@ export default class EmployeeManager extends NavigationMixin(LightningElement) {
 
     async loadFilterOptions() {
         try {
-            const [departments, designations] = await Promise.all([
+            const [departments, designations, positions] = await Promise.all([
                 getDepartmentOptions(),
-                getDesignationOptions()
+                getDesignationOptions(),
+                getPositions()
             ]);
             this.departmentOptions = departments || [];
             this.designationOptions = designations || [];
+            this.positionOptions = (positions || []).map(p => ({
+                label: p.Position_Code__c + ' — ' + p.Name,
+                value: p.Id
+            }));
         } catch (error) {
             console.error('Error loading filter options:', error);
         }
@@ -601,6 +609,7 @@ export default class EmployeeManager extends NavigationMixin(LightningElement) {
             Region__c: this.selectedEmployee.Region__c || '',
             Band__c: this.selectedEmployee.Band__c || '',
             Territory__c: this.selectedEmployee.Territory__c || null,
+            Position__c: this.selectedEmployee.Position__c || null,
             Is_Active__c: this.selectedEmployee.Is_Active__c !== false,
             Profile_Photo_URL__c: this.selectedEmployee.Profile_Photo_URL__c || '',
             Address__c: this.selectedEmployee.Address__c || '',
@@ -621,7 +630,7 @@ export default class EmployeeManager extends NavigationMixin(LightningElement) {
             this.employeeForm = { ...this.employeeForm, [field]: Array.isArray(val) ? (val[0] || null) : val };
         } else if (field === 'Is_Active__c') {
             this.employeeForm = { ...this.employeeForm, [field]: event.target.checked };
-        } else if (field === 'Department__c' || field === 'Designation__c') {
+        } else if (field === 'Department__c' || field === 'Designation__c' || field === 'Position__c') {
             this.employeeForm = { ...this.employeeForm, [field]: event.detail.value };
         } else if (field === 'Week_Off_Days__c') {
             const selectedValues = event.detail.value;
@@ -660,6 +669,10 @@ export default class EmployeeManager extends NavigationMixin(LightningElement) {
             this.showToast('Error', 'At least one Channel must be assigned.', 'error');
             return;
         }
+        if (!this.employeeForm.Position__c) {
+            this.showToast('Error', 'Position Code is required.', 'error');
+            return;
+        }
 
         this.isLoading = true;
         try {
@@ -678,6 +691,7 @@ export default class EmployeeManager extends NavigationMixin(LightningElement) {
                 Region__c: this.employeeForm.Region__c,
                 Band__c: this.employeeForm.Band__c,
                 Territory__c: this.employeeForm.Territory__c,
+                Position__c: this.employeeForm.Position__c,
                 Is_Active__c: this.employeeForm.Is_Active__c,
                 Profile_Photo_URL__c: this.employeeForm.Profile_Photo_URL__c,
                 Address__c: this.employeeForm.Address__c,

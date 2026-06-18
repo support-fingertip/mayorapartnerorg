@@ -372,6 +372,12 @@ public class EmployeeController_Test {
         try { fresh.put('Zone__c', 'West'); } catch (Exception e) {}
         try { fresh.put('Channels__c', 'GT;MT;E-Commerce'); } catch (Exception e) {}
         if (terr != null) fresh.Territory__c = terr.Id;
+        Position__c pos = new Position__c(
+            Name = 'Diag Position',
+            Position_Code__c = 'POS-DIAG-' + String.valueOf(DateTime.now().getTime()).right(6)
+        );
+        insert pos;
+        fresh.Position__c = pos.Id;
         fillRequiredFields(fresh);
 
         Test.startTest();

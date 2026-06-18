@@ -126,8 +126,7 @@ public class MDM_PositionRoleProvisioner implements Queueable {
      *              underscores, prefixed with POS_ (guarantees a letter start),
      *              capped at 80 chars.
      */
-    @TestVisible
-    private static String devName(String positionCode) {
+    public static String devName(String positionCode) {
         if (String.isBlank(positionCode)) {
             return null;
         }
