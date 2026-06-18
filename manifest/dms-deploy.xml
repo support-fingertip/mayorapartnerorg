@@ -17,6 +17,7 @@
         <members>dmsInventory</members>
         <members>dmsReturns</members>
         <members>dmsClaims</members>
+        <members>dmsSecondaryCollection</members>
         <name>LightningComponentBundle</name>
     </types>
     <version>59.0</version>

@@ -410,6 +410,39 @@ export function getClaimSchemes() {
     return [...CLAIM_SCHEMES];
 }
 
+/* --------------------------- Secondary Collection ------------------------- */
+
+const COLLECTIONS = [
+    { id: 'COL-0021', date: '29 May 2026', customer: 'North Zone SD', type: 'Sub-Distributor', code: 'SD-001', invoiceRef: 'SI-2204', amount: 45000, mode: 'NEFT', reference: 'NEFT2605290011', by: 'Ravi Kumar', notes: 'Full settlement against SI-2204.' },
+    { id: 'COL-0020', date: '28 May 2026', customer: 'ABC Mart', type: 'Retailer', code: 'RET-001', invoiceRef: 'SI-2198', amount: 14928, mode: 'UPI', reference: 'UPI28052201@ybl', by: 'Ravi Kumar', notes: '—' },
+    { id: 'COL-0019', date: '27 May 2026', customer: 'Metro General Store', type: 'Retailer', code: 'RET-004', invoiceRef: 'SI-2185', amount: 9800, mode: 'Cash', reference: '—', by: 'Sunil Patil', notes: 'Collected at store.' },
+    { id: 'COL-0018', date: '25 May 2026', customer: 'East Zone SD', type: 'Sub-Distributor', code: 'SD-002', invoiceRef: 'SI-2174', amount: 22800, mode: 'Cheque', reference: 'CHQ-SBI-082341', by: 'Ravi Kumar', notes: 'Cheque deposited.' },
+    { id: 'COL-0017', date: '22 May 2026', customer: 'Sharma Kirana', type: 'Retailer', code: 'RET-005', invoiceRef: 'SI-2162', amount: 7200, mode: 'UPI', reference: 'UPI22052001@paytm', by: 'Sunil Patil', notes: '—' },
+    { id: 'COL-0016', date: '20 May 2026', customer: 'City Grocery', type: 'Retailer', code: 'RET-002', invoiceRef: 'SI-2155', amount: 24000, mode: 'NEFT', reference: 'NEFT2005200022', by: 'Ravi Kumar', notes: '—' },
+    { id: 'COL-0015', date: '18 May 2026', customer: 'West Zone SD', type: 'Sub-Distributor', code: 'SD-003', invoiceRef: 'SI-2140', amount: 33500, mode: 'Cheque', reference: 'CHQ-HDFC-091122', by: 'Ravi Kumar', notes: 'Cheque cleared.' },
+    { id: 'COL-0014', date: '15 May 2026', customer: 'Fresh Mart', type: 'Retailer', code: 'RET-003', invoiceRef: 'SI-2131', amount: 25000, mode: 'Cash', reference: '—', by: 'Sunil Patil', notes: '—' }
+];
+
+const COLLECTION_CUSTOMERS = {
+    Retailer: [
+        { name: 'ABC Mart', code: 'RET-001' }, { name: 'City Grocery', code: 'RET-002' },
+        { name: 'Fresh Mart', code: 'RET-003' }, { name: 'Metro General Store', code: 'RET-004' },
+        { name: 'Sharma Kirana', code: 'RET-005' }, { name: 'Star Provisions', code: 'RET-006' }
+    ],
+    'Sub-Distributor': [
+        { name: 'North Zone SD', code: 'SD-001' }, { name: 'East Zone SD', code: 'SD-002' },
+        { name: 'West Zone SD', code: 'SD-003' }
+    ]
+};
+
+export function getCollections() {
+    return clone(COLLECTIONS);
+}
+
+export function getCollectionCustomers() {
+    return clone(COLLECTION_CUSTOMERS);
+}
+
 
 /* --------------------------- Home: P1 Dashboard --------------------------- */
 
