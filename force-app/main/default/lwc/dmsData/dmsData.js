@@ -443,6 +443,27 @@ export function getCollectionCustomers() {
     return clone(COLLECTION_CUSTOMERS);
 }
 
+/* -------------------------------- Customers ------------------------------- */
+
+const CUSTOMER_RETAILERS = [
+    { name: 'ABC Mart', code: 'RET-001', type: 'Retailer', outletType: 'Grocery Store', beat: 'Andheri West', owner: 'Arvind Sharma', area: 'Andheri West', phone: '+91 98200 11234', monthly: 32000, lastOrder: 'SO-6432' },
+    { name: 'City Grocery', code: 'RET-002', type: 'Retailer', outletType: 'Grocery Store', beat: 'Bandra–Kurla', owner: 'Mehul Jain', area: 'Bandra East', phone: '+91 98209 44567', monthly: 24000, lastOrder: 'SO-6431' },
+    { name: 'Fresh Mart', code: 'RET-003', type: 'Retailer', outletType: 'Grocery Store', beat: 'Borivali North', owner: 'Suresh Patil', area: 'Borivali North', phone: '+91 91364 78901', monthly: 18000, lastOrder: 'SO-6430' },
+    { name: 'Metro General Store', code: 'RET-004', type: 'Retailer', outletType: 'General Trade', beat: 'Bandra–Kurla', owner: 'Ramesh Gupta', area: 'Kurla', phone: '+91 99203 22345', monthly: 15000, lastOrder: 'SO-6420' },
+    { name: 'Sharma Kirana', code: 'RET-005', type: 'Retailer', outletType: 'Kirana', beat: 'Malad–Goregaon', owner: 'Dinesh Sharma', area: 'Malad East', phone: '+91 98765 55678', monthly: 12000, lastOrder: 'SO-6412' },
+    { name: 'Star Provisions', code: 'RET-006', type: 'Retailer', outletType: 'General Trade', beat: 'Malad–Goregaon', owner: 'Vijay Nair', area: 'Goregaon West', phone: '+91 97690 99012', monthly: 20000, lastOrder: 'SO-6429' }
+];
+
+const CUSTOMER_SUBDISTS = [
+    { name: 'North Zone SD', code: 'SD-001', type: 'Sub-Dist.', outletType: 'Sub-Distributor', beat: 'Mira-Bhayander', owner: 'Prakash Mehta', area: 'Mira-Bhayander', phone: '+91 98210 33456', monthly: 125000, lastOrder: 'SO-6440' },
+    { name: 'East Zone SD', code: 'SD-002', type: 'Sub-Dist.', outletType: 'Sub-Distributor', beat: 'Thane East', owner: 'Santosh Rao', area: 'Thane East', phone: '+91 98220 66789', monthly: 95000, lastOrder: 'SO-6416' },
+    { name: 'West Zone SD', code: 'SD-003', type: 'Sub-Dist.', outletType: 'Sub-Distributor', beat: 'Vasai-Virar', owner: 'Anil Desai', area: 'Vasai-Virar', phone: '+91 98230 77890', monthly: 80000, lastOrder: 'SO-6410' }
+];
+
+export function getCustomersData() {
+    return { retailers: clone(CUSTOMER_RETAILERS), subDistributors: clone(CUSTOMER_SUBDISTS) };
+}
+
 
 /* --------------------------- Home: P1 Dashboard --------------------------- */
 

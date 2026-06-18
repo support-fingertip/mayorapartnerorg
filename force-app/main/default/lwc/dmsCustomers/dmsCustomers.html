@@ -1,0 +1,69 @@
+<template>
+    <div class="dms-cust">
+        <!-- Sub-tabs -->
+        <div class="dms-subtabs" role="tablist">
+            <button class={retailerTabClass} data-tab="retailers" onclick={handleTab} type="button">Retailers</button>
+            <button class={subDistTabClass} data-tab="subdist" onclick={handleTab} type="button">Sub-Distributors</button>
+        </div>
+
+        <div class="dms-body">
+            <div class="dms-toolbar">
+                <div class="dms-filters">
+                    <div class="dms-filter"><span class="dms-filter__label">List:</span>
+                        <lightning-combobox variant="label-hidden" value={outletFilter} options={outletOptions} onchange={handleOutlet}></lightning-combobox>
+                    </div>
+                    <div class="dms-filter"><span class="dms-filter__label">Beat:</span>
+                        <lightning-combobox variant="label-hidden" value={beatFilter} options={beatOptions} onchange={handleBeat}></lightning-combobox>
+                    </div>
+                </div>
+                <lightning-input class="dms-search" type="search" variant="label-hidden" placeholder="Search name, area, beat..." value={search} onchange={handleSearch}></lightning-input>
+            </div>
+
+            <div class="dms-chips">
+                <div class="dms-chip">
+                    <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 4-6 8-6s8 2 8 6"></path>
+                    </svg>
+                    <span class="dms-chip__label">{totalLabel}:</span><span class="dms-chip__value">{totalCount}</span>
+                </div>
+            </div>
+
+            <div class="dms-tbl dms-tbl_cust">
+                <div class="dms-thead">
+                    <span>Customer</span><span>Type</span><span>Outlet Type</span><span>Beat</span>
+                    <span>Owner</span><span>Area</span><span>Phone</span>
+                    <span class="dms-num">Monthly Avg</span><span>Last Order</span><span>Action</span>
+                </div>
+                <template for:each={rows} for:item="c">
+                    <div key={c.key} class="dms-trow">
+                        <span class="dms-custcell" data-label="Customer">
+                            <span class="dms-avatar">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <template lwc:if={isRetailers}>
+                                        <circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 4-6 8-6s8 2 8 6"></path>
+                                    </template>
+                                    <template lwc:else>
+                                        <path d="M3 21h18"></path><path d="M5 21V8l7-4 7 4v13"></path><rect x="9" y="13" width="6" height="8"></rect>
+                                    </template>
+                                </svg>
+                            </span>
+                            <span class="dms-custcell__txt">
+                                <span class="dms-strong">{c.name}</span>
+                                <span class="dms-code">{c.code}</span>
+                            </span>
+                        </span>
+                        <span data-label="Type"><c-dms-status-badge label={c.type} theme={c.typeTheme}></c-dms-status-badge></span>
+                        <span data-label="Outlet Type">{c.outletType}</span>
+                        <span data-label="Beat">{c.beat}</span>
+                        <span data-label="Owner">{c.owner}</span>
+                        <span class="dms-muted" data-label="Area">{c.area}</span>
+                        <span class="dms-muted" data-label="Phone">{c.phone}</span>
+                        <span class="dms-num dms-strong" data-label="Monthly Avg">{c.monthlyLabel}</span>
+                        <span class="dms-link" data-label="Last Order">{c.lastOrder}</span>
+                        <span data-label="Action"><button class="dms-viewbtn" type="button">View</button></span>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+</template>
