@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fullName>Type__c</fullName>
-    <label>Type</label>
-    <required>true</required>
-    <trackHistory>false</trackHistory>
+    <fullName>Status__c</fullName>
+    <label>Status</label>
+    <required>false</required>
     <trackTrending>false</trackTrending>
     <type>Picklist</type>
     <valueSet>
@@ -11,24 +10,19 @@
         <valueSetDefinition>
             <sorted>false</sorted>
             <value>
-                <fullName>Journey Cycle</fullName>
+                <fullName>Active</fullName>
                 <default>false</default>
-                <label>Journey Cycle</label>
+                <label>Active</label>
             </value>
             <value>
-                <fullName>Monthly</fullName>
+                <fullName>Expired</fullName>
                 <default>false</default>
-                <label>Monthly</label>
+                <label>Expired</label>
             </value>
             <value>
-                <fullName>Quarterly</fullName>
+                <fullName>Cancelled</fullName>
                 <default>false</default>
-                <label>Quarterly</label>
-            </value>
-            <value>
-                <fullName>Yearly</fullName>
-                <default>false</default>
-                <label>Yearly</label>
+                <label>Cancelled</label>
             </value>
         </valueSetDefinition>
     </valueSet>
