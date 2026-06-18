@@ -1,0 +1,105 @@
+<template>
+    <div class="dms-positions">
+        <!-- Sub-tabs -->
+        <div class="dms-subtabs" role="tablist">
+            <button class={positionsTabClass} data-tab="positions" onclick={handleTab} type="button">
+                <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                Positions &amp; Roles
+            </button>
+            <button class={tempTabClass} data-tab="temp" onclick={handleTab} type="button">
+                <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                Temporary Assignments
+            </button>
+        </div>
+
+        <div class="dms-body">
+            <!-- ========================= Positions ======================= -->
+            <template lwc:if={isPositions}>
+                <div class="dms-kpis">
+                    <template for:each={kpis} for:item="kpi">
+                        <c-dms-kpi-card key={kpi.id} label={kpi.label} value={kpi.value} variant={kpi.variant}></c-dms-kpi-card>
+                    </template>
+                </div>
+
+                <div class="dms-note">
+                    <strong>Auto-chain:</strong> creating a Position auto-creates &amp; maps a Role. Assigning a User flows the
+                    Role, Profile and Manager to that user, who then owns every record tied to the Position. A vacant
+                    Position defaults ownership to the System Admin.
+                </div>
+
+                <div class="dms-filters">
+                    <div class="dms-filter">
+                        <span class="dms-filter__label">Level:</span>
+                        <lightning-combobox variant="label-hidden" value={level} options={levelOptions} onchange={handleLevel}></lightning-combobox>
+                    </div>
+                    <div class="dms-filter">
+                        <span class="dms-filter__label">Status:</span>
+                        <lightning-combobox variant="label-hidden" value={status} options={statusOptions} onchange={handleStatus}></lightning-combobox>
+                    </div>
+                    <div class="dms-filter dms-filter_search">
+                        <lightning-input type="search" variant="label-hidden" placeholder="Search code, user or area..." value={searchKey} onchange={handleSearch}></lightning-input>
+                    </div>
+                </div>
+
+                <div class="dms-tbl dms-tbl_positions">
+                    <div class="dms-thead">
+                        <span>Position Code</span><span>Designation</span><span>Level</span>
+                        <span>Area (Geography)</span><span>Reports To</span><span>Role (auto)</span>
+                        <span>Record Owner</span><span>Status</span>
+                    </div>
+                    <template for:each={filteredPositions} for:item="p">
+                        <div key={p.key} class="dms-trow">
+                            <span class="dms-code" data-label="Position Code">{p.code}</span>
+                            <span class="dms-strong" data-label="Designation">{p.designation}</span>
+                            <span data-label="Level">{p.level}</span>
+                            <span data-label="Area (Geography)">{p.area}</span>
+                            <span class="dms-muted" data-label="Reports To">{p.reportsTo}</span>
+                            <span class="dms-code" data-label="Role (auto)">{p.role}</span>
+                            <span class={p.ownerClass} data-label="Record Owner">{p.owner}</span>
+                            <span data-label="Status">
+                                <c-dms-status-badge label={p.status} theme={p.statusTheme}></c-dms-status-badge>
+                            </span>
+                        </div>
+                    </template>
+                </div>
+                <p class="dms-count">{positionCountLabel}</p>
+            </template>
+
+            <!-- ==================== Temporary Assignments ================ -->
+            <template lwc:if={isTemp}>
+                <div class="dms-note">
+                    <strong>Temporary beat assignment (BRD §5.3):</strong> Admin / Manager can lend a Beat to another user
+                    (same level) to cover an absent user or group work. Access to the Beat, its outlets and DB / SD / SS is
+                    shared immediately and ends on the End Date.
+                </div>
+
+                <div class="dms-tbl dms-tbl_temp">
+                    <div class="dms-thead">
+                        <span>Beat</span><span>From Position</span><span>Assigned To</span>
+                        <span>Start Date</span><span>End Date</span><span>Status</span>
+                    </div>
+                    <template for:each={tempRows} for:item="t">
+                        <div key={t.key} class="dms-trow">
+                            <span class="dms-strong" data-label="Beat">{t.beat}</span>
+                            <span class="dms-code" data-label="From Position">{t.fromPosition}</span>
+                            <span data-label="Assigned To">{t.toUser}</span>
+                            <span data-label="Start Date">{t.start}</span>
+                            <span data-label="End Date">{t.end}</span>
+                            <span data-label="Status">
+                                <c-dms-status-badge label={t.status} theme={t.statusTheme}></c-dms-status-badge>
+                            </span>
+                        </div>
+                    </template>
+                </div>
+            </template>
+        </div>
+    </div>
+</template>

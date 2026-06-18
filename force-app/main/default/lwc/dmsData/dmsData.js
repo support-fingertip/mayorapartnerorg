@@ -601,4 +601,205 @@ export function getPeriodOptions() {
     ];
 }
 
+/* ======================================================================== */
+/* Admin / Config screens (Phase 1 prototype)                               */
+/* Position & Role Management, Scheme Management, Product Sharing, Targets.  */
+/* These mirror the Mayora Salesforce & Schemes architecture documents.     */
+/* Additive only — existing screens above are untouched.                    */
+/* ======================================================================== */
+
+/* ------------------- Position & Role Management (BRD §5–6) ---------------- */
+/* When a Position is created a matching Role is auto-created and mapped.    */
+/* When a User is assigned, that Role + Profile + Manager flow to the user   */
+/* and the user owns all records tied to the Position. Vacant => Sys Admin.  */
+
+const POSITIONS = [
+    { code: 'PC-NSM-01', designation: 'NSM', level: 'L8', area: 'National', reportsTo: '—', role: 'NSM-Role', user: 'Suresh Menon', status: 'Filled', beats: 0 },
+    { code: 'PC-ZSM-W', designation: 'ZSM', level: 'L7', area: 'West Zone', reportsTo: 'PC-NSM-01', role: 'ZSM-W-Role', user: 'Anil Kapoor', status: 'Filled', beats: 0 },
+    { code: 'PC-RSM-MH', designation: 'RSM', level: 'L6', area: 'Maharashtra Region', reportsTo: 'PC-ZSM-W', role: 'RSM-MH-Role', user: 'Deepak Joshi', status: 'Filled', beats: 0 },
+    { code: 'PC-ASM-PUN', designation: 'ASM', level: 'L5', area: 'Pune Area', reportsTo: 'PC-RSM-MH', role: 'ASM-PUN-Role', user: 'Ravindra Patil', status: 'Filled', beats: 0 },
+    { code: 'PC-DO-PUN-2', designation: 'DO', level: 'L2', area: 'Pune City', reportsTo: 'PC-ASM-PUN', role: 'DO-PUN-2-Role', user: '—', status: 'Vacant', beats: 4 },
+    { code: 'PC-SR-PUN-05', designation: 'SR', level: 'L1', area: 'Pune City', reportsTo: 'PC-DO-PUN-2', role: 'SR-PUN-05-Role', user: 'Manoj Kale', status: 'Filled', beats: 6 },
+    { code: 'PC-SR-PUN-06', designation: 'SR', level: 'L1', area: 'Pune City', reportsTo: 'PC-DO-PUN-2', role: 'SR-PUN-06-Role', user: '—', status: 'Vacant', beats: 5 },
+    { code: 'PC-DBSM-PUN', designation: 'DBSM', level: 'L1', area: 'Pune City', reportsTo: 'PC-DO-PUN-2', role: 'DBSM-PUN-Role', user: 'Sunil Rao', status: 'Filled', beats: 3 },
+    { code: 'PC-CFA-W', designation: 'CFA', level: 'L5 (parallel)', area: 'West Zone', reportsTo: '— (independent)', role: 'CFA-W-Role', user: 'Western C&F Agent', status: 'Filled', beats: 0 }
+];
+
+/* Temporary beat assignments (BRD §5.3) — cover an absent user / group work. */
+const TEMP_ASSIGNMENTS = [
+    { beat: 'Kothrud–Karve Rd', fromPosition: 'PC-SR-PUN-06', toUser: 'Manoj Kale', start: '14 Jun 2026', end: '20 Jun 2026', status: 'Active' },
+    { beat: 'Hadapsar East', fromPosition: 'PC-SR-PUN-05', toUser: 'Sunil Rao', start: '10 Jun 2026', end: '12 Jun 2026', status: 'Expired' },
+    { beat: 'Viman Nagar', fromPosition: 'PC-DO-PUN-2', toUser: 'Ravindra Patil', start: '17 Jun 2026', end: '24 Jun 2026', status: 'Active' }
+];
+
+export function getPositions() {
+    return clone(POSITIONS);
+}
+
+export function getTempAssignments() {
+    return clone(TEMP_ASSIGNMENTS);
+}
+
+/* ------------------- Scheme Management engine (BRD §13) ------------------- */
+/* Header (Scheme) + children: Slabs, Eligibility, Bundle Lines, Tiers, plus */
+/* the Claim settlement record — per the Schemes Architecture document.      */
+
+const MANAGED_SCHEMES = [
+    {
+        id: 'SCH-0001', name: 'Malkist Secondary Buy 4 Get 1', schemeClass: 'Secondary',
+        type: 'Proportional', basis: 'Single-Invoice', benefit: 'Free goods', passThrough: false,
+        claimable: false, start: '01 Jun 2026', end: '30 Jun 2026', budget: 500000, utilized: 312000,
+        status: 'Active', eligibility: 'GT · Maharashtra · All GT outlets',
+        slabs: [{ buy: 4, get: 1, note: 'Ratio repeats per block of 4' }],
+        eligibilityRows: [{ region: 'Maharashtra', channel: 'General Trade', outletType: 'All', tag: '—' }],
+        tiers: [], bundleLines: []
+    },
+    {
+        id: 'SCH-0002', name: 'Kopiko Volume Slab', schemeClass: 'Secondary',
+        type: 'Slab', basis: 'Cycle-Cumulative', benefit: 'Free goods', passThrough: false,
+        claimable: true, start: '01 Jun 2026', end: '28 Jun 2026', budget: 800000, utilized: 760000,
+        status: 'Active', eligibility: 'GT · All-India · Alpha outlets',
+        slabs: [
+            { buy: 12, get: 2, note: 'Step 1' },
+            { buy: 24, get: 5, note: 'Step 2' },
+            { buy: 48, get: 12, note: 'Step 3 — highest reached is paid' }
+        ],
+        eligibilityRows: [{ region: 'All-India', channel: 'General Trade', outletType: 'All', tag: 'Alpha' }],
+        tiers: [], bundleLines: []
+    },
+    {
+        id: 'SCH-0003', name: 'Beng-Beng Festive Bundle', schemeClass: 'Secondary',
+        type: 'Bundle', basis: 'Single-Invoice', benefit: 'Free goods', passThrough: false,
+        claimable: false, start: '05 Jun 2026', end: '15 Jul 2026', budget: 300000, utilized: 84000,
+        status: 'Active', eligibility: 'Both · Maharashtra + Gujarat',
+        slabs: [],
+        eligibilityRows: [
+            { region: 'Maharashtra', channel: 'Both', outletType: 'All', tag: '—' },
+            { region: 'Gujarat', channel: 'Both', outletType: 'All', tag: '—' }
+        ],
+        tiers: [],
+        bundleLines: [
+            { product: 'Beng-Beng Wafer Chocolate', qty: 2, role: 'Buy' },
+            { product: 'Choki-Choki Chocolate Paste', qty: 1, role: 'Buy' },
+            { product: 'Beng-Beng Wafer Chocolate', qty: 1, role: 'Free' }
+        ]
+    },
+    {
+        id: 'SCH-0004', name: 'Roma Order-Value Flat Discount', schemeClass: 'Secondary',
+        type: 'Value-Based', basis: 'Single-Invoice', benefit: 'Value discount', passThrough: false,
+        claimable: false, start: '01 Jun 2026', end: '30 Jun 2026', budget: 250000, utilized: 240000,
+        status: 'Active', eligibility: 'GT · Maharashtra · Wholesale',
+        slabs: [
+            { buy: 10000, get: 0, note: '≥ ₹10,000 → 3% off total' },
+            { buy: 25000, get: 0, note: '≥ ₹25,000 → 5% off total' }
+        ],
+        eligibilityRows: [{ region: 'Maharashtra', channel: 'General Trade', outletType: 'Wholesale', tag: '—' }],
+        tiers: [], bundleLines: []
+    },
+    {
+        id: 'SCH-0005', name: 'Danisa P1→P2→P3 Pass-Through', schemeClass: 'Primary',
+        type: 'Slab', basis: 'Single-Invoice', benefit: 'Free goods', passThrough: true,
+        claimable: true, start: '01 Jun 2026', end: '31 Jul 2026', budget: 1200000, utilized: 0,
+        status: 'Pending Director', eligibility: 'GT · All-India',
+        slabs: [],
+        eligibilityRows: [{ region: 'All-India', channel: 'General Trade', outletType: 'All', tag: '—' }],
+        tiers: [
+            { tier: 'P1 (Primary)', buy: 4, get: 1, note: 'Mayora → distributor' },
+            { tier: 'P2 (Secondary)', buy: 4, get: 1, note: 'distributor → wholesaler' },
+            { tier: 'P3 (Retail)', buy: 8, get: 1, note: 'wholesaler → retailer' }
+        ],
+        bundleLines: []
+    },
+    {
+        id: 'SCH-0006', name: 'Coffee Joy Monsoon Slab', schemeClass: 'Secondary',
+        type: 'Slab', basis: 'Period-Cumulative', benefit: 'Percent discount', passThrough: false,
+        claimable: true, start: '01 Jul 2026', end: '28 Jul 2026', budget: 400000, utilized: 0,
+        status: 'Pending IT Review', eligibility: 'GT · Karnataka',
+        slabs: [
+            { buy: 20, get: 0, note: '≥ 20 cartons → 4% off' },
+            { buy: 40, get: 0, note: '≥ 40 cartons → 7% off' }
+        ],
+        eligibilityRows: [{ region: 'Karnataka', channel: 'General Trade', outletType: 'All', tag: '—' }],
+        tiers: [], bundleLines: []
+    },
+    {
+        id: 'SCH-0007', name: 'JoyMee Noodles Buy 10 Get 2', schemeClass: 'Secondary',
+        type: 'Slab', basis: 'Single-Invoice', benefit: 'Free goods', passThrough: false,
+        claimable: false, start: '20 May 2026', end: '31 May 2026', budget: 200000, utilized: 200000,
+        status: 'Expired', eligibility: 'GT · Maharashtra',
+        slabs: [{ buy: 10, get: 2, note: 'Single step' }],
+        eligibilityRows: [{ region: 'Maharashtra', channel: 'General Trade', outletType: 'All', tag: '—' }],
+        tiers: [], bundleLines: []
+    },
+    {
+        id: 'SCH-0008', name: 'Choki-Choki Draft Combo', schemeClass: 'Secondary',
+        type: 'Bundle', basis: 'Single-Invoice', benefit: 'Free goods', passThrough: false,
+        claimable: false, start: '01 Aug 2026', end: '31 Aug 2026', budget: 150000, utilized: 0,
+        status: 'Draft', eligibility: 'Not set',
+        slabs: [],
+        eligibilityRows: [],
+        tiers: [],
+        bundleLines: [{ product: 'Choki-Choki Chocolate Paste', qty: 3, role: 'Buy' }, { product: 'Choki-Choki Chocolate Paste', qty: 1, role: 'Free' }]
+    }
+];
+
+/* Settlement records for cumulative schemes (Scheme_Claim__c). */
+const SCHEME_CLAIMS = [
+    { id: 'CLM-2041', scheme: 'Kopiko Volume Slab', distributor: 'Pune Super Stockiest', amount: 48200, status: 'Approved' },
+    { id: 'CLM-2042', scheme: 'Kopiko Volume Slab', distributor: 'Nashik DB (Retail)', amount: 31750, status: 'Settled' },
+    { id: 'CLM-2043', scheme: 'JoyMee Noodles Buy 10 Get 2', distributor: 'Pune Super Stockiest', amount: 18400, status: 'Draft' }
+];
+
+export function getManagedSchemes() {
+    return clone(MANAGED_SCHEMES);
+}
+
+export function getSchemeClaims() {
+    return clone(SCHEME_CLAIMS);
+}
+
+/* ------------------- Product Sharing / Visibility (BRD §9.3) -------------- */
+/* Admin assigns each SKU's visibility: Nation / Branch / State / Channel /  */
+/* Distributor-specific. Channel GT / MT / Both.                            */
+
+const PRODUCT_SHARING = [
+    { id: 'PV-001', sku: 'MLK-CHE-130', skuName: 'Malkist Cheese Crackers', level: 'Nation', scope: 'All India', channel: 'Both', status: 'Active' },
+    { id: 'PV-002', sku: 'MLK-CHO-130', skuName: 'Malkist Double Chocolatey', level: 'Nation', scope: 'All India', channel: 'Both', status: 'Active' },
+    { id: 'PV-003', sku: 'CFJ-100', skuName: 'Coffee Joy Thin Biscuit', level: 'State', scope: 'Karnataka', channel: 'GT', status: 'Active' },
+    { id: 'PV-004', sku: 'RMG-250', skuName: 'Roma Marie Gold', level: 'Branch', scope: 'Pune Branch', channel: 'GT', status: 'Active' },
+    { id: 'PV-005', sku: 'DAN-BUT-200', skuName: 'Danisa Butter Cookies', level: 'Channel', scope: 'Modern Trade', channel: 'MT', status: 'Active' },
+    { id: 'PV-006', sku: 'BNG-CHO-20', skuName: 'Beng-Beng Wafer Chocolate', level: 'Distributor', scope: 'Reliance Smart (DB-M)', channel: 'MT', status: 'Active' },
+    { id: 'PV-007', sku: 'KOP-CDY-140', skuName: 'Kopiko Coffee Candy', level: 'State', scope: 'Maharashtra', channel: 'Both', status: 'Active' },
+    { id: 'PV-008', sku: 'SOL-STR-90', skuName: "Slai O'lai Strawberry", level: 'Distributor', scope: 'Pune Super Stockiest', channel: 'GT', status: 'Inactive' },
+    { id: 'PV-009', sku: 'CHK-CHO-50', skuName: 'Choki-Choki Chocolate Paste', level: 'Channel', scope: 'General Trade', channel: 'GT', status: 'Active' },
+    { id: 'PV-010', sku: 'JME-CHK-75', skuName: 'JoyMee Chicken Noodles', level: 'State', scope: 'Gujarat', channel: 'GT', status: 'Active' },
+    { id: 'PV-011', sku: 'MLK-CER-130', skuName: 'Malkist Gandum Sereal', level: 'Nation', scope: 'All India', channel: 'Both', status: 'Active' },
+    { id: 'PV-012', sku: 'KOP-BRN-30', skuName: 'Kopiko Brown Coffee', level: 'Branch', scope: 'Nashik Branch', channel: 'GT', status: 'Inactive' }
+];
+
+export function getProductSharing() {
+    return clone(PRODUCT_SHARING);
+}
+
+/* ------------------- Targets vs Actual (BRD §13 Targets) ----------------- */
+/* Tiers: P1 (SS/DB), P2 (SD), Secondary (by User), Outlet (outlet-wise).   */
+/* Always broken down by Product Hierarchy. Actuals roll up on a JC basis.   */
+
+const TARGETS = [
+    { id: 'T-001', tier: 'P1', entity: 'Pune Super Stockiest', brand: 'Malkist', kpi: 'Sales Value', target: 1200000, actual: 1044000, jc: 'JC-06' },
+    { id: 'T-002', tier: 'P1', entity: 'Nashik DB (Retail)', brand: 'Kopiko', kpi: 'Sales Value', target: 800000, actual: 856000, jc: 'JC-06' },
+    { id: 'T-003', tier: 'P2', entity: 'North Zone SD', brand: 'Malkist', kpi: 'Sales Value', target: 450000, actual: 369000, jc: 'JC-06' },
+    { id: 'T-004', tier: 'P2', entity: 'South Zone SD', brand: 'Roma', kpi: 'Sales Value', target: 300000, actual: 171000, jc: 'JC-06' },
+    { id: 'T-005', tier: 'Secondary', entity: 'Manoj Kale (PC-SR-PUN-05)', brand: 'Malkist', kpi: 'Sales Value', target: 180000, actual: 162000, jc: 'JC-06' },
+    { id: 'T-006', tier: 'Secondary', entity: 'Manoj Kale (PC-SR-PUN-05)', brand: 'Kopiko', kpi: 'Lines Per Call', target: 6, actual: 5, jc: 'JC-06' },
+    { id: 'T-007', tier: 'Secondary', entity: 'Sunil Rao (PC-DBSM-PUN)', brand: 'Beng-Beng', kpi: 'Unique Productive Calls', target: 420, actual: 455, jc: 'JC-06' },
+    { id: 'T-008', tier: 'Outlet', entity: 'ABC Mart (Andheri W.)', brand: 'Malkist', kpi: 'Sales Value', target: 24000, actual: 18720, jc: 'JC-06' },
+    { id: 'T-009', tier: 'Outlet', entity: 'City Grocery (Bandra E.)', brand: 'Roma', kpi: 'Sales Value', target: 16000, actual: 16800, jc: 'JC-06' },
+    { id: 'T-010', tier: 'Outlet', entity: 'Star Kirana (Malad)', brand: 'Coffee Joy', kpi: 'Sales Value', target: 12000, actual: 7200, jc: 'JC-06' }
+];
+
+export function getTargets() {
+    return clone(TARGETS);
+}
+
 export { formatCurrency, formatLakh, formatNumber };
