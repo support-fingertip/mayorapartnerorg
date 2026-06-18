@@ -311,7 +311,13 @@
 }
 
 /* Mobile: collapse the product table into stacked cards */
-@media (max-width: 640px) {
+@media (max-width: 767px) {
+    /* injected-mobile */
+    .dms-body { padding: 0.85rem; }
+    .dms-search,
+    .dms-no__search,
+    .dms-filter_search { min-width: 0; width: 100%; box-sizing: border-box; }
+    .dms-toolbar__right { width: 100%; }
     .dms-tbl {
         background: transparent;
         border: none;

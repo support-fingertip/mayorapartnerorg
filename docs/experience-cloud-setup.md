@@ -59,8 +59,10 @@ In **Experience Builder**:
 ## Responsive / mobile
 
 Every screen is responsive: SLDS-style grids, KPI strips that reflow, and data tables that
-collapse into labeled stacked cards below ~640px. All icons are inline SVG (so they render
-reliably in LWR), and in-modal dropdowns use native `<select>` to avoid clipping.
+collapse into labeled stacked cards on phones/small tablets (≤767px), with full-width search
+and filters and tighter padding. Sub-tab bars scroll horizontally, and modals/wizards size to
+the viewport and scroll internally. All icons are inline SVG (so they render reliably in LWR),
+and in-modal dropdowns use native `<select>` to avoid clipping.
 
 ## Theming
 

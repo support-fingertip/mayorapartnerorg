@@ -72,7 +72,7 @@
     white-space: nowrap;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 767px) {
     :host {
         --plot-h: 150px;
     }

@@ -55,7 +55,7 @@
     flex-wrap: wrap;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 767px) {
     .dms-header__title {
         font-size: 1.25rem;
     }
