@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Position_Code__c</fullName>
+    <description>Unique code for the position. Drives the linked Role DeveloperName (POS_&lt;code&gt;).</description>
+    <externalId>true</externalId>
+    <label>Position Code</label>
+    <length>40</length>
+    <required>true</required>
+    <trackHistory>true</trackHistory>
+    <type>Text</type>
+    <unique>true</unique>
+</CustomField>
