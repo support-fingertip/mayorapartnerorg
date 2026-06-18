@@ -1,0 +1,16 @@
+<template>
+    <lightning-card title="My Invoices" icon-name="standard:invoice">
+        <div class="slds-p-horizontal_small slds-p-bottom_medium">
+            <template if:true={error}>
+                <div class="slds-text-color_error slds-p-around_small">{error}</div>
+            </template>
+            <template if:true={hasRows}>
+                <lightning-datatable key-field="Id" data={rows} columns={columns} hide-checkbox-column="true">
+                </lightning-datatable>
+            </template>
+            <template if:false={hasRows}>
+                <p class="slds-p-around_small slds-text-body_small">No invoices yet.</p>
+            </template>
+        </div>
+    </lightning-card>
+</template>

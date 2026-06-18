@@ -1,0 +1,19 @@
+<template>
+    <div class="portal">
+        <nav class="nav">
+            <template for:each={tabs} for:item="t">
+                <button key={t.name} data-name={t.name} class={t.css} onclick={select}>{t.label}</button>
+            </template>
+        </nav>
+
+        <div class="content">
+            <template if:true={isHome}><c-dms-home></c-dms-home></template>
+            <template if:true={isOrders}><c-distributor-orders></c-distributor-orders></template>
+            <template if:true={isInvoices}><c-distributor-invoices></c-distributor-invoices></template>
+            <template if:true={isLedger}><c-distributor-ledger></c-distributor-ledger></template>
+            <template if:true={isClaims}><c-distributor-claims></c-distributor-claims></template>
+            <template if:true={isSale}><c-distributor-secondary-sale></c-distributor-secondary-sale></template>
+            <template if:true={isSupport}><c-distributor-tickets></c-distributor-tickets></template>
+        </div>
+    </div>
+</template>

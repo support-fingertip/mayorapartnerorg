@@ -1,0 +1,28 @@
+<template>
+    <lightning-card title="Ledger & Aging" icon-name="standard:account_info">
+        <div class="slds-p-horizontal_small slds-p-bottom_medium">
+            <template if:true={error}>
+                <div class="slds-text-color_error slds-p-around_small">{error}</div>
+            </template>
+
+            <div class="slds-grid slds-wrap slds-gutters slds-p-bottom_small">
+                <template for:each={buckets} for:item="b">
+                    <div key={b.label} class="slds-col slds-size_1-of-5 slds-p-vertical_x-small">
+                        <div class="slds-box slds-box_x-small slds-text-align_center">
+                            <p class="slds-text-title">{b.label}</p>
+                            <p class="slds-text-heading_small">{b.value}</p>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <template if:true={hasRows}>
+                <lightning-datatable key-field="Id" data={rows} columns={columns} hide-checkbox-column="true">
+                </lightning-datatable>
+            </template>
+            <template if:false={hasRows}>
+                <p class="slds-p-around_small slds-text-body_small">No ledger entries yet.</p>
+            </template>
+        </div>
+    </lightning-card>
+</template>

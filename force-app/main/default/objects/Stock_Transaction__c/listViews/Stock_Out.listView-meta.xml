@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Stock_Out</fullName>
+    <columns>NAME</columns>
+    <columns>Account__c</columns>
+    <columns>Product_Ext__c</columns>
+    <columns>Quantity__c</columns>
+    <columns>Transaction_Type__c</columns>
+    <columns>Transaction_Date__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>Direction__c</field>
+        <operation>equals</operation>
+        <value>Out</value>
+    </filters>
+    <label>Stock Out</label>
+</ListView>

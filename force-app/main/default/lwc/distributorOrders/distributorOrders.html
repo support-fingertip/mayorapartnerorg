@@ -1,0 +1,41 @@
+<template>
+    <lightning-card title="Place Indent" icon-name="standard:orders">
+        <div class="slds-p-horizontal_small slds-p-bottom_medium">
+            <div class="slds-grid slds-gutters slds-grid_vertical-align-end">
+                <div class="slds-col slds-size_3-of-5">
+                    <lightning-combobox label="Product" placeholder="Select a product"
+                        options={productOptions} value={productId} onchange={handleProduct}></lightning-combobox>
+                </div>
+                <div class="slds-col slds-size_1-of-5">
+                    <lightning-input type="number" label="Qty" min="1" value={quantity} onchange={handleQty}></lightning-input>
+                </div>
+                <div class="slds-col slds-size_1-of-5">
+                    <lightning-button label="Add" onclick={addLine}></lightning-button>
+                </div>
+            </div>
+
+            <template if:true={lines.length}>
+                <div class="slds-m-top_small">
+                    <lightning-datatable key-field="productId" data={lines} columns={lineColumns}
+                        hide-checkbox-column="true" onrowaction={handleRowAction}></lightning-datatable>
+                </div>
+            </template>
+
+            <div class="slds-m-top_small slds-text-align_right">
+                <lightning-button label="Submit Indent" variant="brand" disabled={isSubmitDisabled} onclick={submit}></lightning-button>
+            </div>
+        </div>
+    </lightning-card>
+
+    <lightning-card title="My Indents" icon-name="standard:work_order" class="slds-m-top_small">
+        <div class="slds-p-horizontal_small slds-p-bottom_medium">
+            <template if:true={hasIndents}>
+                <lightning-datatable key-field="Id" data={indents} columns={indentColumns} hide-checkbox-column="true">
+                </lightning-datatable>
+            </template>
+            <template if:false={hasIndents}>
+                <p class="slds-p-around_small slds-text-body_small">No indents yet.</p>
+            </template>
+        </div>
+    </lightning-card>
+</template>

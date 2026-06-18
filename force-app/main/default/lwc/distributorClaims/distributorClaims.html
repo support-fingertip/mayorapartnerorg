@@ -1,0 +1,32 @@
+<template>
+    <lightning-card title="Submit a Claim" icon-name="standard:case">
+        <div class="slds-p-horizontal_small slds-p-bottom_medium">
+            <div class="slds-grid slds-gutters slds-grid_vertical-align-end slds-wrap">
+                <div class="slds-col slds-size_1-of-3">
+                    <lightning-combobox label="Claim Type" options={typeOptions} value={claimType} onchange={handleType}></lightning-combobox>
+                </div>
+                <div class="slds-col slds-size_1-of-3">
+                    <lightning-input type="number" label="Amount" min="0" value={amount} onchange={handleAmount}></lightning-input>
+                </div>
+                <div class="slds-col slds-size_1-of-3">
+                    <lightning-button label="Submit Claim" variant="brand" disabled={isSubmitDisabled} onclick={submit}></lightning-button>
+                </div>
+            </div>
+            <lightning-input type="text" label="Notes" value={notes} onchange={handleNotes} class="slds-m-top_x-small"></lightning-input>
+        </div>
+    </lightning-card>
+
+    <lightning-card title="My Claims" icon-name="standard:case" class="slds-m-top_small">
+        <div class="slds-p-horizontal_small slds-p-bottom_medium">
+            <template if:true={error}>
+                <div class="slds-text-color_error slds-p-around_small">{error}</div>
+            </template>
+            <template if:true={hasRows}>
+                <lightning-datatable key-field="Id" data={rows} columns={columns} hide-checkbox-column="true"></lightning-datatable>
+            </template>
+            <template if:false={hasRows}>
+                <p class="slds-p-around_small slds-text-body_small">No claims yet.</p>
+            </template>
+        </div>
+    </lightning-card>
+</template>
