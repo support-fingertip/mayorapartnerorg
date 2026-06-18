@@ -461,6 +461,7 @@
 
 .dms-cart__items {
     flex: 1;
+    min-height: 0;
     overflow: auto;
     padding: 0.25rem 1.25rem;
 }
@@ -650,6 +651,7 @@
 
 .dms-detail__body {
     flex: 1;
+    min-height: 0;
     overflow: auto;
     padding: 0 1.5rem;
 }

@@ -170,6 +170,7 @@
 
 .dms-two .dms-panel {
     margin-bottom: 0;
+    min-width: 0;
 }
 
 @media (max-width: 900px) {

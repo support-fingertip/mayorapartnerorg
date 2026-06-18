@@ -211,6 +211,11 @@
     align-items: flex-start;
     justify-content: space-between;
     padding: 1.25rem 1.5rem 1rem;
+    flex-shrink: 0;
+}
+.dms-detail__info,
+.dms-itabs {
+    flex-shrink: 0;
 }
 .dms-detail__id {
     display: flex;
@@ -296,6 +301,7 @@
 }
 .dms-detail__body {
     flex: 1;
+    min-height: 0;
     overflow: auto;
     padding: 1rem 1.5rem 1.5rem;
 }

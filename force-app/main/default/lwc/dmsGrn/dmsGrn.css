@@ -226,6 +226,7 @@
 }
 .dms-wizard__body {
     flex: 1;
+    min-height: 0;
     overflow: auto;
     padding: 1.25rem 1.5rem;
 }

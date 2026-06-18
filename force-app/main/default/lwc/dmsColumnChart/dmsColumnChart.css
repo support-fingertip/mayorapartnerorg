@@ -9,7 +9,6 @@
 
 .col-chart {
     max-width: 100%;
-    overflow: hidden;
 }
 
 .col-chart__title {
@@ -22,6 +21,7 @@
 .col-chart__plot {
     display: flex;
     gap: 0.5rem;
+    min-width: 0;
 }
 
 .col-chart__yaxis {
@@ -30,6 +30,7 @@
     justify-content: space-between;
     height: var(--plot-h);
     text-align: right;
+    flex-shrink: 0;
 }
 
 .col-chart__ytick {
@@ -41,17 +42,29 @@
 .col-chart__bars {
     display: flex;
     align-items: flex-end;
-    justify-content: space-around;
     gap: 0.5rem;
     flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+    padding-bottom: 0.4rem;
+    scrollbar-width: thin;
+    scrollbar-color: #c4ccd6 transparent;
+}
+
+.col-chart__bars::-webkit-scrollbar {
+    height: 6px;
+}
+.col-chart__bars::-webkit-scrollbar-thumb {
+    background: #c4ccd6;
+    border-radius: 3px;
 }
 
 .col-chart__col {
     display: flex;
     flex-direction: column;
     align-items: center;
-    flex: 1;
-    min-width: 0;
+    flex: 1 0 54px;
+    min-width: 54px;
 }
 
 .col-chart__track {
