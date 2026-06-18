@@ -1,0 +1,105 @@
+<template>
+    <div class="dms-claims">
+        <div class="dms-body">
+            <div class="dms-toolbar">
+                <div class="dms-filters">
+                    <div class="dms-filter"><span class="dms-filter__label">List:</span>
+                        <lightning-combobox variant="label-hidden" value={statusFilter} options={statusOptions} onchange={handleStatus}></lightning-combobox>
+                    </div>
+                    <div class="dms-filter"><span class="dms-filter__label">Date:</span>
+                        <lightning-combobox variant="label-hidden" value={dateFilter} options={dateOptions} onchange={handleDate}></lightning-combobox>
+                    </div>
+                </div>
+                <button class="dms-btn" type="button" onclick={openModal}>
+                    <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    New Claim
+                </button>
+            </div>
+
+            <div class="dms-cards">
+                <template for:each={summary} for:item="c">
+                    <div key={c.id} class="dms-card"><span class="dms-card__label">{c.label}</span><span class={c.cls}>{c.value}</span></div>
+                </template>
+            </div>
+
+            <div class="dms-tbl dms-tbl_claims">
+                <div class="dms-thead">
+                    <span>Claim ID</span><span>Date</span><span>Scheme</span>
+                    <span class="dms-num">No. of Products</span><span class="dms-num">Claim Amount</span>
+                    <span>Description</span><span>Status</span>
+                </div>
+                <template for:each={rows} for:item="c">
+                    <div key={c.key} class="dms-trow">
+                        <span class="dms-link" data-label="Claim ID">{c.id}</span>
+                        <span data-label="Date">{c.date}</span>
+                        <span class="dms-strong" data-label="Scheme">{c.scheme}</span>
+                        <span class="dms-num" data-label="No. of Products">{c.products}</span>
+                        <span class="dms-num dms-strong" data-label="Claim Amount">{c.amountLabel}</span>
+                        <span class="dms-desc" data-label="Description">{c.desc}</span>
+                        <span data-label="Status"><c-dms-status-badge label={c.status} theme={c.statusTheme}></c-dms-status-badge></span>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- ===================== New Scheme Claim ===================== -->
+        <template lwc:if={modalOpen}>
+            <div class="dms-modal__overlay" onclick={closeModal}></div>
+            <div class="dms-modal" role="dialog">
+                <header class="dms-modal__head">
+                    <h2>New Scheme Claim</h2>
+                    <button class="dms-iconbtn" type="button" onclick={closeModal} title="Close">
+                        <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </header>
+                <div class="dms-modal__body">
+                    <label class="dms-flabel">Scheme *</label>
+                    <select class="dms-select dms-select_full" value={formScheme} onchange={handleScheme}>
+                        <option value="">— Select Scheme —</option>
+                        <template for:each={schemeOptions} for:item="opt">
+                            <option key={opt.value} value={opt.value} selected={opt.selected}>{opt.label}</option>
+                        </template>
+                    </select>
+
+                    <div class="dms-form2">
+                        <div>
+                            <label class="dms-flabel">No. of Products *</label>
+                            <lightning-input type="number" variant="label-hidden" placeholder="e.g. 3" value={formProducts} onchange={handleProducts}></lightning-input>
+                        </div>
+                        <div>
+                            <label class="dms-flabel">Claim Amount (₹) *</label>
+                            <lightning-input type="number" variant="label-hidden" placeholder="e.g. 2880" value={formAmount} onchange={handleAmount}></lightning-input>
+                        </div>
+                    </div>
+
+                    <label class="dms-flabel">Description</label>
+                    <lightning-textarea variant="label-hidden" placeholder="Describe the scheme and what this claim covers..." value={formDesc} onchange={handleDesc}></lightning-textarea>
+                </div>
+                <footer class="dms-modal__foot">
+                    <button class="dms-btn dms-btn_outline" type="button" onclick={closeModal}>Cancel</button>
+                    <button class="dms-btn" type="button" onclick={submitClaim} disabled={submitDisabled}>Submit Claim</button>
+                </footer>
+            </div>
+        </template>
+
+        <!-- ===================== Submitted confirmation ===================== -->
+        <template lwc:if={showSuccess}>
+            <div class="dms-modal__overlay"></div>
+            <div class="dms-success" role="dialog">
+                <div class="dms-success__check">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </div>
+                <h2 class="dms-success__title">Scheme Claim Submitted</h2>
+                <p class="dms-success__line">{successInfo.id} for "{successInfo.scheme}"</p>
+                <p class="dms-success__line">{successInfo.amountLabel} claim submitted for approval</p>
+                <button class="dms-btn dms-success__done" type="button" onclick={closeSuccess}>Close</button>
+            </div>
+        </template>
+    </div>
+</template>

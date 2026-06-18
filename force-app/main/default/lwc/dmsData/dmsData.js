@@ -384,6 +384,32 @@ export function getReturnableInvoices() {
     return clone(RETURNABLE_INVOICES);
 }
 
+/* --------------------------------- Claims --------------------------------- */
+
+const CLAIMS = [
+    { id: 'SCH-0041', date: '17 May 2026', scheme: 'Choki-Choki Q4 2025 Scheme', products: 3, amount: 2880, desc: 'B4G1 scheme claim for Q4 — Choki-Choki Chocolate Paste', status: 'Approved' },
+    { id: 'SCH-0040', date: '01 May 2026', scheme: 'Malkist Summer Push Apr 2026', products: 5, amount: 5760, desc: 'Secondary volume push incentive — Malkist Cheese & Choco', status: 'Approved' },
+    { id: 'SCH-0039', date: '10 Apr 2026', scheme: 'Kopiko Visibility Scheme Q1', products: 2, amount: 3200, desc: 'Shelf space and visibility scheme for Kopiko Candy range', status: 'Approved' },
+    { id: 'SCH-0038', date: '25 Mar 2026', scheme: 'Beng-Beng POSM Display Q1', products: 1, amount: 1440, desc: 'POSM display scheme — Beng-Beng Wafer Chocolate 22g', status: 'Pending' }
+];
+
+const CLAIM_SCHEMES = [
+    'Choki-Choki Q4 2025 Scheme',
+    'Malkist Summer Push Apr 2026',
+    'Kopiko Visibility Scheme Q1',
+    'Beng-Beng POSM Display Q1',
+    'JoyMee Trade Offer Q2',
+    'Danisa Festive Scheme'
+];
+
+export function getClaims() {
+    return clone(CLAIMS);
+}
+
+export function getClaimSchemes() {
+    return [...CLAIM_SCHEMES];
+}
+
 
 /* --------------------------- Home: P1 Dashboard --------------------------- */
 
