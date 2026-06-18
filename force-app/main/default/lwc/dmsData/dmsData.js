@@ -446,22 +446,87 @@ export function getCollectionCustomers() {
 /* -------------------------------- Customers ------------------------------- */
 
 const CUSTOMER_RETAILERS = [
-    { name: 'ABC Mart', code: 'RET-001', type: 'Retailer', outletType: 'Grocery Store', beat: 'Andheri West', owner: 'Arvind Sharma', area: 'Andheri West', phone: '+91 98200 11234', monthly: 32000, lastOrder: 'SO-6432' },
-    { name: 'City Grocery', code: 'RET-002', type: 'Retailer', outletType: 'Grocery Store', beat: 'Bandra–Kurla', owner: 'Mehul Jain', area: 'Bandra East', phone: '+91 98209 44567', monthly: 24000, lastOrder: 'SO-6431' },
-    { name: 'Fresh Mart', code: 'RET-003', type: 'Retailer', outletType: 'Grocery Store', beat: 'Borivali North', owner: 'Suresh Patil', area: 'Borivali North', phone: '+91 91364 78901', monthly: 18000, lastOrder: 'SO-6430' },
-    { name: 'Metro General Store', code: 'RET-004', type: 'Retailer', outletType: 'General Trade', beat: 'Bandra–Kurla', owner: 'Ramesh Gupta', area: 'Kurla', phone: '+91 99203 22345', monthly: 15000, lastOrder: 'SO-6420' },
-    { name: 'Sharma Kirana', code: 'RET-005', type: 'Retailer', outletType: 'Kirana', beat: 'Malad–Goregaon', owner: 'Dinesh Sharma', area: 'Malad East', phone: '+91 98765 55678', monthly: 12000, lastOrder: 'SO-6412' },
-    { name: 'Star Provisions', code: 'RET-006', type: 'Retailer', outletType: 'General Trade', beat: 'Malad–Goregaon', owner: 'Vijay Nair', area: 'Goregaon West', phone: '+91 97690 99012', monthly: 20000, lastOrder: 'SO-6429' }
+    { name: 'ABC Mart', code: 'RET-001', type: 'Retailer', outletType: 'Grocery Store', beat: 'Andheri West', owner: 'Arvind Sharma', area: 'Andheri West', phone: '+91 98200 11234', monthly: 32000, lastOrder: 'SO-6432', address: 'Shop 14, Lokhandwala Market, Andheri West, Mumbai 400053', gstin: '27AABCS1429A1ZR' },
+    { name: 'City Grocery', code: 'RET-002', type: 'Retailer', outletType: 'Grocery Store', beat: 'Bandra–Kurla', owner: 'Mehul Jain', area: 'Bandra East', phone: '+91 98209 44567', monthly: 24000, lastOrder: 'SO-6431', address: 'Shop 7, Linking Road, Bandra East, Mumbai 400051', gstin: '27AABCC2231B1Z5' },
+    { name: 'Fresh Mart', code: 'RET-003', type: 'Retailer', outletType: 'Grocery Store', beat: 'Borivali North', owner: 'Suresh Patil', area: 'Borivali North', phone: '+91 91364 78901', monthly: 18000, lastOrder: 'SO-6430', address: 'Plot 22, LT Road, Borivali North, Mumbai 400092', gstin: '27AABCF3344C1Z9' },
+    { name: 'Metro General Store', code: 'RET-004', type: 'Retailer', outletType: 'General Trade', beat: 'Bandra–Kurla', owner: 'Ramesh Gupta', area: 'Kurla', phone: '+91 99203 22345', monthly: 15000, lastOrder: 'SO-6420', address: 'Shop 3, Station Road, Kurla, Mumbai 400070', gstin: '27AABCM4455D1Z2' },
+    { name: 'Sharma Kirana', code: 'RET-005', type: 'Retailer', outletType: 'Kirana', beat: 'Malad–Goregaon', owner: 'Dinesh Sharma', area: 'Malad East', phone: '+91 98765 55678', monthly: 12000, lastOrder: 'SO-6412', address: 'Shop 9, SV Road, Malad East, Mumbai 400097', gstin: '27AABCS5566E1Z7' },
+    { name: 'Star Provisions', code: 'RET-006', type: 'Retailer', outletType: 'General Trade', beat: 'Malad–Goregaon', owner: 'Vijay Nair', area: 'Goregaon West', phone: '+91 97690 99012', monthly: 20000, lastOrder: 'SO-6429', address: 'Shop 5, MG Road, Goregaon West, Mumbai 400062', gstin: '27AABCS6677F1Z4' }
 ];
 
 const CUSTOMER_SUBDISTS = [
-    { name: 'North Zone SD', code: 'SD-001', type: 'Sub-Dist.', outletType: 'Sub-Distributor', beat: 'Mira-Bhayander', owner: 'Prakash Mehta', area: 'Mira-Bhayander', phone: '+91 98210 33456', monthly: 125000, lastOrder: 'SO-6440' },
-    { name: 'East Zone SD', code: 'SD-002', type: 'Sub-Dist.', outletType: 'Sub-Distributor', beat: 'Thane East', owner: 'Santosh Rao', area: 'Thane East', phone: '+91 98220 66789', monthly: 95000, lastOrder: 'SO-6416' },
-    { name: 'West Zone SD', code: 'SD-003', type: 'Sub-Dist.', outletType: 'Sub-Distributor', beat: 'Vasai-Virar', owner: 'Anil Desai', area: 'Vasai-Virar', phone: '+91 98230 77890', monthly: 80000, lastOrder: 'SO-6410' }
+    { name: 'North Zone SD', code: 'SD-001', type: 'Sub-Dist.', outletType: 'Sub-Distributor', beat: 'Mira-Bhayander', owner: 'Prakash Mehta', area: 'Mira-Bhayander', phone: '+91 98210 33456', monthly: 125000, lastOrder: 'SO-6440', address: 'Godown 4, MIDC Industrial Area, Mira Road East, Thane 401107', gstin: '27AABCN5567G1ZF' },
+    { name: 'East Zone SD', code: 'SD-002', type: 'Sub-Dist.', outletType: 'Sub-Distributor', beat: 'Thane East', owner: 'Santosh Rao', area: 'Thane East', phone: '+91 98220 66789', monthly: 95000, lastOrder: 'SO-6416', address: 'Warehouse 12, Wagle Estate, Thane East 400604', gstin: '27AABCE6678H1Z3' },
+    { name: 'West Zone SD', code: 'SD-003', type: 'Sub-Dist.', outletType: 'Sub-Distributor', beat: 'Vasai-Virar', owner: 'Anil Desai', area: 'Vasai-Virar', phone: '+91 98230 77890', monthly: 80000, lastOrder: 'SO-6410', address: 'Godown 8, GIDC, Vasai East, Palghar 401208', gstin: '27AABCW7789I1Z1' }
 ];
+
+const DEFAULT_SKUS = [
+    { code: 'MLK-CHE-130', name: 'Malkist Cheese Crackers 130g' },
+    { code: 'KOP-JAR-140', name: 'Kopiko Coffee Candy Jar 140g' },
+    { code: 'BBG-22', name: 'Beng-Beng Wafer Chocolate 22g' },
+    { code: 'COF-100', name: 'Coffee Joy Thin Biscuit 100g' },
+    { code: 'KIS-18', name: 'KIS Mint Candy 18.4g' }
+];
+const DEFAULT_TARGETS = [
+    { code: 'MLK-CHE-130', name: 'Malkist Cheese Crackers 130g', target: 40, achieved: 36, pct: 90 },
+    { code: 'KOP-JAR-140', name: 'Kopiko Coffee Candy Jar 140g', target: 20, achieved: 16, pct: 80 },
+    { code: 'BBG-22', name: 'Beng-Beng Wafer Chocolate 22g', target: 30, achieved: 28, pct: 93 }
+];
+const DEFAULT_ALIASES = ['Malkist', 'Kopiko', 'Beng-Beng', 'Coffee Joy', 'KIS'];
+const DEFAULT_SUBBRANDS = ['Malkist Cheese', 'Malkist Choco', 'Kopiko Classic', 'Coffee Joy Thin'];
+const DEFAULT_BRANDS = ['Malkist', 'Kopiko', 'Beng-Beng', 'Coffee Joy', 'KIS', 'JoyMee'];
+
+const CUSTOMER_DETAILS = {
+    'RET-001': {
+        orders: [
+            { id: 'SO-6432', date: '29 May 2026', amount: 11136, items: 'Malkist Cheese 130g ×8, Kopiko Jar 140g ×4, Beng-Beng 22g ×6' },
+            { id: 'SO-6418', date: '22 May 2026', amount: 4320, items: 'Coffee Joy 100g ×5, KIS Mint 18.4g ×3' },
+            { id: 'SO-6402', date: '15 May 2026', amount: 8640, items: 'Malkist Cheese 130g ×10, Danisa 200g ×2' },
+            { id: 'SO-6381', date: '08 May 2026', amount: 6912, items: 'Malkist Choco 130g ×8, JoyMee 75g ×6' },
+            { id: 'SO-6360', date: '01 May 2026', amount: 9216, items: 'Kopiko Jar 140g ×6, Beng-Beng 22g ×10' }
+        ],
+        skus: DEFAULT_SKUS,
+        aliases: DEFAULT_ALIASES,
+        subBrands: DEFAULT_SUBBRANDS,
+        brands: DEFAULT_BRANDS,
+        targets: DEFAULT_TARGETS
+    },
+    'SD-001': {
+        orders: [
+            { id: 'SO-6440', date: '29 May 2026', amount: 52416, items: 'Malkist Cheese ×30, Malkist Choco ×20, Coffee Joy ×25, Kopiko Jar ×12' },
+            { id: 'SO-6420', date: '22 May 2026', amount: 41472, items: 'Malkist Cheese ×25, Beng-Beng ×30, JoyMee ×20' },
+            { id: 'SO-6398', date: '15 May 2026', amount: 36864, items: 'Malkist Choco ×20, Kopiko Jar ×18, Danisa ×8' }
+        ],
+        skus: DEFAULT_SKUS,
+        aliases: DEFAULT_ALIASES,
+        subBrands: DEFAULT_SUBBRANDS,
+        brands: DEFAULT_BRANDS,
+        targets: DEFAULT_TARGETS
+    }
+};
 
 export function getCustomersData() {
     return { retailers: clone(CUSTOMER_RETAILERS), subDistributors: clone(CUSTOMER_SUBDISTS) };
+}
+
+export function getCustomerDetail(customer) {
+    if (CUSTOMER_DETAILS[customer.code]) {
+        return clone(CUSTOMER_DETAILS[customer.code]);
+    }
+    // generic detail derived from the customer
+    const m = customer.monthly;
+    return {
+        orders: [
+            { id: customer.lastOrder, date: '29 May 2026', amount: Math.round(m * 0.35), items: 'Malkist Cheese 130g ×8, Kopiko Jar 140g ×4' },
+            { id: 'SO-6300', date: '20 May 2026', amount: Math.round(m * 0.22), items: 'Coffee Joy 100g ×5, KIS Mint 18.4g ×3' },
+            { id: 'SO-6285', date: '12 May 2026', amount: Math.round(m * 0.28), items: 'Malkist Choco 130g ×8, JoyMee 75g ×6' }
+        ],
+        skus: DEFAULT_SKUS,
+        aliases: DEFAULT_ALIASES,
+        subBrands: DEFAULT_SUBBRANDS,
+        brands: DEFAULT_BRANDS,
+        targets: DEFAULT_TARGETS
+    };
 }
 
 
