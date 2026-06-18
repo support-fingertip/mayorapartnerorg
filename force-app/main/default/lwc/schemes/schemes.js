@@ -18,7 +18,7 @@ const CLAIM_THEME = { Draft: 'neutral', Approved: 'info', Settled: 'success' };
  * One Header (Scheme) joined to its Children — Slabs, Eligibility, Bundle
  * Lines and Tiers — with a Claim settlement record for cumulative schemes.
  */
-export default class DmsSchemes extends LightningElement {
+export default class Schemes extends LightningElement {
     activeTab = 'schemes';
 
     schemes = [];

@@ -17,7 +17,7 @@ const STATUS_THEME = { Active: 'success', Inactive: 'neutral' };
  * Admin assigns each SKU's visibility scope — Nation, Branch, State, Channel
  * (GT / MT / Both) or Distributor-specific. The most specific rule wins.
  */
-export default class DmsProductSharing extends LightningElement {
+export default class ProductSharing extends LightningElement {
     rules = [];
 
     level = ALL;

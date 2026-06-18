@@ -1,9 +1,9 @@
 import { createElement } from 'lwc';
-import DmsPositions from 'c/dmsPositions';
+import Positions from 'c/positions';
 
 const flush = () => Promise.resolve();
 
-describe('c-dms-positions', () => {
+describe('c-positions', () => {
     afterEach(() => {
         while (document.body.firstChild) {
             document.body.removeChild(document.body.firstChild);
@@ -11,7 +11,7 @@ describe('c-dms-positions', () => {
     });
 
     it('renders all positions as rows by default', () => {
-        const element = createElement('c-dms-positions', { is: DmsPositions });
+        const element = createElement('c-positions', { is: Positions });
         document.body.appendChild(element);
 
         const rows = element.shadowRoot.querySelectorAll('.dms-tbl_positions .dms-trow');
@@ -22,7 +22,7 @@ describe('c-dms-positions', () => {
     });
 
     it('filters positions by vacant status', async () => {
-        const element = createElement('c-dms-positions', { is: DmsPositions });
+        const element = createElement('c-positions', { is: Positions });
         document.body.appendChild(element);
 
         const statusCombo = element.shadowRoot.querySelectorAll('lightning-combobox')[1];
@@ -34,7 +34,7 @@ describe('c-dms-positions', () => {
     });
 
     it('switches to the Temporary Assignments tab', async () => {
-        const element = createElement('c-dms-positions', { is: DmsPositions });
+        const element = createElement('c-positions', { is: Positions });
         document.body.appendChild(element);
 
         const tempTab = [...element.shadowRoot.querySelectorAll('.dms-subtab')].find(

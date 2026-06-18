@@ -1,9 +1,9 @@
 import { createElement } from 'lwc';
-import DmsSchemes from 'c/dmsSchemes';
+import Schemes from 'c/schemes';
 
 const flush = () => Promise.resolve();
 
-describe('c-dms-schemes', () => {
+describe('c-schemes', () => {
     afterEach(() => {
         while (document.body.firstChild) {
             document.body.removeChild(document.body.firstChild);
@@ -11,7 +11,7 @@ describe('c-dms-schemes', () => {
     });
 
     it('renders all managed schemes by default', () => {
-        const element = createElement('c-dms-schemes', { is: DmsSchemes });
+        const element = createElement('c-schemes', { is: Schemes });
         document.body.appendChild(element);
 
         const rows = element.shadowRoot.querySelectorAll('.dms-tbl_schemes .dms-trow');
@@ -22,7 +22,7 @@ describe('c-dms-schemes', () => {
     });
 
     it('opens the detail panel with children when a scheme row is clicked', async () => {
-        const element = createElement('c-dms-schemes', { is: DmsSchemes });
+        const element = createElement('c-schemes', { is: Schemes });
         document.body.appendChild(element);
 
         // SCH-0005 is the pass-through scheme with Tier child rows.
@@ -37,7 +37,7 @@ describe('c-dms-schemes', () => {
     });
 
     it('switches to the Scheme Claims tab', async () => {
-        const element = createElement('c-dms-schemes', { is: DmsSchemes });
+        const element = createElement('c-schemes', { is: Schemes });
         document.body.appendChild(element);
 
         const claimsTab = [...element.shadowRoot.querySelectorAll('.dms-subtab')].find(

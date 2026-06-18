@@ -12,7 +12,7 @@ const TEMP_STATUS_THEME = { Active: 'success', Expired: 'neutral' };
  * Profile and Manager to that user, who then owns the Position's records.
  * A vacant Position falls back to the System Admin as owner.
  */
-export default class DmsPositions extends LightningElement {
+export default class Positions extends LightningElement {
     activeTab = 'positions';
 
     positions = [];

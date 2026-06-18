@@ -1,9 +1,9 @@
 import { createElement } from 'lwc';
-import DmsTargets from 'c/dmsTargets';
+import Targets from 'c/targets';
 
 const flush = () => Promise.resolve();
 
-describe('c-dms-targets', () => {
+describe('c-targets', () => {
     afterEach(() => {
         while (document.body.firstChild) {
             document.body.removeChild(document.body.firstChild);
@@ -11,7 +11,7 @@ describe('c-dms-targets', () => {
     });
 
     it('renders all target lines by default', () => {
-        const element = createElement('c-dms-targets', { is: DmsTargets });
+        const element = createElement('c-targets', { is: Targets });
         document.body.appendChild(element);
 
         const rows = element.shadowRoot.querySelectorAll('.dms-tbl_targets .dms-trow');
@@ -22,7 +22,7 @@ describe('c-dms-targets', () => {
     });
 
     it('filters target lines by the Outlet tier', async () => {
-        const element = createElement('c-dms-targets', { is: DmsTargets });
+        const element = createElement('c-targets', { is: Targets });
         document.body.appendChild(element);
 
         const tierCombo = element.shadowRoot.querySelectorAll('lightning-combobox')[0];

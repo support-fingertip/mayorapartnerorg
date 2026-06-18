@@ -8,7 +8,7 @@ const ALL = 'All';
  * Targets are managed by tier (P1 / P2 / Secondary / Outlet) and always
  * broken down by Product Hierarchy. Actuals roll up on a JC basis.
  */
-export default class DmsTargets extends LightningElement {
+export default class Targets extends LightningElement {
     targets = [];
 
     tier = ALL;
