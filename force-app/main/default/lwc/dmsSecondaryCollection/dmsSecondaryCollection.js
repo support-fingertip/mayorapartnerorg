@@ -12,7 +12,15 @@ const REF_FIELD = {
 
 export default class DmsSecondaryCollection extends LightningElement {
     dateFilter = ALL;
-    dateOptions = [{ label: 'All Dates', value: ALL }];
+    dateOptions = [
+        { label: 'All Dates', value: ALL },
+        { label: 'This JC', value: 'this-jc' },
+        { label: 'Last JC', value: 'last-jc' },
+        { label: 'This Week', value: 'this-week' },
+        { label: 'Last Week', value: 'last-week' },
+        { label: 'This Quarter', value: 'this-quarter' },
+        { label: 'This Year', value: 'this-year' }
+    ];
     search = '';
 
     collections = [];
