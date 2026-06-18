@@ -22,7 +22,8 @@ public with sharing class TAM_OutletTargetIncrement_Batch
 
     public Database.QueryLocator start(Database.BatchableContext bc) {
         return Database.getQueryLocator([
-            SELECT Id, Account__c, Product__c, Brand__c, State__c, Outlet_Type__c,
+            SELECT Id, Salesperson__c, User__c, Territory__c, Product__c, Product_Ext__c,
+                   Product_Category__c, Brand__c, State__c, Outlet_Type__c,
                    Target_Type__c, Target_Value__c, Achievement_Value__c,
                    Period_Start__c, Period_End__c
             FROM Target__c

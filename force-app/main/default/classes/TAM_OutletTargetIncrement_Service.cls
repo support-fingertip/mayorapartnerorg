@@ -44,8 +44,12 @@ public with sharing class TAM_OutletTargetIncrement_Service {
 
             Target__c next = new Target__c(
                 Tier__c = 'Outlet',
-                Account__c = src.Account__c,
+                Salesperson__c = src.Salesperson__c,
+                User__c = src.User__c,
+                Territory__c = src.Territory__c,
                 Product__c = src.Product__c,
+                Product_Ext__c = src.Product_Ext__c,
+                Product_Category__c = src.Product_Category__c,
                 Brand__c = src.Brand__c,
                 State__c = src.State__c,
                 Outlet_Type__c = src.Outlet_Type__c,
