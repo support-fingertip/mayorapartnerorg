@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Type__c</fullName>
+    <label>Type</label>
+    <type>Picklist</type>
+    <valueSet>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+                <value>
+                    <fullName>Slab</fullName>
+                    <default>false</default>
+                    <label>Slab</label>
+                </value>
+                <value>
+                    <fullName>Proportional</fullName>
+                    <default>false</default>
+                    <label>Proportional</label>
+                </value>
+                <value>
+                    <fullName>Bundle</fullName>
+                    <default>false</default>
+                    <label>Bundle</label>
+                </value>
+                <value>
+                    <fullName>Discount</fullName>
+                    <default>false</default>
+                    <label>Discount</label>
+                </value>
+                <value>
+                    <fullName>Value-Based</fullName>
+                    <default>false</default>
+                    <label>Value-Based</label>
+                </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

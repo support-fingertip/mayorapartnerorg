@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Visibility_Level__c</fullName>
+    <label>Visibility Level</label>
+    <type>Picklist</type>
+    <valueSet>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+                <value>
+                    <fullName>Nation</fullName>
+                    <default>false</default>
+                    <label>Nation</label>
+                </value>
+                <value>
+                    <fullName>Branch</fullName>
+                    <default>false</default>
+                    <label>Branch</label>
+                </value>
+                <value>
+                    <fullName>State</fullName>
+                    <default>false</default>
+                    <label>State</label>
+                </value>
+                <value>
+                    <fullName>Channel</fullName>
+                    <default>false</default>
+                    <label>Channel</label>
+                </value>
+                <value>
+                    <fullName>Distributor</fullName>
+                    <default>false</default>
+                    <label>Distributor</label>
+                </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>
