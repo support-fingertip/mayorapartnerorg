@@ -348,11 +348,16 @@
 /* Mobile */
 @media (max-width: 767px) {
     /* injected-mobile */
-    .dms-body { padding: 0.85rem; }
+    .dms-body { padding: 0.85rem; overflow-x: hidden; }
     .dms-search,
     .dms-no__search,
     .dms-filter_search { min-width: 0; width: 100%; box-sizing: border-box; }
     .dms-toolbar__right { width: 100%; }
+    /* detail modal: stack info + compact spacing so tabs stay visible */
+    .dms-detail__head { padding: 1rem 1rem 0.75rem; }
+    .dms-detail__info { grid-template-columns: 1fr; gap: 0.6rem; padding: 0.75rem 1rem; }
+    .dms-itabs { padding: 0 1rem; gap: 1.1rem; }
+    .dms-detail__body { padding: 0.85rem 1rem 1.1rem; }
     .dms-thead {
         display: none;
     }

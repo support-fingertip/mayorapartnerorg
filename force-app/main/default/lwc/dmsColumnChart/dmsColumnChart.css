@@ -4,6 +4,12 @@
     --dms-track: #f3f5f8;
     --plot-h: 200px;
     display: block;
+    max-width: 100%;
+}
+
+.col-chart {
+    max-width: 100%;
+    overflow: hidden;
 }
 
 .col-chart__title {

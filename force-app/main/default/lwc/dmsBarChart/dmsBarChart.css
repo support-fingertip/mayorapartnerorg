@@ -6,6 +6,8 @@
     --dms-track: #eef1f5;
     --label-w: 110px;
     display: block;
+    max-width: 100%;
+    overflow: hidden;
 }
 
 .chart__title {

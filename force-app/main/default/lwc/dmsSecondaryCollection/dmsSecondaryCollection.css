@@ -290,7 +290,7 @@
 /* Mobile */
 @media (max-width: 767px) {
     /* injected-mobile */
-    .dms-body { padding: 0.85rem; }
+    .dms-body { padding: 0.85rem; overflow-x: hidden; }
     .dms-search,
     .dms-no__search,
     .dms-filter_search { min-width: 0; width: 100%; box-sizing: border-box; }
