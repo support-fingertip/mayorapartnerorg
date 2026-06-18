@@ -93,7 +93,8 @@ export default class DmsGrn extends LightningElement {
     get itemRows() {
         return this.items.map((it) => ({
             ...it,
-            reasonDisabled: it.damage === 0
+            reasonDisabled: it.damage === 0,
+            options: REASONS.map((o) => ({ ...o, selected: o.value === it.reason }))
         }));
     }
 
@@ -147,7 +148,7 @@ export default class DmsGrn extends LightningElement {
 
     handleReason(event) {
         const id = event.currentTarget.dataset.id;
-        const reason = event.detail.value;
+        const reason = event.target.value;
         this.items = this.items.map((it) => (it.id === id ? { ...it, reason } : it));
     }
 

@@ -191,7 +191,10 @@ export default class DmsReturns extends LightningElement {
     }
 
     get itemRows() {
-        return this.items.map((it) => ({ ...it }));
+        return this.items.map((it) => ({
+            ...it,
+            options: RETURN_REASONS.map((o) => ({ ...o, selected: o.value === it.reason }))
+        }));
     }
     get totalReturnQty() {
         return this.items.reduce((s, it) => s + it.returnQty, 0);
@@ -233,7 +236,7 @@ export default class DmsReturns extends LightningElement {
     }
     handleReason(event) {
         const id = event.currentTarget.dataset.id;
-        const reason = event.detail.value;
+        const reason = event.target.value;
         this.items = this.items.map((it) => (it.id === id ? { ...it, reason } : it));
     }
 
