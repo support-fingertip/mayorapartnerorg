@@ -1,0 +1,158 @@
+<template>
+    <div class="dms-tickets">
+        <div class="dms-body">
+            <div class="dms-toolbar">
+                <div class="dms-filters">
+                    <div class="dms-filter"><span class="dms-filter__label">Category:</span>
+                        <lightning-combobox variant="label-hidden" value={categoryFilter} options={categoryOptions} onchange={handleCategory}></lightning-combobox>
+                    </div>
+                    <div class="dms-filter"><span class="dms-filter__label">List:</span>
+                        <lightning-combobox variant="label-hidden" value={statusFilter} options={statusOptions} onchange={handleStatus}></lightning-combobox>
+                    </div>
+                </div>
+                <div class="dms-toolbar__right">
+                    <lightning-input class="dms-search" type="search" variant="label-hidden" placeholder="Search tickets..." value={search} onchange={handleSearch}></lightning-input>
+                    <button class="dms-btn" type="button" onclick={openModal}>
+                        <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        New Ticket
+                    </button>
+                </div>
+            </div>
+
+            <div class="dms-cards">
+                <template for:each={summary} for:item="c">
+                    <div key={c.id} class="dms-card"><span class="dms-card__label">{c.label}</span><span class={c.cls}>{c.value}</span></div>
+                </template>
+            </div>
+
+            <div class="dms-tbl dms-tbl_tk">
+                <div class="dms-thead">
+                    <span>Ticket ID</span><span>Date</span><span>Category</span><span>Subject</span>
+                    <span>Reference</span><span>Priority</span><span>Status</span><span>Last Update</span><span>Action</span>
+                </div>
+                <template for:each={rows} for:item="t">
+                    <div key={t.key} class="dms-trow">
+                        <span class="dms-link" data-label="Ticket ID">{t.id}</span>
+                        <span class="dms-muted" data-label="Date">{t.date}</span>
+                        <span data-label="Category"><c-dms-status-badge label={t.category} theme={t.categoryTheme}></c-dms-status-badge></span>
+                        <span class="dms-subject" data-label="Subject">{t.subject}</span>
+                        <span class="dms-link" data-label="Reference">{t.refLabel}</span>
+                        <span data-label="Priority"><c-dms-status-badge label={t.priority} theme={t.priorityTheme}></c-dms-status-badge></span>
+                        <span data-label="Status">
+                            <span class={t.statusClass}>
+                                <svg class="dms-ic dms-ic_xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <template lwc:if={t.isOpen}><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="8" x2="12" y2="13"></line><line x1="12" y1="16" x2="12" y2="16"></line></template>
+                                    <template lwc:if={t.isProgress}><circle cx="12" cy="12" r="9"></circle><polyline points="12 8 12 12 15 14"></polyline></template>
+                                    <template lwc:if={t.isDone}><circle cx="12" cy="12" r="9"></circle><polyline points="8.5 12.5 11 15 16 9"></polyline></template>
+                                </svg>
+                                {t.status}
+                            </span>
+                        </span>
+                        <span class="dms-muted" data-label="Last Update">{t.lastUpdate}</span>
+                        <span class="dms-viewlink" data-label="Action" data-id={t.id} onclick={viewTicket}>
+                            <svg class="dms-ic dms-ic_sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                            View
+                        </span>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- ===================== Ticket detail modal ===================== -->
+        <template lwc:if={detailOpen}>
+            <div class="dms-modal__overlay" onclick={closeDetail}></div>
+            <div class="dms-detail" role="dialog">
+                <header class="dms-detail__head">
+                    <div>
+                        <div class="dms-detail__top">
+                            <span class="dms-detail__id">{selected.id}</span>
+                            <c-dms-status-badge label={selected.status} theme={selected.statusTheme}></c-dms-status-badge>
+                            <c-dms-status-badge label={selected.priority} theme={selected.priorityTheme}></c-dms-status-badge>
+                        </div>
+                        <h2 class="dms-detail__subject">{selected.subject}</h2>
+                    </div>
+                    <button class="dms-iconbtn" type="button" onclick={closeDetail} title="Close">
+                        <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </header>
+
+                <div class="dms-detail__info">
+                    <div class="dms-info"><span class="dms-info__label">Category</span><span class="dms-info__strong">{selected.category}</span></div>
+                    <div class="dms-info"><span class="dms-info__label">Raised On</span><span class="dms-info__strong">{selected.date}</span></div>
+                    <div class="dms-info"><span class="dms-info__label">Reference</span><span class="dms-info__strong">{selected.refLabel}</span></div>
+                </div>
+
+                <div class="dms-detail__body">
+                    <template for:each={selected.messages} for:item="m">
+                        <div key={m.key} class={m.cardClass}>
+                            <div class="dms-msg__head">
+                                <span class={m.avatarClass}>{m.initials}</span>
+                                <span class="dms-msg__from">{m.from} · {m.date}</span>
+                            </div>
+                            <p class="dms-msg__text">{m.text}</p>
+                        </div>
+                    </template>
+                </div>
+
+                <footer class="dms-detail__foot">
+                    <button class="dms-btn" type="button" onclick={closeDetail}>Close</button>
+                </footer>
+            </div>
+        </template>
+
+        <!-- ===================== Raise New Ticket ===================== -->
+        <template lwc:if={modalOpen}>
+            <div class="dms-modal__overlay" onclick={closeModal}></div>
+            <div class="dms-modal" role="dialog">
+                <header class="dms-modal__head">
+                    <h2>Raise New Ticket</h2>
+                    <button class="dms-iconbtn" type="button" onclick={closeModal} title="Close">
+                        <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </header>
+                <div class="dms-modal__body">
+                    <div class="dms-form2">
+                        <div>
+                            <label class="dms-flabel">Category</label>
+                            <select class="dms-select dms-select_full" value={formCategory} onchange={handleFormCategory}>
+                                <option value="">Select...</option>
+                                <template for:each={newCategoryOptions} for:item="opt">
+                                    <option key={opt.value} value={opt.value} selected={opt.selected}>{opt.label}</option>
+                                </template>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="dms-flabel">Priority</label>
+                            <div class="dms-segs3">
+                                <template for:each={priorityButtons} for:item="b">
+                                    <button key={b.p} class={b.class} data-p={b.p} onclick={setPriority} type="button">{b.p}</button>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+
+                    <label class="dms-flabel">Subject</label>
+                    <lightning-input variant="label-hidden" placeholder="Brief description of the issue..." value={formSubject} onchange={handleSubject}></lightning-input>
+
+                    <label class="dms-flabel">Order / Invoice Reference (optional)</label>
+                    <lightning-input variant="label-hidden" placeholder="e.g. PO-2847, PI-SAP-0892, GRN-0391..." value={formRef} onchange={handleRef}></lightning-input>
+
+                    <label class="dms-flabel">Description</label>
+                    <lightning-textarea variant="label-hidden" placeholder="Provide full details — product names, quantities, dates, and what resolution you need..." value={formDesc} onchange={handleDesc}></lightning-textarea>
+                </div>
+                <footer class="dms-modal__foot">
+                    <button class="dms-btn dms-btn_outline" type="button" onclick={closeModal}>Cancel</button>
+                    <button class="dms-btn" type="button" onclick={submitTicket} disabled={submitDisabled}>Submit Ticket</button>
+                </footer>
+            </div>
+        </template>
+    </div>
+</template>

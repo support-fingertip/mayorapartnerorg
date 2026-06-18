@@ -529,6 +529,27 @@ export function getCustomerDetail(customer) {
     };
 }
 
+/* --------------------------------- Tickets -------------------------------- */
+
+const TICKETS = [
+    { id: 'TKT-0085', date: '28 May 2026', category: 'Delivery Delay', subject: 'PO-2847 not received — dispatch not initiated', reference: 'PO-2847', priority: 'High', status: 'Open', lastUpdate: '28 May 2026', messages: [{ from: 'Sharma Distributors', type: 'sd', date: '28 May 2026', text: 'Primary order PO-2847 placed on 29 May 2026. Mayora India has not provided dispatch details or LR number. Expected delivery was 3 Jun 2026.' }] },
+    { id: 'TKT-0082', date: '25 May 2026', category: 'Product Quality', subject: 'Beng-Beng Wafer — damaged packaging in PO-2841', reference: 'PO-2841 / RET-045', priority: 'High', status: 'In Progress', lastUpdate: '27 May 2026', messages: [{ from: 'Sharma Distributors', type: 'sd', date: '25 May 2026', text: 'Received 60 cartons of Beng-Beng Wafer Chocolate (BBG-22) in PO-2841. 5 cartons found with crushed packaging and broken wafers. Return RET-045 already raised.' }, { from: 'Mayora India Ltd.', type: 'mayora', date: '27 May 2026', text: 'Field quality team has been informed. Credit note will be processed once RET-045 is approved by ASM.' }] },
+    { id: 'TKT-0079', date: '20 May 2026', category: 'Invoice Dispute', subject: 'PI-SAP-0871 — wrong carton quantity billed for GRN-0385', reference: 'PI-SAP-0871 / GRN-0385', priority: 'Medium', status: 'In Progress', lastUpdate: '24 May 2026', messages: [{ from: 'Sharma Distributors', type: 'sd', date: '20 May 2026', text: 'PI-SAP-0871 billed 100 cartons but GRN-0385 received 96. Requesting correction of 4 cartons.' }, { from: 'Mayora India Ltd.', type: 'mayora', date: '24 May 2026', text: 'Reconciliation in progress with the SAP team; correction note to follow.' }] },
+    { id: 'TKT-0075', date: '14 May 2026', category: 'Order Issue', subject: 'Wrong SKU dispatched — Kopiko Jar vs Kopiko Pouch', reference: 'PO-2820', priority: 'High', status: 'Resolved', lastUpdate: '18 May 2026', messages: [{ from: 'Sharma Distributors', type: 'sd', date: '14 May 2026', text: 'Kopiko Jar dispatched instead of Kopiko Pouch in PO-2820.' }, { from: 'Mayora India Ltd.', type: 'mayora', date: '18 May 2026', text: 'Replacement dispatched and short-pick corrected. Issue resolved.' }] },
+    { id: 'TKT-0071', date: '08 May 2026', category: 'Scheme / Pricing', subject: 'Kopiko Jar Q4 trade scheme not applied on PI-SAP-0858', reference: 'PI-SAP-0858', priority: 'Medium', status: 'Resolved', lastUpdate: '12 May 2026', messages: [{ from: 'Sharma Distributors', type: 'sd', date: '08 May 2026', text: 'Q4 trade scheme not applied on PI-SAP-0858.' }, { from: 'Mayora India Ltd.', type: 'mayora', date: '12 May 2026', text: 'Scheme credit applied via SCH-0041. Resolved.' }] },
+    { id: 'TKT-0068', date: '02 May 2026', category: 'Feedback', subject: 'Request: add JuizyMilk Candy larger pack (100g)', reference: '—', priority: 'Low', status: 'Closed', lastUpdate: '10 May 2026', messages: [{ from: 'Sharma Distributors', type: 'sd', date: '02 May 2026', text: 'Request: add JuizyMilk Candy larger pack (100g) to the catalog.' }, { from: 'Mayora India Ltd.', type: 'mayora', date: '10 May 2026', text: 'Forwarded to the product team for evaluation. Closing for now.' }] }
+];
+
+const TICKET_CATEGORIES = ['Order Issue', 'Invoice Dispute', 'Product Quality', 'Delivery Delay', 'Scheme / Pricing', 'Feedback', 'Other'];
+
+export function getTickets() {
+    return clone(TICKETS);
+}
+
+export function getTicketCategories() {
+    return [...TICKET_CATEGORIES];
+}
+
 
 /* --------------------------- Home: P1 Dashboard --------------------------- */
 

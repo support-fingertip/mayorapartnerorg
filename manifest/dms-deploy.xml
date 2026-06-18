@@ -19,6 +19,7 @@
         <members>dmsClaims</members>
         <members>dmsSecondaryCollection</members>
         <members>dmsCustomers</members>
+        <members>dmsTickets</members>
         <name>LightningComponentBundle</name>
     </types>
     <version>59.0</version>
