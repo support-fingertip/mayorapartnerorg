@@ -97,8 +97,8 @@
 }
 
 .dms-chipbtn_active {
-    background: var(--dms-navy);
-    border-color: var(--dms-navy);
+    background: var(--dms-brand);
+    border-color: var(--dms-brand);
     color: #fff;
 }
 
@@ -107,7 +107,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    background: var(--dms-navy);
+    background: var(--dms-brand);
     color: #fff;
     border: none;
     border-radius: 0.5rem;

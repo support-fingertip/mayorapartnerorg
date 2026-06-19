@@ -98,7 +98,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    background: var(--dms-navy);
+    background: var(--dms-brand);
     color: #fff;
     border: none;
     border-radius: 0.5rem;
@@ -285,7 +285,7 @@
     justify-content: center;
 }
 .dms-step__dot_active {
-    background: var(--dms-navy);
+    background: var(--dms-brand);
     color: #fff;
 }
 .dms-steps__label {
@@ -324,8 +324,8 @@
     cursor: pointer;
 }
 .dms-seg_active {
-    background: var(--dms-navy);
-    border-color: var(--dms-navy);
+    background: var(--dms-brand);
+    border-color: var(--dms-brand);
     color: #fff;
 }
 
