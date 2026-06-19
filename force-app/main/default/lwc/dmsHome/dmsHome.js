@@ -24,7 +24,7 @@ const ORDERS_TICKS = ['0', '5', '10', '15', '20'];
 const VALUE_TICKS = ['₹0L', '₹0.5L', '₹1L', '₹1.5L', '₹2L'];
 const BEAT_TICKS = ['₹1.6L', '₹1.2L', '₹0.8L', '₹0.4L', '₹0L'];
 const CUSTOMER_TICKS = ['₹0L', '₹0.25L', '₹0.5L', '₹0.75L', '₹1L'];
-const RANGE_ACCENT_COLOR = { purple: '#6d28d9', brand: '#c01a12' };
+const RANGE_ACCENT_COLOR = { purple: '#6d28d9', brand: '#a20417' };
 
 /** DMS landing screen — hosts the P1, P2 and Secondary dashboards as sub-tabs. */
 export default class DmsHome extends LightningElement {
