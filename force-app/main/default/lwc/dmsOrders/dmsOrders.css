@@ -259,7 +259,7 @@
 
 .dms-no__credit-bar {
     height: 100%;
-    background: var(--dms-navy);
+    background: var(--dms-brand);
     border-radius: 0.25rem;
     transition: width 0.3s ease;
 }
