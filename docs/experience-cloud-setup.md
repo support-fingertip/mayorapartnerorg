@@ -66,8 +66,38 @@ and in-modal dropdowns use native `<select>` to avoid clipping.
 
 ## Theming
 
-Brand colors are inlined as `--dms-*` CSS custom properties at the top of each component's CSS
-(red primary / navy ink). Adjust them to match the final Mayora palette / Figma tokens.
+Brand colors are inlined as `--dms-*` CSS custom properties in each component, but the three
+key brand colors are **overridable site-wide** via `--mayora-*` variables (with the current
+Mayora red/navy/purple as defaults):
+
+- `--mayora-brand` (primary red — active tabs, accents)
+- `--mayora-navy` (dark ink — buttons, headings)
+- `--mayora-accent` (purple — P2/secondary accents)
+
+To recolor **all** DMS components at once to a client's palette, set these variables at the
+page/site level. In Experience Builder (LWR): **Settings → Advanced → Edit Head Markup** (or a
+custom-CSS area) and add:
+
+```html
+<style>
+  :root {
+    --mayora-brand: #E2231A;   /* primary */
+    --mayora-navy:  #1B2A4A;   /* dark ink */
+    --mayora-accent:#6D28D9;   /* accent */
+  }
+</style>
+```
+
+CSS custom properties inherit through shadow DOM, so every DMS component picks these up
+automatically. (Per-component fine-grained colors can still be tuned in each component's CSS.)
+
+## Logo & site colors (Experience Cloud config — no code)
+
+- **Login page logo / background / colors:** Setup → Digital Experiences → All Sites →
+  *[site]* → Workspaces → **Administration → Login & Registration** (and **Branding**).
+- **Authenticated site theme (header logo, nav, buttons):** Experience Builder →
+  **Theme** → Colors / Theme Settings, and upload the header logo.
+- Then set the `--mayora-*` variables above so the DMS components match the site theme.
 
 ## Notes / next steps
 
