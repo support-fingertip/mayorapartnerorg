@@ -1,6 +1,6 @@
 /* Mayora DMS brand tokens — keep in sync across DMS components. */
 :host {
-    --dms-brand: var(--mayora-brand, #a20417);
+    --dms-brand: var(--dxp-g-brand, var(--lwc-brandPrimary, var(--mayora-brand, #a20417)));
     --dms-navy: var(--mayora-navy, #1b2a4a);
     --dms-bg: #f4f6f9;
     --dms-surface: #ffffff;

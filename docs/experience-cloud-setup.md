@@ -66,30 +66,36 @@ and in-modal dropdowns use native `<select>` to avoid clipping.
 
 ## Theming
 
-Brand colors are inlined as `--dms-*` CSS custom properties in each component, but the three
-key brand colors are **overridable site-wide** via `--mayora-*` variables (with the current
-Mayora red/navy/purple as defaults):
+The DMS components' **brand color follows the Experience Cloud Theme automatically**. Each
+component resolves its brand color in this order:
 
-- `--mayora-brand` (primary red — active tabs, accents)
-- `--mayora-navy` (dark ink — buttons, headings)
-- `--mayora-accent` (purple — P2/secondary accents)
+```
+--dms-brand: var(--dxp-g-brand,            /* LWR Theme brand color */
+             var(--lwc-brandPrimary,        /* Aura template brand color */
+             var(--mayora-brand,            /* optional manual override (head markup) */
+             #a20417)));                     /* default */
+```
 
-To recolor **all** DMS components at once to a client's palette, set these variables at the
-page/site level. In Experience Builder (LWR): **Settings → Advanced → Edit Head Markup** (or a
-custom-CSS area) and add:
+So to recolor every DMS screen, just set the brand color in **Experience Builder → Theme →
+Colors** — the LWR Theme exposes `--dxp-g-brand`, which inherits into the components' shadow
+DOM, and they pick it up with no code change.
+
+Optional manual override (e.g. to force a color independent of the Theme): add to
+**Experience Builder → Settings → Advanced → Edit Head Markup**:
 
 ```html
 <style>
   :root {
-    --mayora-brand: #E2231A;   /* primary */
-    --mayora-navy:  #1B2A4A;   /* dark ink */
-    --mayora-accent:#6D28D9;   /* accent */
+    --mayora-brand:  #a20417;   /* primary */
+    --mayora-navy:   #1b2a4a;   /* dark ink (buttons/headings) */
+    --mayora-accent: #6d28d9;   /* secondary accent (P2 dashboard) */
   }
 </style>
 ```
 
-CSS custom properties inherit through shadow DOM, so every DMS component picks these up
-automatically. (Per-component fine-grained colors can still be tuned in each component's CSS.)
+> Note: `--dms-navy` and `--dms-accent` follow `--mayora-navy` / `--mayora-accent` (manual
+> override or default) — they are not auto-bound to the Theme. Ask if you want those wired to
+> Theme tokens too.
 
 ## Logo & site colors (Experience Cloud config — no code)
 

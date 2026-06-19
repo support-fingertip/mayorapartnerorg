@@ -1,6 +1,6 @@
 /* Mayora DMS brand tokens — keep in sync across DMS components. */
 :host {
-    --dms-brand: var(--mayora-brand, #a20417);
+    --dms-brand: var(--dxp-g-brand, var(--lwc-brandPrimary, var(--mayora-brand, #a20417)));
     --dms-navy: var(--mayora-navy, #1b2a4a);
     --dms-accent: var(--mayora-accent, #6d28d9);
     --dms-green: #0f7a4d;
@@ -156,7 +156,7 @@
 }
 
 .dms-toggle__btn_brand {
-    background: var(--mayora-brand, #a20417);
+    background: var(--dxp-g-brand, var(--lwc-brandPrimary, var(--mayora-brand, #a20417)));
     color: #fff;
 }
 

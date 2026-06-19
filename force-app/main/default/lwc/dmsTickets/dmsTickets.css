@@ -325,7 +325,7 @@
     background: var(--dms-navy);
 }
 .dms-msg__av_m {
-    background: var(--mayora-brand, #a20417);
+    background: var(--dxp-g-brand, var(--lwc-brandPrimary, var(--mayora-brand, #a20417)));
 }
 .dms-msg__from {
     font-size: 0.82rem;
