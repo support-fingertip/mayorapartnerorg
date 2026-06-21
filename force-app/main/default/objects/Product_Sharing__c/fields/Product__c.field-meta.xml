@@ -5,9 +5,7 @@
     <referenceTo>Product2</referenceTo>
     <relationshipLabel>Product Sharings</relationshipLabel>
     <relationshipName>Product_Sharings</relationshipName>
-    <relationshipOrder>0</relationshipOrder>
-    <reparentableMasterDetail>false</reparentableMasterDetail>
+    <required>true</required>
     <trackTrending>false</trackTrending>
-    <type>MasterDetail</type>
-    <writeRequiresMasterRead>false</writeRequiresMasterRead>
+    <type>Lookup</type>
 </CustomField>

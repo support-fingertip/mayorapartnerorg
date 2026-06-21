@@ -18,6 +18,6 @@
         <type>AutoNumber</type>
     </nameField>
     <pluralLabel>Product Sharings</pluralLabel>
-    <sharingModel>ControlledByParent</sharingModel>
+    <sharingModel>ReadWrite</sharingModel>
     <visibility>Public</visibility>
 </CustomObject>
