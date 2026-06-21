@@ -78,6 +78,7 @@ public with sharing class EmployeeController {
                    Channels__c, L1_Approver__c, L1_Approver__r.Name, L2_Approver__c, L2_Approver__r.Name,
                    Territory__c, Territory__r.Name,
                    Position__c, Position__r.Name, Position__r.Position_Code__c,
+                   Profile_Id__c, Profile_Name__c,
                    Reporting_Manager__c, Reporting_Manager__r.First_Name__c,
                    Reporting_Manager__r.Last_Name__c, Reporting_Manager__r.Employee_Code__c
             FROM Employee__c
@@ -113,6 +114,7 @@ public with sharing class EmployeeController {
                        Channels__c, L1_Approver__c, L1_Approver__r.Name, L2_Approver__c, L2_Approver__r.Name,
                    Territory__c, Territory__r.Name,
                        Position__c, Position__r.Name, Position__r.Position_Code__c,
+                       Profile_Id__c, Profile_Name__c,
                        Reporting_Manager__c, Reporting_Manager__r.First_Name__c,
                        Reporting_Manager__r.Last_Name__c, Reporting_Manager__r.Employee_Code__c
                 FROM Employee__c
@@ -235,6 +237,106 @@ public with sharing class EmployeeController {
             WHERE Is_Active__c = true
             ORDER BY Position_Code__c
         ];
+    }
+
+    // ── Get Profiles ─────────────────────────────────────────────────────────────
+
+    /**
+     * @description Returns the Salesforce Profiles available to assign to an
+     *              employee. The chosen profile is stored on the Employee and
+     *              applied to the User created at activation.
+     * @return List of Profile records (Id + Name).
+     */
+    @AuraEnabled(cacheable=true)
+    public static List<Profile> getProfiles() {
+        return [SELECT Id, Name FROM Profile ORDER BY Name];
+    }
+
+    // ── Activate Employee (provision User) ───────────────────────────────────────
+
+    /**
+     * @description Provisions a Salesforce User for an employee: creates the User
+     *              with the employee's selected Profile, the Role derived from the
+     *              employee's Position (POS_<code>), and the manager's user, then
+     *              links it back to the Employee. User (setup) and Employee
+     *              (non-setup) cannot be DML'd in one transaction, so the back-link
+     *              is written asynchronously via linkUserToEmployee.
+     * @param employeeId The Employee__c to activate.
+     * @return The Id of the newly created User.
+     */
+    @AuraEnabled
+    public static Id activateEmployee(Id employeeId) {
+        Employee__c emp = [
+            SELECT Id, First_Name__c, Last_Name__c, Employee_Code__c, Email__c,
+                   User__c, Profile_Id__c, Position__r.Position_Code__c,
+                   Reporting_Manager__r.User__c
+            FROM Employee__c
+            WHERE Id = :employeeId
+            LIMIT 1
+        ];
+
+        if (emp.User__c != null) {
+            throw new AuraHandledException('This employee is already activated.');
+        }
+        if (String.isBlank(emp.Profile_Id__c)) {
+            throw new AuraHandledException('Select a Profile before activating this employee.');
+        }
+        if (String.isBlank(emp.Email__c)) {
+            throw new AuraHandledException('Employee Email is required to create a user.');
+        }
+
+        // Resolve the Role auto-created for the employee's Position.
+        Id roleId = null;
+        if (emp.Position__r != null && String.isNotBlank(emp.Position__r.Position_Code__c)) {
+            String dev = MDM_PositionRoleProvisioner.devName(emp.Position__r.Position_Code__c);
+            List<UserRole> roles = [SELECT Id FROM UserRole WHERE DeveloperName = :dev LIMIT 1];
+            if (!roles.isEmpty()) {
+                roleId = roles[0].Id;
+            }
+        }
+
+        String lastName = String.isNotBlank(emp.Last_Name__c) ? emp.Last_Name__c : emp.Employee_Code__c;
+        String aliasBase = ((emp.First_Name__c != null ? emp.First_Name__c.left(1) : '')
+            + (lastName != null ? lastName : 'user')).replaceAll('[^a-zA-Z0-9]', '');
+        if (String.isBlank(aliasBase)) {
+            aliasBase = 'usr';
+        }
+        String alias = aliasBase.left(8);
+
+        User u = new User(
+            FirstName = emp.First_Name__c,
+            LastName = lastName,
+            Email = emp.Email__c,
+            Username = emp.Email__c,
+            Alias = alias,
+            ProfileId = emp.Profile_Id__c,
+            UserRoleId = roleId,
+            ManagerId = (emp.Reporting_Manager__r != null) ? emp.Reporting_Manager__r.User__c : null,
+            IsActive = true,
+            TimeZoneSidKey = 'Asia/Kolkata',
+            LocaleSidKey = 'en_IN',
+            EmailEncodingKey = 'UTF-8',
+            LanguageLocaleKey = 'en_US'
+        );
+
+        try {
+            insert u;
+        } catch (DmlException e) {
+            throw new AuraHandledException('Could not create user: ' + e.getDmlMessage(0));
+        }
+
+        linkUserToEmployee(employeeId, u.Id);
+        return u.Id;
+    }
+
+    /**
+     * @description Asynchronously links a freshly created User to its Employee and
+     *              marks the employee active. Runs in its own transaction to avoid
+     *              the MIXED_DML restriction between User and Employee__c.
+     */
+    @future
+    public static void linkUserToEmployee(Id employeeId, Id userId) {
+        update new Employee__c(Id = employeeId, User__c = userId, Is_Active__c = true);
     }
 
     // ── Get Direct Reports ───────────────────────────────────────────────────────

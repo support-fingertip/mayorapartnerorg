@@ -555,4 +555,76 @@ public class EmployeeController_Test {
             System.assertEquals('Modified', updated.Last_Name__c);
         }
     }
+
+    @isTest
+    static void testGetProfiles() {
+        Test.startTest();
+        List<Profile> profiles = EmployeeController.getProfiles();
+        Test.stopTest();
+        System.assertNotEquals(null, profiles, 'Profiles list returned');
+        System.assert(!profiles.isEmpty(), 'Org always has at least one Profile');
+    }
+
+    @isTest
+    static void testActivateEmployee() {
+        Profile p = [SELECT Id FROM Profile WHERE Name = 'Standard User' LIMIT 1];
+        // Role the activated user should receive, matched by POS_<code>.
+        UserRole role = new UserRole(Name = 'Act Role', DeveloperName = 'POS_ACT_TEST_01');
+        Position__c pos = new Position__c(Name = 'Act Pos', Position_Code__c = 'ACT-TEST-01');
+        Employee__c emp;
+
+        // System.runAs lets the test mix setup (User/UserRole) and non-setup
+        // (Employee__c/Position__c) DML without hitting MIXED_DML.
+        System.runAs(new User(Id = UserInfo.getUserId())) {
+            insert role;
+            insert pos;
+            emp = new Employee__c(
+                First_Name__c = 'Act',
+                Last_Name__c = 'User',
+                Employee_Code__c = 'EMP-ACT-01',
+                Email__c = 'act.user.' + DateTime.now().getTime() + '@mayora.test.invalid',
+                Channels__c = 'GT',
+                Position__c = pos.Id,
+                Profile_Id__c = p.Id
+            );
+            insert emp;
+
+            Test.startTest();
+            Id newUserId = EmployeeController.activateEmployee(emp.Id);
+            Test.stopTest();
+
+            System.assertNotEquals(null, newUserId, 'A user should be created');
+            User u = [SELECT ProfileId, UserRoleId FROM User WHERE Id = :newUserId];
+            System.assertEquals(p.Id, u.ProfileId, 'Profile assigned from the employee selection');
+            System.assertEquals(role.Id, u.UserRoleId, 'Role assigned from the position');
+
+            Employee__c linked = [SELECT User__c, Is_Active__c FROM Employee__c WHERE Id = :emp.Id];
+            System.assertEquals(newUserId, linked.User__c, 'New user linked back to the employee');
+            System.assertEquals(true, linked.Is_Active__c, 'Employee marked active on activation');
+        }
+    }
+
+    @isTest
+    static void testActivateEmployeeRequiresProfile() {
+        Employee__c emp;
+        System.runAs(new User(Id = UserInfo.getUserId())) {
+            emp = new Employee__c(
+                First_Name__c = 'No',
+                Last_Name__c = 'Profile',
+                Employee_Code__c = 'EMP-NOPROF',
+                Email__c = 'noprof.' + DateTime.now().getTime() + '@mayora.test.invalid',
+                Channels__c = 'GT'
+            );
+            insert emp;
+        }
+        Test.startTest();
+        Boolean threw = false;
+        try {
+            EmployeeController.activateEmployee(emp.Id);
+        } catch (AuraHandledException e) {
+            threw = true;
+        }
+        Test.stopTest();
+        System.assertEquals(true, threw, 'Activation without a Profile should fail');
+    }
 }

@@ -6,6 +6,8 @@ import getEmployees from '@salesforce/apex/EmployeeController.getEmployees';
 import getEmployee from '@salesforce/apex/EmployeeController.getEmployee';
 import saveEmployee from '@salesforce/apex/EmployeeController.saveEmployee';
 import deactivateEmployee from '@salesforce/apex/EmployeeController.deactivateEmployee';
+import activateEmployee from '@salesforce/apex/EmployeeController.activateEmployee';
+import getProfiles from '@salesforce/apex/EmployeeController.getProfiles';
 import getDepartmentOptions from '@salesforce/apex/EmployeeController.getDepartmentOptions';
 import getDesignationOptions from '@salesforce/apex/EmployeeController.getDesignationOptions';
 import getPositions from '@salesforce/apex/EmployeeController.getPositions';
@@ -42,6 +44,8 @@ const EMPTY_EMPLOYEE_FORM = {
     Band__c: '',
     Territory__c: null,
     Position__c: null,
+    Profile_Id__c: '',
+    Profile_Name__c: '',
     Is_Active__c: true,
     Profile_Photo_URL__c: '',
     Address__c: '',
@@ -57,6 +61,7 @@ export default class EmployeeManager extends NavigationMixin(LightningElement) {
     @track departmentOptions = [];
     @track designationOptions = [];
     @track positionOptions = [];
+    @track profileOptions = [];
     isLoading = false;
     showEmployeeForm = false;
     isEditMode = false;
@@ -408,15 +413,20 @@ export default class EmployeeManager extends NavigationMixin(LightningElement) {
 
     async loadFilterOptions() {
         try {
-            const [departments, designations, positions] = await Promise.all([
+            const [departments, designations, positions, profiles] = await Promise.all([
                 getDepartmentOptions(),
                 getDesignationOptions(),
-                getPositions()
+                getPositions(),
+                getProfiles()
             ]);
             this.departmentOptions = departments || [];
             this.designationOptions = designations || [];
             this.positionOptions = (positions || []).map(p => ({
                 label: p.Position_Code__c + ' — ' + p.Name,
+                value: p.Id
+            }));
+            this.profileOptions = (profiles || []).map(p => ({
+                label: p.Name,
                 value: p.Id
             }));
         } catch (error) {
@@ -610,6 +620,8 @@ export default class EmployeeManager extends NavigationMixin(LightningElement) {
             Band__c: this.selectedEmployee.Band__c || '',
             Territory__c: this.selectedEmployee.Territory__c || null,
             Position__c: this.selectedEmployee.Position__c || null,
+            Profile_Id__c: this.selectedEmployee.Profile_Id__c || '',
+            Profile_Name__c: this.selectedEmployee.Profile_Name__c || '',
             Is_Active__c: this.selectedEmployee.Is_Active__c !== false,
             Profile_Photo_URL__c: this.selectedEmployee.Profile_Photo_URL__c || '',
             Address__c: this.selectedEmployee.Address__c || '',
@@ -630,6 +642,13 @@ export default class EmployeeManager extends NavigationMixin(LightningElement) {
             this.employeeForm = { ...this.employeeForm, [field]: Array.isArray(val) ? (val[0] || null) : val };
         } else if (field === 'Is_Active__c') {
             this.employeeForm = { ...this.employeeForm, [field]: event.target.checked };
+        } else if (field === 'Profile_Id__c') {
+            const opt = this.profileOptions.find(o => o.value === event.detail.value);
+            this.employeeForm = {
+                ...this.employeeForm,
+                Profile_Id__c: event.detail.value,
+                Profile_Name__c: opt ? opt.label : ''
+            };
         } else if (field === 'Department__c' || field === 'Designation__c' || field === 'Position__c') {
             this.employeeForm = { ...this.employeeForm, [field]: event.detail.value };
         } else if (field === 'Week_Off_Days__c') {
@@ -673,6 +692,10 @@ export default class EmployeeManager extends NavigationMixin(LightningElement) {
             this.showToast('Error', 'Position Code is required.', 'error');
             return;
         }
+        if (!this.employeeForm.Profile_Id__c) {
+            this.showToast('Error', 'Profile is required.', 'error');
+            return;
+        }
 
         this.isLoading = true;
         try {
@@ -692,6 +715,8 @@ export default class EmployeeManager extends NavigationMixin(LightningElement) {
                 Band__c: this.employeeForm.Band__c,
                 Territory__c: this.employeeForm.Territory__c,
                 Position__c: this.employeeForm.Position__c,
+                Profile_Id__c: this.employeeForm.Profile_Id__c,
+                Profile_Name__c: this.employeeForm.Profile_Name__c,
                 Is_Active__c: this.employeeForm.Is_Active__c,
                 Profile_Photo_URL__c: this.employeeForm.Profile_Photo_URL__c,
                 Address__c: this.employeeForm.Address__c,
@@ -722,6 +747,28 @@ export default class EmployeeManager extends NavigationMixin(LightningElement) {
             }
         } catch (error) {
             this.showToast('Error', 'Failed to save employee: ' + this.reduceErrors(error), 'error');
+        } finally {
+            this.isLoading = false;
+        }
+    }
+
+    get showActivateButton() {
+        return !!this.selectedEmployee && !this.selectedEmployee.User__c;
+    }
+
+    async handleActivate() {
+        if (!this.selectedEmployee) return;
+        this.isLoading = true;
+        try {
+            const newUserId = await activateEmployee({ employeeId: this.selectedEmployee.Id });
+            // The User-to-Employee back-link is written asynchronously, so reflect
+            // it locally right away to hide the Activate button without waiting.
+            this.selectedEmployee = { ...this.selectedEmployee, User__c: newUserId };
+            this.showToast('Success', 'User created and assigned the profile and role.', 'success');
+            await this.loadEmployees();
+            this.loadEmployeeDetail(this.selectedEmployee.Id);
+        } catch (error) {
+            this.showToast('Error', 'Failed to activate employee: ' + this.reduceErrors(error), 'error');
         } finally {
             this.isLoading = false;
         }

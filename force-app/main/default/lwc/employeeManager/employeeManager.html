@@ -394,6 +394,10 @@
                         <lightning-button-group>
                             <lightning-button variant="neutral" label="Edit" icon-name="utility:edit"
                                 onclick={handleEditEmployee}></lightning-button>
+                            <template if:true={showActivateButton}>
+                                <lightning-button variant="success" label="Activate" icon-name="utility:user"
+                                    onclick={handleActivate}></lightning-button>
+                            </template>
                             <lightning-button variant="destructive-text" label="Deactivate" icon-name="utility:ban"
                                 onclick={handleDeactivate} disabled={isDeactivateDisabled}></lightning-button>
                             <lightning-button variant="brand" label="View 360" icon-name="utility:preview"
@@ -521,11 +525,13 @@
                                             variant="label-stacked"></lightning-input-field>
                                     </div>
                                     <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
-                                        <lightning-input-field field-name="User__c"
-                                            value={employeeForm.User__c}
-                                            data-field="User__c"
-                                            onchange={handleFormChange}
-                                            variant="label-stacked"></lightning-input-field>
+                                        <lightning-combobox label="Profile" value={employeeForm.Profile_Id__c}
+                                            options={profileOptions}
+                                            data-field="Profile_Id__c"
+                                            placeholder="Select a profile"
+                                            required
+                                            field-level-help="Salesforce Profile assigned to the user created when this employee is activated"
+                                            onchange={handleFormChange}></lightning-combobox>
                                     </div>
                                     <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
                                         <lightning-input-field field-name="L1_Approver__c"
