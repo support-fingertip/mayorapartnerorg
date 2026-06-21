@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Position__c</fullName>
-    <description>The sales position this employee holds. Drives the user's Salesforce Role.</description>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>The sales position this employee holds. Drives the user&apos;s Salesforce Role.</description>
     <label>Position</label>
     <referenceTo>Position__c</referenceTo>
     <relationshipLabel>Employees</relationshipLabel>
     <relationshipName>Employees</relationshipName>
     <required>false</required>
-    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
     <type>Lookup</type>
 </CustomField>

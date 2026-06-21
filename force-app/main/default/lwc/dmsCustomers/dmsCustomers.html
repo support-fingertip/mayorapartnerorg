@@ -1,0 +1,173 @@
+<template>
+    <div class="dms-cust">
+        <!-- Sub-tabs -->
+        <div class="dms-subtabs" role="tablist">
+            <button class={retailerTabClass} data-tab="retailers" onclick={handleTab} type="button">Retailers</button>
+            <button class={subDistTabClass} data-tab="subdist" onclick={handleTab} type="button">Sub-Distributors</button>
+        </div>
+
+        <div class="dms-body">
+            <div class="dms-toolbar">
+                <div class="dms-filters">
+                    <div class="dms-filter"><span class="dms-filter__label">List:</span>
+                        <lightning-combobox variant="label-hidden" value={outletFilter} options={outletOptions} onchange={handleOutlet}></lightning-combobox>
+                    </div>
+                    <div class="dms-filter"><span class="dms-filter__label">Beat:</span>
+                        <lightning-combobox variant="label-hidden" value={beatFilter} options={beatOptions} onchange={handleBeat}></lightning-combobox>
+                    </div>
+                </div>
+                <lightning-input class="dms-search" type="search" variant="label-hidden" placeholder="Search name, area, beat..." value={search} onchange={handleSearch}></lightning-input>
+            </div>
+
+            <div class="dms-chips">
+                <div class="dms-chip">
+                    <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 4-6 8-6s8 2 8 6"></path>
+                    </svg>
+                    <span class="dms-chip__label">{totalLabel}:</span><span class="dms-chip__value">{totalCount}</span>
+                </div>
+            </div>
+
+            <div class="dms-tbl dms-tbl_cust">
+                <div class="dms-thead">
+                    <span>Customer</span><span>Type</span><span>Outlet Type</span><span>Beat</span>
+                    <span>Owner</span><span>Area</span><span>Phone</span>
+                    <span class="dms-num">Monthly Avg</span><span>Last Order</span><span>Action</span>
+                </div>
+                <template for:each={rows} for:item="c">
+                    <div key={c.key} class="dms-trow">
+                        <span class="dms-custcell" data-label="Customer">
+                            <span class="dms-avatar">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <template lwc:if={isRetailers}>
+                                        <circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 4-6 8-6s8 2 8 6"></path>
+                                    </template>
+                                    <template lwc:else>
+                                        <path d="M3 21h18"></path><path d="M5 21V8l7-4 7 4v13"></path><rect x="9" y="13" width="6" height="8"></rect>
+                                    </template>
+                                </svg>
+                            </span>
+                            <span class="dms-custcell__txt">
+                                <span class="dms-strong">{c.name}</span>
+                                <span class="dms-code">{c.code}</span>
+                            </span>
+                        </span>
+                        <span data-label="Type"><c-dms-status-badge label={c.type} theme={c.typeTheme}></c-dms-status-badge></span>
+                        <span data-label="Outlet Type">{c.outletType}</span>
+                        <span data-label="Beat">{c.beat}</span>
+                        <span data-label="Owner">{c.owner}</span>
+                        <span class="dms-muted" data-label="Area">{c.area}</span>
+                        <span class="dms-muted" data-label="Phone">{c.phone}</span>
+                        <span class="dms-num dms-strong" data-label="Monthly Avg">{c.monthlyLabel}</span>
+                        <span class="dms-link" data-label="Last Order">{c.lastOrder}</span>
+                        <span data-label="Action"><button class="dms-viewbtn" type="button" data-code={c.code} onclick={viewCustomer}>View</button></span>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- ===================== Customer detail modal ===================== -->
+        <template lwc:if={detailOpen}>
+            <div class="dms-modal__overlay" onclick={closeDetail}></div>
+            <div class="dms-detail" role="dialog">
+                <header class="dms-detail__head">
+                    <div class="dms-detail__id">
+                        <span class="dms-avatar dms-avatar_lg">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <template lwc:if={isRetailers}>
+                                    <circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 4-6 8-6s8 2 8 6"></path>
+                                </template>
+                                <template lwc:else>
+                                    <path d="M3 21h18"></path><path d="M5 21V8l7-4 7 4v13"></path><rect x="9" y="13" width="6" height="8"></rect>
+                                </template>
+                            </svg>
+                        </span>
+                        <div>
+                            <h2>{selected.name}</h2>
+                            <p>{selected.subtitle}</p>
+                        </div>
+                    </div>
+                    <button class="dms-iconbtn" type="button" onclick={closeDetail} title="Close">
+                        <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </header>
+
+                <div class="dms-detail__info">
+                    <div>
+                        <span class="dms-info__label">Owner / Contact</span>
+                        <span class="dms-info__strong">{selected.owner}</span>
+                        <span class="dms-info__muted">{selected.phone}</span>
+                    </div>
+                    <div>
+                        <span class="dms-info__label">Address</span>
+                        <span class="dms-info__muted">{selected.address}</span>
+                    </div>
+                    <div>
+                        <span class="dms-info__label">GSTIN</span>
+                        <span class="dms-info__strong">{selected.gstin}</span>
+                        <span class="dms-info__muted">Monthly Avg: {selected.monthlyLabel}</span>
+                    </div>
+                </div>
+
+                <div class="dms-itabs">
+                    <template for:each={detailTabs} for:item="t">
+                        <button key={t.id} class={t.class} data-id={t.id} onclick={setDetailTab} type="button">{t.label}</button>
+                    </template>
+                </div>
+
+                <div class="dms-detail__body">
+                    <template lwc:if={isOrders}>
+                        <div class="dms-tbl dms-tbl_d">
+                            <div class="dms-thead dms-thead_d4"><span>Order ID</span><span>Date</span><span class="dms-num">Amount</span><span>Items</span></div>
+                            <template for:each={selected.orders} for:item="o">
+                                <div key={o.key} class="dms-trow dms-thead_d4">
+                                    <span class="dms-link">{o.id}</span>
+                                    <span class="dms-muted">{o.date}</span>
+                                    <span class="dms-num dms-strong">{o.amountLabel}</span>
+                                    <span class="dms-muted">{o.items}</span>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <template lwc:if={isSkus}>
+                        <div class="dms-tbl dms-tbl_d">
+                            <div class="dms-thead dms-thead_d2"><span>SKU Code</span><span>SKU Name</span></div>
+                            <template for:each={selected.skus} for:item="s">
+                                <div key={s.key} class="dms-trow dms-thead_d2">
+                                    <span class="dms-code">{s.code}</span>
+                                    <span class="dms-strong">{s.name}</span>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <template lwc:if={isChipsTab}>
+                        <div class="dms-chiprow">
+                            <template for:each={chipList} for:item="ch">
+                                <span key={ch.key} class="dms-pill">{ch.label}</span>
+                            </template>
+                        </div>
+                    </template>
+
+                    <template lwc:if={isTarget}>
+                        <div class="dms-tbl dms-tbl_d">
+                            <div class="dms-thead dms-thead_d5"><span>SKU Code</span><span>SKU Name</span><span class="dms-num">Target (Cases)</span><span class="dms-num">Achieved (Cases)</span><span>Achieved %</span></div>
+                            <template for:each={selected.targets} for:item="t">
+                                <div key={t.key} class="dms-trow dms-thead_d5">
+                                    <span class="dms-code">{t.code}</span>
+                                    <span class="dms-strong">{t.name}</span>
+                                    <span class="dms-num">{t.target}</span>
+                                    <span class="dms-num dms-link">{t.achieved}</span>
+                                    <span><span class={t.pctClass}>{t.pctLabel}</span></span>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </template>
+    </div>
+</template>

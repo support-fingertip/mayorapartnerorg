@@ -6,8 +6,11 @@ const STATUS_THEME = { Approved: 'success', Pending: 'warning', Rejected: 'dange
 const TYPE_THEME = { Retailer: 'purple', 'Sub-Dist.': 'purple' };
 const RETURN_REASONS = [
     { label: 'Damaged goods', value: 'Damaged goods' },
-    { label: 'Expired', value: 'Expired' },
-    { label: 'Short received', value: 'Short received' },
+    { label: 'Quality issue', value: 'Quality issue' },
+    { label: 'Excess delivery', value: 'Excess delivery' },
+    { label: 'Wrong product', value: 'Wrong product' },
+    { label: 'Expired stock', value: 'Expired stock' },
+    { label: 'Near-expiry', value: 'Near-expiry' },
     { label: 'Other', value: 'Other' }
 ];
 
@@ -32,6 +35,10 @@ export default class DmsReturns extends LightningElement {
     items = [];
     invoices = [];
     reasonOptions = RETURN_REASONS;
+
+    // detail modal
+    detailOpen = false;
+    selected = null;
 
     connectedCallback() {
         const r = getReturns();
@@ -121,6 +128,28 @@ export default class DmsReturns extends LightningElement {
         ];
     }
 
+    /* ---------------------------- detail modal ---------------------------- */
+    viewReturn(event) {
+        const id = event.currentTarget.dataset.id;
+        const ret = [...this.p1, ...this.p2, ...this.secondary].find((r) => r.id === id);
+        if (!ret) {
+            return;
+        }
+        const sub = ret.customer ? `${ret.date} · ${ret.customer}` : `${ret.date} · ${ret.ref}`;
+        this.selected = {
+            id: ret.id,
+            subtitle: sub,
+            status: ret.status,
+            statusTheme: STATUS_THEME[ret.status] || 'neutral',
+            lines: (ret.lines || []).map((l, i) => ({ ...l, key: i })),
+            totalLabel: `${ret.qty} units`
+        };
+        this.detailOpen = true;
+    }
+    closeDetail() {
+        this.detailOpen = false;
+    }
+
     /* ------------------------- Create Primary Return ---------------------- */
     openWizard() {
         this.wizardOpen = true;
@@ -162,7 +191,10 @@ export default class DmsReturns extends LightningElement {
     }
 
     get itemRows() {
-        return this.items.map((it) => ({ ...it }));
+        return this.items.map((it) => ({
+            ...it,
+            options: RETURN_REASONS.map((o) => ({ ...o, selected: o.value === it.reason }))
+        }));
     }
     get totalReturnQty() {
         return this.items.reduce((s, it) => s + it.returnQty, 0);
@@ -204,7 +236,7 @@ export default class DmsReturns extends LightningElement {
     }
     handleReason(event) {
         const id = event.currentTarget.dataset.id;
-        const reason = event.detail.value;
+        const reason = event.target.value;
         this.items = this.items.map((it) => (it.id === id ? { ...it, reason } : it));
     }
 
@@ -227,8 +259,18 @@ export default class DmsReturns extends LightningElement {
         }
     }
     saveReturn() {
+        const lines = this.items
+            .filter((it) => it.returnQty > 0)
+            .map((it) => ({ product: it.name, qty: it.returnQty, reason: it.reason }));
         this.p1 = [
-            { id: 'RET-046', date: '17 Jun 2026', qty: this.totalReturnQty, status: 'Pending' },
+            {
+                id: 'RET-046',
+                date: '17 Jun 2026',
+                qty: this.totalReturnQty,
+                status: 'Pending',
+                ref: this.selectedInvoiceId,
+                lines
+            },
             ...this.p1
         ];
         this.wizardOpen = false;

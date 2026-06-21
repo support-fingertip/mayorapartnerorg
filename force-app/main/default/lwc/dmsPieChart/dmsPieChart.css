@@ -2,12 +2,18 @@
     --dms-text: #16202c;
     --dms-text-muted: #5c6b7a;
     display: block;
+    max-width: 100%;
+    min-width: 0;
 }
 
 .pie {
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
 }
 
 .pie__title {
@@ -33,12 +39,16 @@
     flex-wrap: wrap;
     justify-content: center;
     gap: 0.5rem 1rem;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
 }
 
 .pie__legend-item {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
+    white-space: nowrap;
 }
 
 .pie__dot {

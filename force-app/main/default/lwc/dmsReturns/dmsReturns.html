@@ -45,7 +45,7 @@
                             <span data-label="Date">{r.date}</span>
                             <span class="dms-num" data-label="Qty (Units)">{r.qty}</span>
                             <span data-label="Status"><c-dms-status-badge label={r.status} theme={r.statusTheme}></c-dms-status-badge></span>
-                            <span class="dms-link" data-label="Action">View</span>
+                            <span class="dms-link" data-label="Action" data-id={r.id} onclick={viewReturn}>View</span>
                         </div>
                     </template>
                 </div>
@@ -68,7 +68,7 @@
                             <span data-label="Date">{r.date}</span>
                             <span class="dms-num" data-label="Qty (Units)">{r.qty}</span>
                             <span data-label="Status"><c-dms-status-badge label={r.status} theme={r.statusTheme}></c-dms-status-badge></span>
-                            <span class="dms-link" data-label="Action">View</span>
+                            <span class="dms-link" data-label="Action" data-id={r.id} onclick={viewReturn}>View</span>
                         </div>
                     </template>
                 </div>
@@ -94,7 +94,7 @@
                             <span data-label="Type"><c-dms-status-badge label={r.type} theme={r.typeTheme}></c-dms-status-badge></span>
                             <span class="dms-num" data-label="Qty (Units)">{r.qty}</span>
                             <span data-label="Status"><c-dms-status-badge label={r.status} theme={r.statusTheme}></c-dms-status-badge></span>
-                            <span class="dms-link" data-label="Action">View</span>
+                            <span class="dms-link" data-label="Action" data-id={r.id} onclick={viewReturn}>View</span>
                         </div>
                     </template>
                 </div>
@@ -158,7 +158,11 @@
                                         <input class="dms-qtyinput" type="number" min="0" max={it.delivered} value={it.returnQty} data-id={it.id} onchange={handleReturnQty} />
                                     </span>
                                     <span data-label="Reason">
-                                        <lightning-combobox variant="label-hidden" value={it.reason} options={reasonOptions} data-id={it.id} onchange={handleReason}></lightning-combobox>
+                                        <select class="dms-select" data-id={it.id} onchange={handleReason}>
+                                            <template for:each={it.options} for:item="opt">
+                                                <option key={opt.value} value={opt.value} selected={opt.selected}>{opt.label}</option>
+                                            </template>
+                                        </select>
                                     </span>
                                 </div>
                             </template>
@@ -178,6 +182,45 @@
                         <template lwc:if={isStep2}>Save Return</template>
                         <template lwc:else>Next ›</template>
                     </button>
+                </footer>
+            </div>
+        </template>
+
+        <!-- ===================== Return detail modal ===================== -->
+        <template lwc:if={detailOpen}>
+            <div class="dms-modal__overlay" onclick={closeDetail}></div>
+            <div class="dms-detail" role="dialog">
+                <header class="dms-detail__head">
+                    <div>
+                        <h2>{selected.id}</h2>
+                        <p>{selected.subtitle}</p>
+                    </div>
+                    <div class="dms-detail__headright">
+                        <c-dms-status-badge label={selected.status} theme={selected.statusTheme}></c-dms-status-badge>
+                        <button class="dms-iconbtn" type="button" onclick={closeDetail} title="Close">
+                            <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </header>
+                <div class="dms-detail__body">
+                    <div class="dms-tbl dms-tbl_rdetail">
+                        <div class="dms-thead">
+                            <span>Product</span><span class="dms-num">Return Qty (Units)</span><span>Reason</span>
+                        </div>
+                        <template for:each={selected.lines} for:item="l">
+                            <div key={l.key} class="dms-trow">
+                                <span class="dms-strong" data-label="Product">{l.product}</span>
+                                <span class="dms-num dms-link" data-label="Return Qty (Units)">{l.qty}</span>
+                                <span class="dms-reason" data-label="Reason">{l.reason}</span>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+                <footer class="dms-detail__foot">
+                    <span class="dms-detail__total">Total: <strong>{selected.totalLabel}</strong></span>
+                    <button class="dms-btn dms-btn_outline" type="button" onclick={closeDetail}>Close</button>
                 </footer>
             </div>
         </template>

@@ -1,8 +1,8 @@
 /* Mayora DMS brand tokens — keep in sync across DMS components. */
 :host {
-    --dms-brand: #e2231a;
-    --dms-navy: #1b2a4a;
-    --dms-accent: #6d28d9;
+    --dms-brand: var(--dxp-g-brand, var(--lwc-brandPrimary, var(--mayora-brand, #a20417)));
+    --dms-navy: var(--mayora-navy, #1b2a4a);
+    --dms-accent: var(--mayora-accent, #6d28d9);
     --dms-bg: #f4f6f9;
     --dms-surface: #ffffff;
     --dms-text: #16202c;
@@ -97,8 +97,8 @@
 }
 
 .dms-chipbtn_active {
-    background: var(--dms-navy);
-    border-color: var(--dms-navy);
+    background: var(--dms-brand);
+    border-color: var(--dms-brand);
     color: #fff;
 }
 
@@ -107,7 +107,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    background: var(--dms-navy);
+    background: var(--dms-brand);
     color: #fff;
     border: none;
     border-radius: 0.5rem;
@@ -259,7 +259,7 @@
 
 .dms-no__credit-bar {
     height: 100%;
-    background: var(--dms-navy);
+    background: var(--dms-brand);
     border-radius: 0.25rem;
     transition: width 0.3s ease;
 }
@@ -461,6 +461,7 @@
 
 .dms-cart__items {
     flex: 1;
+    min-height: 0;
     overflow: auto;
     padding: 0.25rem 1.25rem;
 }
@@ -650,6 +651,7 @@
 
 .dms-detail__body {
     flex: 1;
+    min-height: 0;
     overflow: auto;
     padding: 0 1.5rem;
 }
@@ -730,7 +732,13 @@
 }
 
 /* Mobile: collapse tables into stacked cards */
-@media (max-width: 640px) {
+@media (max-width: 767px) {
+    /* injected-mobile */
+    .dms-body { padding: 0.85rem; overflow-x: hidden; }
+    .dms-search,
+    .dms-no__search,
+    .dms-filter_search { min-width: 0; width: 100%; box-sizing: border-box; }
+    .dms-toolbar__right { width: 100%; }
     .dms-thead {
         display: none;
     }

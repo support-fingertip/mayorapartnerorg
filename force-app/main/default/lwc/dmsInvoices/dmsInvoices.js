@@ -13,7 +13,15 @@ const GRN_OPTIONS = [
     { label: 'GRN Done', value: 'done' },
     { label: 'GRN Not Done', value: 'notdone' }
 ];
-const DATE_OPTIONS = [{ label: 'All Dates', value: ALL }];
+const DATE_OPTIONS = [
+    { label: 'All Dates', value: ALL },
+    { label: 'This JC', value: 'this-jc' },
+    { label: 'Last JC', value: 'last-jc' },
+    { label: 'This Week', value: 'this-week' },
+    { label: 'Last Week', value: 'last-week' },
+    { label: 'This Quarter', value: 'this-quarter' },
+    { label: 'This Year', value: 'this-year' }
+];
 const TYPE_THEME = { Retailer: 'info', 'Sub-Dist.': 'purple' };
 const STEP_LABELS = { 1: 'Select Customer', 2: 'Select Orders', 3: 'Review & Save' };
 

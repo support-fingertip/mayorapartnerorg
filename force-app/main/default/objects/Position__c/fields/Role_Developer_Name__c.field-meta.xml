@@ -2,8 +2,12 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Role_Developer_Name__c</fullName>
     <description>Convention: developer name of the auto-created Salesforce Role linked to this position.</description>
-    <formula>"POS_" &amp; UPPER(Position_Code__c)</formula>
+    <externalId>false</externalId>
+    <formula>&quot;POS_&quot; &amp; UPPER(Position_Code__c)</formula>
     <label>Linked Role (Developer Name)</label>
     <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
     <type>Text</type>
+    <unique>false</unique>
 </CustomField>

@@ -1,7 +1,7 @@
 /* Mayora DMS brand tokens — keep in sync across DMS components. */
 :host {
-    --dms-brand: #e2231a;
-    --dms-navy: #1b2a4a;
+    --dms-brand: var(--dxp-g-brand, var(--lwc-brandPrimary, var(--mayora-brand, #a20417)));
+    --dms-navy: var(--mayora-navy, #1b2a4a);
     --dms-bg: #f4f6f9;
     --dms-surface: #ffffff;
     --dms-text: #16202c;
@@ -53,7 +53,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    background: var(--dms-navy);
+    background: var(--dms-brand);
     color: #fff;
     border: none;
     border-radius: 0.5rem;
@@ -169,7 +169,13 @@
 }
 
 /* Mobile */
-@media (max-width: 640px) {
+@media (max-width: 767px) {
+    /* injected-mobile */
+    .dms-body { padding: 0.85rem; overflow-x: hidden; }
+    .dms-search,
+    .dms-no__search,
+    .dms-filter_search { min-width: 0; width: 100%; box-sizing: border-box; }
+    .dms-toolbar__right { width: 100%; }
     .dms-thead {
         display: none;
     }

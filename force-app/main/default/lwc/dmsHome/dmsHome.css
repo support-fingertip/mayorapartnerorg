@@ -1,8 +1,8 @@
 /* Mayora DMS brand tokens — keep in sync across DMS components. */
 :host {
-    --dms-brand: #e2231a;
-    --dms-navy: #1b2a4a;
-    --dms-accent: #6d28d9;
+    --dms-brand: var(--dxp-g-brand, var(--lwc-brandPrimary, var(--mayora-brand, #a20417)));
+    --dms-navy: var(--mayora-navy, #1b2a4a);
+    --dms-accent: var(--mayora-accent, #6d28d9);
     --dms-green: #0f7a4d;
     --dms-bg: #f4f6f9;
     --dms-surface: #ffffff;
@@ -146,7 +146,7 @@
 }
 
 .dms-toggle__btn_navy {
-    background: var(--dms-navy);
+    background: var(--dms-brand);
     color: #fff;
 }
 
@@ -156,7 +156,7 @@
 }
 
 .dms-toggle__btn_brand {
-    background: #c01a12;
+    background: var(--dxp-g-brand, var(--lwc-brandPrimary, var(--mayora-brand, #a20417)));
     color: #fff;
 }
 
@@ -170,6 +170,7 @@
 
 .dms-two .dms-panel {
     margin-bottom: 0;
+    min-width: 0;
 }
 
 @media (max-width: 900px) {
@@ -322,7 +323,14 @@
 }
 
 /* Mobile: collapse tables into stacked cards */
-@media (max-width: 640px) {
+@media (max-width: 767px) {
+    /* injected-mobile */
+    .dms-body { padding: 0.85rem; overflow-x: hidden; }
+    .dms-charts { margin: 0; }
+    .dms-search,
+    .dms-no__search,
+    .dms-filter_search { min-width: 0; width: 100%; box-sizing: border-box; }
+    .dms-toolbar__right { width: 100%; }
     .dms-thead {
         display: none;
     }

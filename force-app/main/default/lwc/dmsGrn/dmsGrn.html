@@ -119,14 +119,11 @@
                                         <input class="dms-qtyinput" type="number" min="0" max={it.qty} value={it.damage} data-id={it.id} onchange={handleDamage} />
                                     </span>
                                     <span data-label="Reason">
-                                        <lightning-combobox
-                                            variant="label-hidden"
-                                            value={it.reason}
-                                            options={reasonOptions}
-                                            data-id={it.id}
-                                            disabled={it.reasonDisabled}
-                                            onchange={handleReason}
-                                        ></lightning-combobox>
+                                        <select class="dms-select" data-id={it.id} disabled={it.reasonDisabled} onchange={handleReason}>
+                                            <template for:each={it.options} for:item="opt">
+                                                <option key={opt.value} value={opt.value} selected={opt.selected}>{opt.label}</option>
+                                            </template>
+                                        </select>
                                     </span>
                                 </div>
                             </template>

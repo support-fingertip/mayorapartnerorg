@@ -350,24 +350,24 @@ export function getStockAdjustments() {
 /* --------------------------------- Returns -------------------------------- */
 
 const P1_RETURNS = [
-    { id: 'RET-045', date: '28 May 2026', qty: 5, status: 'Approved' },
-    { id: 'RET-043', date: '20 May 2026', qty: 5, status: 'Approved' },
-    { id: 'RET-040', date: '10 May 2026', qty: 4, status: 'Approved' },
-    { id: 'RET-038', date: '02 May 2026', qty: 11, status: 'Rejected' }
+    { id: 'RET-045', date: '28 May 2026', qty: 5, status: 'Approved', ref: 'PI-SAP-0885', lines: [{ product: 'Malkist Cheese Crackers 130g', qty: 3, reason: 'Damaged goods' }, { product: 'JoyMee Chicken Noodles 75g', qty: 2, reason: 'Damaged goods' }] },
+    { id: 'RET-043', date: '20 May 2026', qty: 5, status: 'Approved', ref: 'PI-SAP-0878', lines: [{ product: 'Kopiko Coffee Candy Jar 140g', qty: 5, reason: 'Quality issue' }] },
+    { id: 'RET-040', date: '10 May 2026', qty: 4, status: 'Approved', ref: 'PI-SAP-0858', lines: [{ product: 'Danisa Butter Cookies 200g', qty: 4, reason: 'Expired stock' }] },
+    { id: 'RET-038', date: '02 May 2026', qty: 11, status: 'Rejected', ref: 'PI-SAP-0841', lines: [{ product: 'Beng-Beng Wafer Chocolate 22g', qty: 6, reason: 'Damaged goods' }, { product: 'Choki-Choki Chocolate Paste', qty: 5, reason: 'Near-expiry' }] }
 ];
 
 const P2_RETURNS = [
-    { id: 'P2RET-012', date: '25 May 2026', qty: 3, status: 'Pending' },
-    { id: 'P2RET-011', date: '14 May 2026', qty: 5, status: 'Approved' },
-    { id: 'P2RET-010', date: '02 Apr 2026', qty: 2, status: 'Approved' }
+    { id: 'P2RET-012', date: '25 May 2026', qty: 3, status: 'Pending', ref: 'PO-2835', lines: [{ product: 'Malkist Double Chocolatey 130g', qty: 3, reason: 'Damaged goods' }] },
+    { id: 'P2RET-011', date: '14 May 2026', qty: 5, status: 'Approved', ref: 'PO-2820', lines: [{ product: "Slai O'lai Strawberry 90g", qty: 5, reason: 'Quality issue' }] },
+    { id: 'P2RET-010', date: '02 Apr 2026', qty: 2, status: 'Approved', ref: 'PO-2810', lines: [{ product: 'Coffee Joy Thin Biscuit 100g', qty: 2, reason: 'Wrong product' }] }
 ];
 
 const SECONDARY_RETURNS = [
-    { id: 'SRET-012', date: '27 May 2026', customer: 'ABC Mart', type: 'Retailer', qty: 5, status: 'Pending' },
-    { id: 'SRET-011', date: '24 May 2026', customer: 'North Zone SD', type: 'Sub-Dist.', qty: 18, status: 'Approved' },
-    { id: 'SRET-010', date: '20 May 2026', customer: 'City Grocery', type: 'Retailer', qty: 2, status: 'Approved' },
-    { id: 'SRET-009', date: '15 May 2026', customer: 'East Zone SD', type: 'Sub-Dist.', qty: 9, status: 'Approved' },
-    { id: 'SRET-008', date: '10 May 2026', customer: 'Fresh Mart', type: 'Retailer', qty: 3, status: 'Pending' }
+    { id: 'SRET-012', date: '27 May 2026', customer: 'ABC Mart', type: 'Retailer', qty: 5, status: 'Pending', lines: [{ product: 'Malkist Cheese Crackers 130g', qty: 5, reason: 'Damaged goods' }] },
+    { id: 'SRET-011', date: '24 May 2026', customer: 'North Zone SD', type: 'Sub-Dist.', qty: 18, status: 'Approved', lines: [{ product: 'Kopiko Jar 140g', qty: 10, reason: 'Near-expiry' }, { product: 'Danisa Butter 200g', qty: 8, reason: 'Expired stock' }] },
+    { id: 'SRET-010', date: '20 May 2026', customer: 'City Grocery', type: 'Retailer', qty: 2, status: 'Approved', lines: [{ product: 'Roma Marie Gold 250g', qty: 2, reason: 'Quality issue' }] },
+    { id: 'SRET-009', date: '15 May 2026', customer: 'East Zone SD', type: 'Sub-Dist.', qty: 9, status: 'Approved', lines: [{ product: 'KIS Mint Candy 18.4g', qty: 9, reason: 'Damaged goods' }] },
+    { id: 'SRET-008', date: '10 May 2026', customer: 'Fresh Mart', type: 'Retailer', qty: 3, status: 'Pending', lines: [{ product: 'Coffee Joy Thin Biscuit 100g', qty: 3, reason: 'Wrong product' }] }
 ];
 
 // GRN-done SAP invoices that can be returned against (Create Primary Return).
@@ -382,6 +382,172 @@ export function getReturns() {
 
 export function getReturnableInvoices() {
     return clone(RETURNABLE_INVOICES);
+}
+
+/* --------------------------------- Claims --------------------------------- */
+
+const CLAIMS = [
+    { id: 'SCH-0041', date: '17 May 2026', scheme: 'Choki-Choki Q4 2025 Scheme', products: 3, amount: 2880, desc: 'B4G1 scheme claim for Q4 — Choki-Choki Chocolate Paste', status: 'Approved' },
+    { id: 'SCH-0040', date: '01 May 2026', scheme: 'Malkist Summer Push Apr 2026', products: 5, amount: 5760, desc: 'Secondary volume push incentive — Malkist Cheese & Choco', status: 'Approved' },
+    { id: 'SCH-0039', date: '10 Apr 2026', scheme: 'Kopiko Visibility Scheme Q1', products: 2, amount: 3200, desc: 'Shelf space and visibility scheme for Kopiko Candy range', status: 'Approved' },
+    { id: 'SCH-0038', date: '25 Mar 2026', scheme: 'Beng-Beng POSM Display Q1', products: 1, amount: 1440, desc: 'POSM display scheme — Beng-Beng Wafer Chocolate 22g', status: 'Pending' }
+];
+
+const CLAIM_SCHEMES = [
+    'Choki-Choki Q4 2025 Scheme',
+    'Malkist Summer Push Apr 2026',
+    'Kopiko Visibility Scheme Q1',
+    'Beng-Beng POSM Display Q1',
+    'JoyMee Trade Offer Q2',
+    'Danisa Festive Scheme'
+];
+
+export function getClaims() {
+    return clone(CLAIMS);
+}
+
+export function getClaimSchemes() {
+    return [...CLAIM_SCHEMES];
+}
+
+/* --------------------------- Secondary Collection ------------------------- */
+
+const COLLECTIONS = [
+    { id: 'COL-0021', date: '29 May 2026', customer: 'North Zone SD', type: 'Sub-Distributor', code: 'SD-001', invoiceRef: 'SI-2204', amount: 45000, mode: 'NEFT', reference: 'NEFT2605290011', by: 'Ravi Kumar', notes: 'Full settlement against SI-2204.' },
+    { id: 'COL-0020', date: '28 May 2026', customer: 'ABC Mart', type: 'Retailer', code: 'RET-001', invoiceRef: 'SI-2198', amount: 14928, mode: 'UPI', reference: 'UPI28052201@ybl', by: 'Ravi Kumar', notes: '—' },
+    { id: 'COL-0019', date: '27 May 2026', customer: 'Metro General Store', type: 'Retailer', code: 'RET-004', invoiceRef: 'SI-2185', amount: 9800, mode: 'Cash', reference: '—', by: 'Sunil Patil', notes: 'Collected at store.' },
+    { id: 'COL-0018', date: '25 May 2026', customer: 'East Zone SD', type: 'Sub-Distributor', code: 'SD-002', invoiceRef: 'SI-2174', amount: 22800, mode: 'Cheque', reference: 'CHQ-SBI-082341', by: 'Ravi Kumar', notes: 'Cheque deposited.' },
+    { id: 'COL-0017', date: '22 May 2026', customer: 'Sharma Kirana', type: 'Retailer', code: 'RET-005', invoiceRef: 'SI-2162', amount: 7200, mode: 'UPI', reference: 'UPI22052001@paytm', by: 'Sunil Patil', notes: '—' },
+    { id: 'COL-0016', date: '20 May 2026', customer: 'City Grocery', type: 'Retailer', code: 'RET-002', invoiceRef: 'SI-2155', amount: 24000, mode: 'NEFT', reference: 'NEFT2005200022', by: 'Ravi Kumar', notes: '—' },
+    { id: 'COL-0015', date: '18 May 2026', customer: 'West Zone SD', type: 'Sub-Distributor', code: 'SD-003', invoiceRef: 'SI-2140', amount: 33500, mode: 'Cheque', reference: 'CHQ-HDFC-091122', by: 'Ravi Kumar', notes: 'Cheque cleared.' },
+    { id: 'COL-0014', date: '15 May 2026', customer: 'Fresh Mart', type: 'Retailer', code: 'RET-003', invoiceRef: 'SI-2131', amount: 25000, mode: 'Cash', reference: '—', by: 'Sunil Patil', notes: '—' }
+];
+
+const COLLECTION_CUSTOMERS = {
+    Retailer: [
+        { name: 'ABC Mart', code: 'RET-001' }, { name: 'City Grocery', code: 'RET-002' },
+        { name: 'Fresh Mart', code: 'RET-003' }, { name: 'Metro General Store', code: 'RET-004' },
+        { name: 'Sharma Kirana', code: 'RET-005' }, { name: 'Star Provisions', code: 'RET-006' }
+    ],
+    'Sub-Distributor': [
+        { name: 'North Zone SD', code: 'SD-001' }, { name: 'East Zone SD', code: 'SD-002' },
+        { name: 'West Zone SD', code: 'SD-003' }
+    ]
+};
+
+export function getCollections() {
+    return clone(COLLECTIONS);
+}
+
+export function getCollectionCustomers() {
+    return clone(COLLECTION_CUSTOMERS);
+}
+
+/* -------------------------------- Customers ------------------------------- */
+
+const CUSTOMER_RETAILERS = [
+    { name: 'ABC Mart', code: 'RET-001', type: 'Retailer', outletType: 'Grocery Store', beat: 'Andheri West', owner: 'Arvind Sharma', area: 'Andheri West', phone: '+91 98200 11234', monthly: 32000, lastOrder: 'SO-6432', address: 'Shop 14, Lokhandwala Market, Andheri West, Mumbai 400053', gstin: '27AABCS1429A1ZR' },
+    { name: 'City Grocery', code: 'RET-002', type: 'Retailer', outletType: 'Grocery Store', beat: 'Bandra–Kurla', owner: 'Mehul Jain', area: 'Bandra East', phone: '+91 98209 44567', monthly: 24000, lastOrder: 'SO-6431', address: 'Shop 7, Linking Road, Bandra East, Mumbai 400051', gstin: '27AABCC2231B1Z5' },
+    { name: 'Fresh Mart', code: 'RET-003', type: 'Retailer', outletType: 'Grocery Store', beat: 'Borivali North', owner: 'Suresh Patil', area: 'Borivali North', phone: '+91 91364 78901', monthly: 18000, lastOrder: 'SO-6430', address: 'Plot 22, LT Road, Borivali North, Mumbai 400092', gstin: '27AABCF3344C1Z9' },
+    { name: 'Metro General Store', code: 'RET-004', type: 'Retailer', outletType: 'General Trade', beat: 'Bandra–Kurla', owner: 'Ramesh Gupta', area: 'Kurla', phone: '+91 99203 22345', monthly: 15000, lastOrder: 'SO-6420', address: 'Shop 3, Station Road, Kurla, Mumbai 400070', gstin: '27AABCM4455D1Z2' },
+    { name: 'Sharma Kirana', code: 'RET-005', type: 'Retailer', outletType: 'Kirana', beat: 'Malad–Goregaon', owner: 'Dinesh Sharma', area: 'Malad East', phone: '+91 98765 55678', monthly: 12000, lastOrder: 'SO-6412', address: 'Shop 9, SV Road, Malad East, Mumbai 400097', gstin: '27AABCS5566E1Z7' },
+    { name: 'Star Provisions', code: 'RET-006', type: 'Retailer', outletType: 'General Trade', beat: 'Malad–Goregaon', owner: 'Vijay Nair', area: 'Goregaon West', phone: '+91 97690 99012', monthly: 20000, lastOrder: 'SO-6429', address: 'Shop 5, MG Road, Goregaon West, Mumbai 400062', gstin: '27AABCS6677F1Z4' }
+];
+
+const CUSTOMER_SUBDISTS = [
+    { name: 'North Zone SD', code: 'SD-001', type: 'Sub-Dist.', outletType: 'Sub-Distributor', beat: 'Mira-Bhayander', owner: 'Prakash Mehta', area: 'Mira-Bhayander', phone: '+91 98210 33456', monthly: 125000, lastOrder: 'SO-6440', address: 'Godown 4, MIDC Industrial Area, Mira Road East, Thane 401107', gstin: '27AABCN5567G1ZF' },
+    { name: 'East Zone SD', code: 'SD-002', type: 'Sub-Dist.', outletType: 'Sub-Distributor', beat: 'Thane East', owner: 'Santosh Rao', area: 'Thane East', phone: '+91 98220 66789', monthly: 95000, lastOrder: 'SO-6416', address: 'Warehouse 12, Wagle Estate, Thane East 400604', gstin: '27AABCE6678H1Z3' },
+    { name: 'West Zone SD', code: 'SD-003', type: 'Sub-Dist.', outletType: 'Sub-Distributor', beat: 'Vasai-Virar', owner: 'Anil Desai', area: 'Vasai-Virar', phone: '+91 98230 77890', monthly: 80000, lastOrder: 'SO-6410', address: 'Godown 8, GIDC, Vasai East, Palghar 401208', gstin: '27AABCW7789I1Z1' }
+];
+
+const DEFAULT_SKUS = [
+    { code: 'MLK-CHE-130', name: 'Malkist Cheese Crackers 130g' },
+    { code: 'KOP-JAR-140', name: 'Kopiko Coffee Candy Jar 140g' },
+    { code: 'BBG-22', name: 'Beng-Beng Wafer Chocolate 22g' },
+    { code: 'COF-100', name: 'Coffee Joy Thin Biscuit 100g' },
+    { code: 'KIS-18', name: 'KIS Mint Candy 18.4g' }
+];
+const DEFAULT_TARGETS = [
+    { code: 'MLK-CHE-130', name: 'Malkist Cheese Crackers 130g', target: 40, achieved: 36, pct: 90 },
+    { code: 'KOP-JAR-140', name: 'Kopiko Coffee Candy Jar 140g', target: 20, achieved: 16, pct: 80 },
+    { code: 'BBG-22', name: 'Beng-Beng Wafer Chocolate 22g', target: 30, achieved: 28, pct: 93 }
+];
+const DEFAULT_ALIASES = ['Malkist', 'Kopiko', 'Beng-Beng', 'Coffee Joy', 'KIS'];
+const DEFAULT_SUBBRANDS = ['Malkist Cheese', 'Malkist Choco', 'Kopiko Classic', 'Coffee Joy Thin'];
+const DEFAULT_BRANDS = ['Malkist', 'Kopiko', 'Beng-Beng', 'Coffee Joy', 'KIS', 'JoyMee'];
+
+const CUSTOMER_DETAILS = {
+    'RET-001': {
+        orders: [
+            { id: 'SO-6432', date: '29 May 2026', amount: 11136, items: 'Malkist Cheese 130g ×8, Kopiko Jar 140g ×4, Beng-Beng 22g ×6' },
+            { id: 'SO-6418', date: '22 May 2026', amount: 4320, items: 'Coffee Joy 100g ×5, KIS Mint 18.4g ×3' },
+            { id: 'SO-6402', date: '15 May 2026', amount: 8640, items: 'Malkist Cheese 130g ×10, Danisa 200g ×2' },
+            { id: 'SO-6381', date: '08 May 2026', amount: 6912, items: 'Malkist Choco 130g ×8, JoyMee 75g ×6' },
+            { id: 'SO-6360', date: '01 May 2026', amount: 9216, items: 'Kopiko Jar 140g ×6, Beng-Beng 22g ×10' }
+        ],
+        skus: DEFAULT_SKUS,
+        aliases: DEFAULT_ALIASES,
+        subBrands: DEFAULT_SUBBRANDS,
+        brands: DEFAULT_BRANDS,
+        targets: DEFAULT_TARGETS
+    },
+    'SD-001': {
+        orders: [
+            { id: 'SO-6440', date: '29 May 2026', amount: 52416, items: 'Malkist Cheese ×30, Malkist Choco ×20, Coffee Joy ×25, Kopiko Jar ×12' },
+            { id: 'SO-6420', date: '22 May 2026', amount: 41472, items: 'Malkist Cheese ×25, Beng-Beng ×30, JoyMee ×20' },
+            { id: 'SO-6398', date: '15 May 2026', amount: 36864, items: 'Malkist Choco ×20, Kopiko Jar ×18, Danisa ×8' }
+        ],
+        skus: DEFAULT_SKUS,
+        aliases: DEFAULT_ALIASES,
+        subBrands: DEFAULT_SUBBRANDS,
+        brands: DEFAULT_BRANDS,
+        targets: DEFAULT_TARGETS
+    }
+};
+
+export function getCustomersData() {
+    return { retailers: clone(CUSTOMER_RETAILERS), subDistributors: clone(CUSTOMER_SUBDISTS) };
+}
+
+export function getCustomerDetail(customer) {
+    if (CUSTOMER_DETAILS[customer.code]) {
+        return clone(CUSTOMER_DETAILS[customer.code]);
+    }
+    // generic detail derived from the customer
+    const m = customer.monthly;
+    return {
+        orders: [
+            { id: customer.lastOrder, date: '29 May 2026', amount: Math.round(m * 0.35), items: 'Malkist Cheese 130g ×8, Kopiko Jar 140g ×4' },
+            { id: 'SO-6300', date: '20 May 2026', amount: Math.round(m * 0.22), items: 'Coffee Joy 100g ×5, KIS Mint 18.4g ×3' },
+            { id: 'SO-6285', date: '12 May 2026', amount: Math.round(m * 0.28), items: 'Malkist Choco 130g ×8, JoyMee 75g ×6' }
+        ],
+        skus: DEFAULT_SKUS,
+        aliases: DEFAULT_ALIASES,
+        subBrands: DEFAULT_SUBBRANDS,
+        brands: DEFAULT_BRANDS,
+        targets: DEFAULT_TARGETS
+    };
+}
+
+/* --------------------------------- Tickets -------------------------------- */
+
+const TICKETS = [
+    { id: 'TKT-0085', date: '28 May 2026', category: 'Delivery Delay', subject: 'PO-2847 not received — dispatch not initiated', reference: 'PO-2847', priority: 'High', status: 'Open', lastUpdate: '28 May 2026', messages: [{ from: 'Sharma Distributors', type: 'sd', date: '28 May 2026', text: 'Primary order PO-2847 placed on 29 May 2026. Mayora India has not provided dispatch details or LR number. Expected delivery was 3 Jun 2026.' }] },
+    { id: 'TKT-0082', date: '25 May 2026', category: 'Product Quality', subject: 'Beng-Beng Wafer — damaged packaging in PO-2841', reference: 'PO-2841 / RET-045', priority: 'High', status: 'In Progress', lastUpdate: '27 May 2026', messages: [{ from: 'Sharma Distributors', type: 'sd', date: '25 May 2026', text: 'Received 60 cartons of Beng-Beng Wafer Chocolate (BBG-22) in PO-2841. 5 cartons found with crushed packaging and broken wafers. Return RET-045 already raised.' }, { from: 'Mayora India Ltd.', type: 'mayora', date: '27 May 2026', text: 'Field quality team has been informed. Credit note will be processed once RET-045 is approved by ASM.' }] },
+    { id: 'TKT-0079', date: '20 May 2026', category: 'Invoice Dispute', subject: 'PI-SAP-0871 — wrong carton quantity billed for GRN-0385', reference: 'PI-SAP-0871 / GRN-0385', priority: 'Medium', status: 'In Progress', lastUpdate: '24 May 2026', messages: [{ from: 'Sharma Distributors', type: 'sd', date: '20 May 2026', text: 'PI-SAP-0871 billed 100 cartons but GRN-0385 received 96. Requesting correction of 4 cartons.' }, { from: 'Mayora India Ltd.', type: 'mayora', date: '24 May 2026', text: 'Reconciliation in progress with the SAP team; correction note to follow.' }] },
+    { id: 'TKT-0075', date: '14 May 2026', category: 'Order Issue', subject: 'Wrong SKU dispatched — Kopiko Jar vs Kopiko Pouch', reference: 'PO-2820', priority: 'High', status: 'Resolved', lastUpdate: '18 May 2026', messages: [{ from: 'Sharma Distributors', type: 'sd', date: '14 May 2026', text: 'Kopiko Jar dispatched instead of Kopiko Pouch in PO-2820.' }, { from: 'Mayora India Ltd.', type: 'mayora', date: '18 May 2026', text: 'Replacement dispatched and short-pick corrected. Issue resolved.' }] },
+    { id: 'TKT-0071', date: '08 May 2026', category: 'Scheme / Pricing', subject: 'Kopiko Jar Q4 trade scheme not applied on PI-SAP-0858', reference: 'PI-SAP-0858', priority: 'Medium', status: 'Resolved', lastUpdate: '12 May 2026', messages: [{ from: 'Sharma Distributors', type: 'sd', date: '08 May 2026', text: 'Q4 trade scheme not applied on PI-SAP-0858.' }, { from: 'Mayora India Ltd.', type: 'mayora', date: '12 May 2026', text: 'Scheme credit applied via SCH-0041. Resolved.' }] },
+    { id: 'TKT-0068', date: '02 May 2026', category: 'Feedback', subject: 'Request: add JuizyMilk Candy larger pack (100g)', reference: '—', priority: 'Low', status: 'Closed', lastUpdate: '10 May 2026', messages: [{ from: 'Sharma Distributors', type: 'sd', date: '02 May 2026', text: 'Request: add JuizyMilk Candy larger pack (100g) to the catalog.' }, { from: 'Mayora India Ltd.', type: 'mayora', date: '10 May 2026', text: 'Forwarded to the product team for evaluation. Closing for now.' }] }
+];
+
+const TICKET_CATEGORIES = ['Order Issue', 'Invoice Dispute', 'Product Quality', 'Delivery Delay', 'Scheme / Pricing', 'Feedback', 'Other'];
+
+export function getTickets() {
+    return clone(TICKETS);
+}
+
+export function getTicketCategories() {
+    return [...TICKET_CATEGORIES];
 }
 
 

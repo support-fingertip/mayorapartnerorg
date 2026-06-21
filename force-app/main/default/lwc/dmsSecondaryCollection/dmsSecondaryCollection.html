@@ -1,0 +1,115 @@
+<template>
+    <div class="dms-coll">
+        <div class="dms-body">
+            <div class="dms-toolbar">
+                <div class="dms-filter">
+                    <span class="dms-filter__label">Date:</span>
+                    <lightning-combobox variant="label-hidden" value={dateFilter} options={dateOptions} onchange={handleDate}></lightning-combobox>
+                </div>
+                <div class="dms-toolbar__right">
+                    <lightning-input class="dms-search" type="search" variant="label-hidden" placeholder="Search collection, customer..." value={search} onchange={handleSearch}></lightning-input>
+                    <button class="dms-btn" type="button" onclick={openModal}>
+                        <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Record Collection
+                    </button>
+                </div>
+            </div>
+
+            <div class="dms-chips">
+                <template for:each={summary} for:item="c">
+                    <div key={c.id} class="dms-chip"><span class="dms-chip__label">{c.label}:</span><span class="dms-chip__value">{c.value}</span></div>
+                </template>
+            </div>
+
+            <div class="dms-tbl dms-tbl_coll">
+                <div class="dms-thead">
+                    <span>Collection ID</span><span>Date</span><span>Customer</span><span>Invoice Ref</span>
+                    <span class="dms-num">Amount</span><span>Mode</span><span>Reference</span>
+                    <span>Collected By</span><span>Notes</span>
+                </div>
+                <template for:each={rows} for:item="c">
+                    <div key={c.key} class="dms-trow">
+                        <span class="dms-link" data-label="Collection ID">{c.id}</span>
+                        <span data-label="Date">{c.date}</span>
+                        <span class="dms-custcell" data-label="Customer">
+                            <span class="dms-strong">{c.customer}</span>
+                            <span class="dms-custmeta">
+                                <c-dms-status-badge label={c.type} theme="purple"></c-dms-status-badge>
+                                <span class="dms-code">{c.code}</span>
+                            </span>
+                        </span>
+                        <span class="dms-link" data-label="Invoice Ref">{c.invoiceRef}</span>
+                        <span class="dms-num dms-strong" data-label="Amount">{c.amountLabel}</span>
+                        <span data-label="Mode"><c-dms-status-badge label={c.mode} theme={c.modeTheme}></c-dms-status-badge></span>
+                        <span class="dms-code" data-label="Reference">{c.reference}</span>
+                        <span data-label="Collected By">{c.by}</span>
+                        <span class="dms-notes" data-label="Notes">{c.notes}</span>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- ===================== Record Collection ===================== -->
+        <template lwc:if={modalOpen}>
+            <div class="dms-modal__overlay" onclick={closeModal}></div>
+            <div class="dms-modal" role="dialog">
+                <header class="dms-modal__head">
+                    <h2>Record Collection</h2>
+                    <button class="dms-iconbtn" type="button" onclick={closeModal} title="Close">
+                        <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </header>
+                <div class="dms-modal__body">
+                    <label class="dms-flabel">Customer *</label>
+                    <select class="dms-select dms-select_full" value={formCustomer} onchange={handleCustomer}>
+                        <option value="">Select customer...</option>
+                        <optgroup label="Retailers">
+                            <template for:each={retailerOpts} for:item="o">
+                                <option key={o.code} value={o.code} selected={o.selected}>{o.label}</option>
+                            </template>
+                        </optgroup>
+                        <optgroup label="Sub-Distributors">
+                            <template for:each={subDistOpts} for:item="o">
+                                <option key={o.code} value={o.code} selected={o.selected}>{o.label}</option>
+                            </template>
+                        </optgroup>
+                    </select>
+
+                    <div class="dms-form2">
+                        <div>
+                            <label class="dms-flabel">Invoice Reference</label>
+                            <lightning-input variant="label-hidden" placeholder="e.g. SI-2210" value={formInvoice} onchange={handleInvoice}></lightning-input>
+                        </div>
+                        <div>
+                            <label class="dms-flabel">Amount (₹) *</label>
+                            <lightning-input type="number" variant="label-hidden" placeholder="e.g. 15000" value={formAmount} onchange={handleAmount}></lightning-input>
+                        </div>
+                    </div>
+
+                    <label class="dms-flabel">Payment Mode *</label>
+                    <div class="dms-segs">
+                        <template for:each={modeButtons} for:item="m">
+                            <button key={m.mode} class={m.class} data-mode={m.mode} onclick={setMode} type="button">{m.mode}</button>
+                        </template>
+                    </div>
+
+                    <template lwc:if={showRefField}>
+                        <label class="dms-flabel">{refLabel}</label>
+                        <lightning-input variant="label-hidden" placeholder={refPlaceholder} value={formRef} onchange={handleRef}></lightning-input>
+                    </template>
+
+                    <label class="dms-flabel">Notes</label>
+                    <lightning-textarea variant="label-hidden" placeholder="Any remarks about this collection..." value={formNotes} onchange={handleNotes}></lightning-textarea>
+                </div>
+                <footer class="dms-modal__foot">
+                    <button class="dms-btn dms-btn_outline" type="button" onclick={closeModal}>Cancel</button>
+                    <button class="dms-btn" type="button" onclick={save} disabled={saveDisabled}>Save</button>
+                </footer>
+            </div>
+        </template>
+    </div>
+</template>
