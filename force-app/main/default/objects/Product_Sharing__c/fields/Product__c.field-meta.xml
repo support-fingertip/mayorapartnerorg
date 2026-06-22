@@ -3,10 +3,9 @@
     <fullName>Product__c</fullName>
     <label>Product (SKU)</label>
     <referenceTo>Product2</referenceTo>
-    <deleteConstraint>Restrict</deleteConstraint>
     <relationshipLabel>Product Sharings</relationshipLabel>
     <relationshipName>Product_Sharings</relationshipName>
-    <required>true</required>
+    <required>false</required>
     <trackTrending>false</trackTrending>
     <type>Lookup</type>
 </CustomField>
