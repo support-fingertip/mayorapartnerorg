@@ -10,9 +10,21 @@
         <restricted>true</restricted>
         <valueSetDefinition>
             <sorted>false</sorted>
-            <value><fullName>GT</fullName><default>false</default><label>GT</label></value>
-            <value><fullName>MT</fullName><default>false</default><label>MT</label></value>
-            <value><fullName>E-Commerce</fullName><default>false</default><label>E-Commerce</label></value>
+            <value>
+                <fullName>GT</fullName>
+                <default>false</default>
+                <label>GT</label>
+            </value>
+            <value>
+                <fullName>MT</fullName>
+                <default>false</default>
+                <label>MT</label>
+            </value>
+            <value>
+                <fullName>E-Commerce</fullName>
+                <default>false</default>
+                <label>E-Commerce</label>
+            </value>
         </valueSetDefinition>
     </valueSet>
 </CustomField>

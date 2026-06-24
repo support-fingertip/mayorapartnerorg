@@ -10,11 +10,31 @@
         <restricted>true</restricted>
         <valueSetDefinition>
             <sorted>false</sorted>
-            <value><fullName>National</fullName><default>false</default><label>National</label></value>
-            <value><fullName>Channel</fullName><default>false</default><label>Channel</label></value>
-            <value><fullName>State</fullName><default>false</default><label>State</label></value>
-            <value><fullName>Branch</fullName><default>false</default><label>Branch</label></value>
-            <value><fullName>Distributor</fullName><default>false</default><label>Distributor</label></value>
+            <value>
+                <fullName>National</fullName>
+                <default>false</default>
+                <label>National</label>
+            </value>
+            <value>
+                <fullName>Channel</fullName>
+                <default>false</default>
+                <label>Channel</label>
+            </value>
+            <value>
+                <fullName>State</fullName>
+                <default>false</default>
+                <label>State</label>
+            </value>
+            <value>
+                <fullName>Branch</fullName>
+                <default>false</default>
+                <label>Branch</label>
+            </value>
+            <value>
+                <fullName>Distributor</fullName>
+                <default>false</default>
+                <label>Distributor</label>
+            </value>
         </valueSetDefinition>
     </valueSet>
 </CustomField>

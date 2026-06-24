@@ -2,10 +2,11 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Profile_Name__c</fullName>
     <description>Name of the selected Salesforce Profile (display copy of Profile_Id__c).</description>
+    <externalId>false</externalId>
     <label>Profile</label>
     <length>255</length>
     <required>false</required>
-    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
     <type>Text</type>
     <unique>false</unique>
 </CustomField>
