@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Is_Bundle_Scheme__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Bundle scheme has first priority; one order can have multiple bundles if qty matches (BRD 13.3).</description>
+    <label>Is Bundle Scheme</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

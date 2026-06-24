@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>No_Sale_Reason__c</fullName>
+    <label>No-Sale Reason</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Out of stock</fullName>
+                <default>false</default>
+                <label>Out of stock</label>
+            </value>
+            <value>
+                <fullName>Low demand</fullName>
+                <default>false</default>
+                <label>Low demand</label>
+            </value>
+            <value>
+                <fullName>Price issue</fullName>
+                <default>false</default>
+                <label>Price issue</label>
+            </value>
+            <value>
+                <fullName>Near expiry</fullName>
+                <default>false</default>
+                <label>Near expiry</label>
+            </value>
+            <value>
+                <fullName>Customer refused</fullName>
+                <default>false</default>
+                <label>Customer refused</label>
+            </value>
+            <value>
+                <fullName>Other</fullName>
+                <default>false</default>
+                <label>Other</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

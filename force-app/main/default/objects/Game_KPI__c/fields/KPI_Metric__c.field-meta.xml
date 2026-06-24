@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>KPI_Metric__c</fullName>
+    <description>Reuses existing KPI master (KPI_Metric__c).</description>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <label>KPI Metric</label>
+    <referenceTo>KPI_Metric__c</referenceTo>
+    <relationshipName>Game_KPIs</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>
