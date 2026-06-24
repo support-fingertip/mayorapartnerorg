@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
     <label>Mayora SysAdmin Full Access</label>
-    <description>Grants the System Administrator full CRUD and field-level access to the NET-NEW objects added during the BRD/spec alignment build (employee gamification, in-visit stock check, retail assets, must-sell no-sale). Existing objects/fields are not touched. Assign to System Administrator users.</description>
+    <description>Full CRUD + FLS on the net-new BRD-alignment objects (gamification, stock check, retail asset, must-sell no-sale). Existing objects untouched. Assign to System Administrator.</description>
     <hasActivationRequired>false</hasActivationRequired>
     <objectPermissions>
         <allowCreate>true</allowCreate>
