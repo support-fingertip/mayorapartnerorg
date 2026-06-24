@@ -38,17 +38,32 @@ on:
         type: choice
         options:
           - all
-          - apex-only
+          # ── Individual metadata types (deploy one by one) ──
+          - aura-only
+          - classes-only
+          - components-only
+          - contentassets-only
+          - customMetadata-only
+          - email-only
+          - flexipages-only
+          - flows-only
+          - layouts-only
           - lwc-only
           - objects-only
+          - pages-only
+          - permissionsets-only
+          - profiles-only
+          - quickActions-only
+          - staticresources-only
           - tabs-only
-          - flows-only
+          - triggers-only
+          # ── Extra single types (folders may not exist yet) ──
           - labels-only
-          - flexipages-only
-          - layouts-only
           - reports-only
           - dashboards-only
           - messageChannels-only
+          # ── Convenience combos ──
+          - apex-only
           - reports-and-dashboards
           - apex-and-lwc
           - apex-lwc-messageChannels
@@ -112,17 +127,32 @@ jobs:
           BASE="force-app/main/default"
           case "$FILTER" in
             all)                       echo "SOURCE_PATHS=force-app" >> $GITHUB_ENV ;;
-            apex-only)                 echo "SOURCE_PATHS=${BASE}/classes,${BASE}/triggers" >> $GITHUB_ENV ;;
+            # ── Individual metadata types (deploy one by one) ──
+            aura-only)                 echo "SOURCE_PATHS=${BASE}/aura" >> $GITHUB_ENV ;;
+            classes-only)              echo "SOURCE_PATHS=${BASE}/classes" >> $GITHUB_ENV ;;
+            components-only)           echo "SOURCE_PATHS=${BASE}/components" >> $GITHUB_ENV ;;
+            contentassets-only)        echo "SOURCE_PATHS=${BASE}/contentassets" >> $GITHUB_ENV ;;
+            customMetadata-only)       echo "SOURCE_PATHS=${BASE}/customMetadata" >> $GITHUB_ENV ;;
+            email-only)                echo "SOURCE_PATHS=${BASE}/email" >> $GITHUB_ENV ;;
+            flexipages-only)           echo "SOURCE_PATHS=${BASE}/flexipages" >> $GITHUB_ENV ;;
+            flows-only)                echo "SOURCE_PATHS=${BASE}/flows" >> $GITHUB_ENV ;;
+            layouts-only)              echo "SOURCE_PATHS=${BASE}/layouts" >> $GITHUB_ENV ;;
             lwc-only)                  echo "SOURCE_PATHS=${BASE}/lwc" >> $GITHUB_ENV ;;
             objects-only)              echo "SOURCE_PATHS=${BASE}/objects" >> $GITHUB_ENV ;;
+            pages-only)                echo "SOURCE_PATHS=${BASE}/pages" >> $GITHUB_ENV ;;
+            permissionsets-only)       echo "SOURCE_PATHS=${BASE}/permissionsets" >> $GITHUB_ENV ;;
+            profiles-only)             echo "SOURCE_PATHS=${BASE}/profiles" >> $GITHUB_ENV ;;
+            quickActions-only)         echo "SOURCE_PATHS=${BASE}/quickActions" >> $GITHUB_ENV ;;
+            staticresources-only)      echo "SOURCE_PATHS=${BASE}/staticresources" >> $GITHUB_ENV ;;
             tabs-only)                 echo "SOURCE_PATHS=${BASE}/tabs" >> $GITHUB_ENV ;;
-            flows-only)                echo "SOURCE_PATHS=${BASE}/flows" >> $GITHUB_ENV ;;
+            triggers-only)             echo "SOURCE_PATHS=${BASE}/triggers" >> $GITHUB_ENV ;;
+            # ── Extra single types (folders may not exist yet) ──
             labels-only)               echo "SOURCE_PATHS=${BASE}/labels" >> $GITHUB_ENV ;;
-            flexipages-only)           echo "SOURCE_PATHS=${BASE}/flexipages" >> $GITHUB_ENV ;;
-            layouts-only)              echo "SOURCE_PATHS=${BASE}/layouts" >> $GITHUB_ENV ;;
             reports-only)              echo "SOURCE_PATHS=${BASE}/reports" >> $GITHUB_ENV ;;
             dashboards-only)           echo "SOURCE_PATHS=${BASE}/dashboards" >> $GITHUB_ENV ;;
             messageChannels-only)      echo "SOURCE_PATHS=${BASE}/messageChannels" >> $GITHUB_ENV ;;
+            # ── Convenience combos ──
+            apex-only)                 echo "SOURCE_PATHS=${BASE}/classes,${BASE}/triggers" >> $GITHUB_ENV ;;
             reports-and-dashboards)    echo "SOURCE_PATHS=${BASE}/reports,${BASE}/dashboards" >> $GITHUB_ENV ;;
             apex-and-lwc)              echo "SOURCE_PATHS=${BASE}/classes,${BASE}/triggers,${BASE}/lwc" >> $GITHUB_ENV ;;
             apex-lwc-messageChannels)  echo "SOURCE_PATHS=${BASE}/classes,${BASE}/triggers,${BASE}/lwc,${BASE}/messageChannels" >> $GITHUB_ENV ;;
