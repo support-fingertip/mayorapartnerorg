@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
     <label>Mayora SysAdmin Full Access</label>
-    <description>Grants the System Administrator full CRUD and field-level access to all objects and fields added during the BRD/spec alignment build (gamification, in-visit stock check, retail assets, must-sell no-sale, and additive gap fields). Assign this permission set to System Administrator users.</description>
+    <description>Grants the System Administrator full CRUD and field-level access to the NET-NEW objects added during the BRD/spec alignment build (employee gamification, in-visit stock check, retail assets, must-sell no-sale). Existing objects/fields are not touched. Assign to System Administrator users.</description>
     <hasActivationRequired>false</hasActivationRequired>
     <objectPermissions>
         <allowCreate>true</allowCreate>
@@ -203,11 +203,6 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
-        <field>Order_Line_Item__c.Is_Must_Sell__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
         <field>Retail_Asset__c.Account__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -248,11 +243,6 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
-        <field>Scheme__c.Is_Bundle_Scheme__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
         <field>Stock_Check_Item__c.Available_Qty_Cases__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -274,31 +264,6 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>Stock_Check__c.Outlet__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>Survey_Answer__c.Brand_Alias__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>Survey_Answer__c.Photo_After_URL__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>Survey_Answer__c.Photo_Before_URL__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>Survey_Answer__c.Visibility_Type__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>Survey_Question__c.Brand_Alias__c</field>
         <readable>true</readable>
     </fieldPermissions>
 </PermissionSet>

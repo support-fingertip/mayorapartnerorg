@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fullName>Is_Must_Sell__c</fullName>
-    <defaultValue>false</defaultValue>
-    <description>Line is a Must-Sell SKU (BRD 17).</description>
-    <label>Is Must Sell</label>
-    <trackTrending>false</trackTrending>
-    <type>Checkbox</type>
-</CustomField>

@@ -26,7 +26,7 @@ objects that already exist under another name.
 | User (extended) | `User` (std) + `Employee__c` | Covered (std User not tracked in this repo) |
 | Product / Visibility / Must-Sell / Batch | `Product_Extension__c`, `Product_Sharing__c`, `Must_Sell_Config__c`, `Batch_Master__c` | Covered |
 | P1/P2/Secondary Price | `Price_List__c` (+ `Pricebook_Priority__mdt`) | Covered by unified priority-cascade model |
-| Scheme / Slab / Basket | `Scheme__c`, `Scheme_Slab__c`, `Scheme_Product__c`, `Scheme_Mapping__c`, `Scheme_Accrual__c` | Covered (+ `Is_Bundle_Scheme__c` added) |
+| Scheme / Slab / Basket | `Scheme__c`, `Scheme_Slab__c`, `Scheme_Product__c`, `Scheme_Mapping__c`, `Scheme_Accrual__c` | Covered |
 | Target / KPI / JC | `Target__c`, `Target_Period__c` (Type=Journey Cycle), `Target_Criteria__c`, `KPI_Metric__c`, `Outlet_Target_Increment__c` | Covered |
 | Tour Plan (PJP) / Holiday | `Journey_Plan__c`, `Journey_Plan_Day__c`, `Holiday__c` | Covered |
 | Attendance / Visit / Leave | `Day_Attendance__c`, `Visit__c`, `Leave_*`, `GPS_Log__c` | Covered |
@@ -34,7 +34,7 @@ objects that already exist under another name.
 | **Stock Check (in-visit)** | — | **GAP → built** |
 | **Retail Asset (in-visit)** | — | **GAP → built** |
 | **Must-Sell No-Sale** | — | **GAP → built** |
-| Survey / Question / Response | `Survey__c`, `Survey_Question__c`, `Survey_Response__c`, `Survey_Answer__c` | Covered (+ MT fields added) |
+| Survey / Question / Response | `Survey__c`, `Survey_Question__c`, `Survey_Response__c`, `Survey_Answer__c` | Covered |
 | Expense / Item / Config | `Expense__c`, `Expense_Item__c`, `Expense_Eligibility__c`, `Expense_Rate_Slab__c` | Covered |
 | Ticket | `Ticket__c` | Covered |
 | **Game / Game KPI / Game Score (employee gamification)** | — (`Scorecard__c`=distributor, `Incentive__c`/`Loyalty_Points__c`=monetary) | **GAP → built** |
@@ -56,20 +56,29 @@ objects that already exist under another name.
 - **`Must_Sell_No_Sale__c`** — child of `Sales_Order__c`; captures the reason a
   Must-Sell SKU was not ordered (BRD §17 "stored under the order record").
 
-### Additive fields on existing objects
-- `Scheme__c.Is_Bundle_Scheme__c` — bundle-first priority (BRD §13.3).
-- `Order_Line_Item__c.Is_Must_Sell__c` — must-sell line flag (BRD §17).
-- `Survey_Question__c.Brand_Alias__c`; `Survey_Answer__c.Brand_Alias__c`,
-  `Photo_Before_URL__c`, `Photo_After_URL__c`, `Visibility_Type__c` — MT
-  merchandising surveys: per-brand-alias, before/after photos, paid/unpaid
-  visibility (BRD §18.2 / §21.19).
-
 ### Permissions
 - `permissionsets/Mayora_SysAdmin_Full_Access.permissionset-meta.xml` — full
-  CRUD + View/Modify-All on the 7 new objects and read/edit FLS on all 47 new
+  CRUD + View/Modify-All on the 7 new objects and read/edit FLS on all 40 new
   FLS-eligible fields. **Assign to System Administrator users.** (The repo ships
   no custom `Admin` profile, so a permission set is the portable way to grant
   this.)
+
+## Existing objects are NOT touched
+
+Every change in this build is a **brand-new file** — no existing object or field
+definition is modified, renamed, or duplicated. Only net-new objects (and the
+fields inside them) are added "on top of" the existing model.
+
+### Deferred (would require touching existing objects — intentionally not done)
+These small gaps live naturally on existing objects, so adding them would touch
+existing object folders. They are **left out** to keep existing objects
+untouched; re-add only on explicit request:
+- `Scheme__c.Is_Bundle_Scheme__c` — bundle-first priority (BRD §13.3). Note
+  `Scheme__c.Is_Stackable__c` already exists.
+- `Order_Line_Item__c.Is_Must_Sell__c` — must-sell line flag (BRD §17). The new
+  `Must_Sell_No_Sale__c` object already captures the no-sale reason.
+- `Survey_Question__c` / `Survey_Answer__c` MT fields — brand alias, before/after
+  photo, paid/unpaid visibility (BRD §18.2 / §21.19).
 
 ## Deliberately NOT forked (divergences, already covered)
 
