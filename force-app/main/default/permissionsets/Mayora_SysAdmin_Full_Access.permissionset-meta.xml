@@ -585,10 +585,6 @@
         <visibility>Visible</visibility>
     </tabSettings>
     <tabSettings>
-        <tab>Retail_Asset__c</tab>
-        <visibility>Visible</visibility>
-    </tabSettings>
-    <tabSettings>
         <tab>Scheme_Basket__c</tab>
         <visibility>Visible</visibility>
     </tabSettings>
@@ -597,15 +593,7 @@
         <visibility>Visible</visibility>
     </tabSettings>
     <tabSettings>
-        <tab>Stock_Check__c</tab>
-        <visibility>Visible</visibility>
-    </tabSettings>
-    <tabSettings>
         <tab>MAP_Budget__c</tab>
-        <visibility>Visible</visibility>
-    </tabSettings>
-    <tabSettings>
-        <tab>MAP_Order__c</tab>
         <visibility>Visible</visibility>
     </tabSettings>
     <tabSettings>
@@ -614,10 +602,6 @@
     </tabSettings>
     <tabSettings>
         <tab>Game_Builder</tab>
-        <visibility>Visible</visibility>
-    </tabSettings>
-    <tabSettings>
-        <tab>MAP_Manager</tab>
         <visibility>Visible</visibility>
     </tabSettings>
     <tabSettings>
