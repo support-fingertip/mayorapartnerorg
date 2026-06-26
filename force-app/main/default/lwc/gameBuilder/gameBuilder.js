@@ -1,173 +1,174 @@
 import { LightningElement, wire, track } from 'lwc';
 import { refreshApex } from '@salesforce/apex';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import getTeams from '@salesforce/apex/GAM_Battleground_Controller.getTeams';
-import saveTeams from '@salesforce/apex/GAM_Battleground_Controller.saveTeams';
-import getTeamMembers from '@salesforce/apex/GAM_Battleground_Controller.getTeamMembers';
-import saveTeamMembers from '@salesforce/apex/GAM_Battleground_Controller.saveTeamMembers';
-import getKpis from '@salesforce/apex/GAM_Battleground_Controller.getKpis';
-import saveKpis from '@salesforce/apex/GAM_Battleground_Controller.saveKpis';
 import getGames from '@salesforce/apex/GAM_Battleground_Controller.getGames';
-import saveGames from '@salesforce/apex/GAM_Battleground_Controller.saveGames';
-import getGameTeams from '@salesforce/apex/GAM_Battleground_Controller.getGameTeams';
-import saveGameTeams from '@salesforce/apex/GAM_Battleground_Controller.saveGameTeams';
-import getGameKpis from '@salesforce/apex/GAM_Battleground_Controller.getGameKpis';
-import saveGameKpis from '@salesforce/apex/GAM_Battleground_Controller.saveGameKpis';
-import getAwards from '@salesforce/apex/GAM_Battleground_Controller.getAwards';
-import saveAwards from '@salesforce/apex/GAM_Battleground_Controller.saveAwards';
+import getKpis from '@salesforce/apex/GAM_Battleground_Controller.getKpis';
 import getLookupOptions from '@salesforce/apex/GAM_Battleground_Controller.getLookupOptions';
+import saveGameWizard from '@salesforce/apex/GAM_Battleground_Controller.saveGameWizard';
 
-const P = (...vals) => vals.map(v => ({ label: v, value: v }));
-const LVL = P('L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8', 'L9');
-const CAT = P('Qualifier', 'Discipline', 'Coverage', 'Sales');
-const FREQ = P('Daily', 'Weekly', 'Monthly', 'Journey Cycle');
-const OBJ = P('Sales', 'Coverage', 'Discipline', 'Quality', 'Other');
-const CALC = P('App', 'Query');
-const MEAS = P('Number', 'Decimal', 'Percent', 'Currency', 'Duration');
-const KTYPE = P('Positive', 'Negative');
-const TIER = P('Basic', 'Advanced');
-const GKTYPE = P('Qualifier', 'Coverage', 'Sales', 'Other');
+const GAME_COLUMNS = [
+    { label: 'Game', fieldName: 'Name' },
+    { label: 'Start', fieldName: 'Start_Date__c', type: 'date-local' },
+    { label: 'End', fieldName: 'End_Date__c', type: 'date-local' },
+    { label: 'Status', fieldName: 'statusLabel' }
+];
 
 export default class GameBuilder extends LightningElement {
-    @track teamColumns = [];
-    @track kpiColumns = [];
-    @track gameColumns = [];
-    @track gameTeamColumns = [];
-    @track gameKpiColumns = [];
-    @track awardColumns = [];
-    @track memberColumns = [];
+    gameColumns = GAME_COLUMNS;
+    @track games = [];
+    @track userOptions = [];
+    @track kpiOptions = [];
+    kpiMeta = {};
+    _wiredGames;
 
-    @track teamRows = [];
-    @track kpiRows = [];
-    @track gameRows = [];
+    // wizard state
+    @track view = 'list';
+    @track step = 1;
+    @track gameName = '';
+    @track startDate;
+    @track endDate;
+    @track isActive = true;
+    @track teamName = '';
+    @track selectedUserIds = [];
+    @track selectedKpiIds = [];
     @track awardRows = [];
-    @track gameTeamRows = [];
-    @track gameKpiRows = [];
-    @track memberRows = [];
 
-    @track gameOptions = [];
-    @track teamOptions = [];
-    @track selectedGameId;
-    @track selectedTeamId;
+    @wire(getGames)
+    wiredGames(result) {
+        this._wiredGames = result;
+        if (result.data) {
+            this.games = result.data.map(g => ({
+                ...g,
+                statusLabel: g.Is_Active__c ? 'Active' : 'Inactive'
+            }));
+        }
+    }
 
-    userOptions = [];
-    kpiOptions = [];
-    metricOptions = [];
-
-    _wiredTeams; _wiredKpis; _wiredGames; _wiredAwards; _wiredGameTeams; _wiredGameKpis; _wiredMembers;
-
-    @wire(getTeams) wiredTeams(r) { this._wiredTeams = r; if (r.data) { this.teamRows = r.data; this.teamOptions = r.data.map(t => ({ label: t.Name, value: t.Id })); } }
-    @wire(getKpis) wiredKpis(r) { this._wiredKpis = r; if (r.data) { this.kpiRows = r.data; this.kpiOptions = r.data.map(k => ({ label: k.Name, value: k.Id })); } }
-    @wire(getGames) wiredGames(r) { this._wiredGames = r; if (r.data) { this.gameRows = r.data; this.gameOptions = r.data.map(g => ({ label: g.Name, value: g.Id })); } }
-    @wire(getAwards) wiredAwards(r) { this._wiredAwards = r; if (r.data) { this.awardRows = r.data; } }
-    @wire(getGameTeams, { gameId: '$selectedGameId' }) wiredGameTeams(r) { this._wiredGameTeams = r; if (r.data) { this.gameTeamRows = r.data; } }
-    @wire(getGameKpis, { gameId: '$selectedGameId' }) wiredGameKpis(r) { this._wiredGameKpis = r; if (r.data) { this.gameKpiRows = r.data; } }
-    @wire(getTeamMembers, { teamId: '$selectedTeamId' }) wiredMembers(r) { this._wiredMembers = r; if (r.data) { this.memberRows = r.data; } }
-
-    connectedCallback() { this.loadOptions(); this.buildColumns(); }
+    connectedCallback() { this.loadOptions(); }
 
     async loadOptions() {
         try {
-            const [users, kpis, metrics] = await Promise.all([
+            const [users, kpis] = await Promise.all([
                 getLookupOptions({ objectApiName: 'User' }),
-                getLookupOptions({ objectApiName: 'Battleground_KPI__c' }),
-                getLookupOptions({ objectApiName: 'KPI_Metric__c' })
+                getKpis()
             ]);
-            this.userOptions = (users || []).map(o => ({ label: o.label, value: o.value }));
-            this.kpiOptions = (kpis || []).map(o => ({ label: o.label, value: o.value }));
-            this.metricOptions = (metrics || []).map(o => ({ label: o.label, value: o.value }));
+            this.userOptions = (users || []).map(u => ({ label: u.label, value: u.value }));
+            this.kpiOptions = (kpis || []).map(k => ({
+                label: (k.Category__c ? k.Category__c + ' — ' : '') + k.Name,
+                value: k.Id
+            }));
+            this.kpiMeta = {};
+            (kpis || []).forEach(k => { this.kpiMeta[k.Id] = { name: k.Name, category: k.Category__c }; });
         } catch (e) {
             this.toast('Error', this.msg(e), 'error');
         }
-        this.buildColumns();
     }
 
-    buildColumns() {
-        this.teamColumns = [
-            { label: 'Team Name', field: 'Name', type: 'text' },
-            { label: 'Code', field: 'Team_Code__c', type: 'text' },
-            { label: 'Level', field: 'Level__c', type: 'picklist', options: LVL },
-            { label: 'State', field: 'State__c', type: 'text' },
-            { label: 'Manager', field: 'Manager__c', type: 'lookup', options: this.userOptions },
-            { label: 'Active', field: 'Is_Active__c', type: 'checkbox' }
-        ];
-        this.kpiColumns = [
-            { label: 'KPI Name', field: 'Name', type: 'text' },
-            { label: 'UI Name', field: 'UI_Name__c', type: 'text' },
-            { label: 'Category', field: 'Category__c', type: 'picklist', options: CAT },
-            { label: 'Frequency', field: 'Frequency__c', type: 'picklist', options: FREQ },
-            { label: 'Objective', field: 'Objective__c', type: 'picklist', options: OBJ },
-            { label: 'Calculation', field: 'Calculation__c', type: 'picklist', options: CALC },
-            { label: 'Measure', field: 'Measure__c', type: 'picklist', options: MEAS },
-            { label: 'KPI Type', field: 'KPI_Type__c', type: 'picklist', options: KTYPE },
-            { label: 'Tier', field: 'Tier__c', type: 'picklist', options: TIER },
-            { label: 'Seq', field: 'Sequence__c', type: 'number' },
-            { label: 'Qualifier', field: 'Is_Qualifier__c', type: 'checkbox' },
-            { label: 'Incentive', field: 'Is_Incentive__c', type: 'checkbox' },
-            { label: 'KPI Metric', field: 'KPI_Metric__c', type: 'lookup', options: this.metricOptions },
-            { label: 'Active', field: 'Is_Active__c', type: 'checkbox' }
-        ];
-        this.gameColumns = [
-            { label: 'Game Name', field: 'Name', type: 'text' },
-            { label: 'Team Label', field: 'Team_Name__c', type: 'text' },
-            { label: 'Start', field: 'Start_Date__c', type: 'date' },
-            { label: 'End', field: 'End_Date__c', type: 'date' },
-            { label: 'Active', field: 'Is_Active__c', type: 'checkbox' }
-        ];
-        this.gameTeamColumns = [
-            { label: 'Team', field: 'Battleground_Team__c', type: 'lookup', options: this.teamOptions }
-        ];
-        this.gameKpiColumns = [
-            { label: 'Battleground KPI', field: 'Battleground_KPI__c', type: 'lookup', options: this.kpiOptions },
-            { label: 'Category', field: 'Category__c', type: 'picklist', options: CAT },
-            { label: 'KPI Type', field: 'KPI_Type__c', type: 'picklist', options: GKTYPE },
-            { label: 'Slab', field: 'Slab_Number__c', type: 'number' },
-            { label: 'Cutoff', field: 'Cutoff_Value__c', type: 'number' },
-            { label: 'Coins', field: 'Reward_Coins__c', type: 'number' }
-        ];
-        this.awardColumns = [
-            { label: 'Game', field: 'Game__c', type: 'lookup', options: this.gameOptions },
-            { label: 'KPI', field: 'Battleground_KPI__c', type: 'lookup', options: this.kpiOptions },
-            { label: 'Coins', field: 'Coins__c', type: 'number' },
-            { label: 'Description', field: 'Description__c', type: 'text' },
-            { label: 'Active', field: 'Is_Active__c', type: 'checkbox' }
-        ];
-        this.memberColumns = [
-            { label: 'User', field: 'Member__c', type: 'lookup', options: this.userOptions }
-        ];
+    // ----- list view -----
+    get isList() { return this.view === 'list'; }
+    get isWizard() { return this.view === 'wizard'; }
+    get hasGames() { return this.games && this.games.length > 0; }
+
+    handleNewGame() { this.resetWizard(); this.view = 'wizard'; }
+    handleCancel() { this.view = 'list'; }
+
+    resetWizard() {
+        this.step = 1;
+        this.gameName = '';
+        this.startDate = null;
+        this.endDate = null;
+        this.isActive = true;
+        this.teamName = '';
+        this.selectedUserIds = [];
+        this.selectedKpiIds = [];
+        this.awardRows = [];
     }
 
-    get hasGameSelected() { return !!this.selectedGameId; }
-    get hasTeamSelected() { return !!this.selectedTeamId; }
-
-    handleGameSelect(e) { this.selectedGameId = e.detail.value; }
-    handleTeamSelect(e) { this.selectedTeamId = e.detail.value; }
-
-    saver(fn, rows, wired, label) {
-        return fn({ records: rows })
-            .then(() => { this.toast('Saved', label + ' saved.', 'success'); return refreshApex(wired); })
-            .catch(e => this.toast('Save failed', this.msg(e), 'error'));
+    // ----- step state -----
+    get isStep1() { return this.step === 1; }
+    get isStep2() { return this.step === 2; }
+    get isStep3() { return this.step === 3; }
+    get isStep4() { return this.step === 4; }
+    get showBack() { return this.step > 1; }
+    get isLastStep() { return this.step === 4; }
+    get stepLabel() {
+        return ['Game & Team', 'Select KPIs', 'Awards', 'Review & Save'][this.step - 1];
     }
 
-    handleSaveTeams(e) { this.saver(saveTeams, e.detail.rows, this._wiredTeams, 'Teams'); }
-    handleSaveKpis(e) { this.saver(saveKpis, e.detail.rows, this._wiredKpis, 'KPIs'); }
-    handleSaveGames(e) { this.saver(saveGames, e.detail.rows, this._wiredGames, 'Games'); }
-    handleSaveAwards(e) { this.saver(saveAwards, e.detail.rows, this._wiredAwards, 'Awards'); }
+    // ----- field handlers -----
+    handleField(event) {
+        const field = event.target.dataset.field;
+        this[field] = event.target.type === 'checkbox' ? event.target.checked : event.target.value;
+    }
+    handleUsers(event) { this.selectedUserIds = event.detail.value; }
+    handleKpis(event) { this.selectedKpiIds = event.detail.value; }
+    handleAward(event) {
+        const id = event.target.dataset.id;
+        const field = event.target.dataset.field;
+        const row = this.awardRows.find(r => r.kpiId === id);
+        if (row) { row[field] = event.target.value; }
+    }
 
-    handleSaveGameTeams(e) {
-        if (!this.selectedGameId) { this.toast('Select first', 'Choose a Game.', 'warning'); return; }
-        const rows = e.detail.rows.map(r => ({ ...r, Game__c: this.selectedGameId }));
-        this.saver(saveGameTeams, rows, this._wiredGameTeams, 'Game teams');
+    // ----- navigation -----
+    handleBack() { if (this.step > 1) { this.step -= 1; } }
+    handleNext() {
+        if (this.step === 1 && !this.gameName) { this.toast('Required', 'Enter a game name.', 'warning'); return; }
+        if (this.step === 2) {
+            if (!this.selectedKpiIds.length) { this.toast('Required', 'Select at least one KPI.', 'warning'); return; }
+            this.buildAwardRows();
+        }
+        if (this.step < 4) { this.step += 1; }
     }
-    handleSaveGameKpis(e) {
-        if (!this.selectedGameId) { this.toast('Select first', 'Choose a Game.', 'warning'); return; }
-        const rows = e.detail.rows.map(r => ({ ...r, Game__c: this.selectedGameId }));
-        this.saver(saveGameKpis, rows, this._wiredGameKpis, 'Game KPIs');
+
+    buildAwardRows() {
+        const existing = {};
+        this.awardRows.forEach(r => { existing[r.kpiId] = r; });
+        this.awardRows = this.selectedKpiIds.map(id => {
+            const prev = existing[id] || {};
+            const meta = this.kpiMeta[id] || {};
+            return {
+                kpiId: id,
+                kpiName: meta.name || id,
+                category: meta.category || '',
+                target: prev.target || null,
+                points: prev.points || null,
+                reward: prev.reward || ''
+            };
+        });
     }
-    handleSaveMembers(e) {
-        if (!this.selectedTeamId) { this.toast('Select first', 'Choose a Team.', 'warning'); return; }
-        const rows = e.detail.rows.map(r => ({ ...r, Battleground_Team__c: this.selectedTeamId }));
-        this.saver(saveTeamMembers, rows, this._wiredMembers, 'Team members');
+
+    get reviewSummary() {
+        return {
+            users: this.selectedUserIds.length,
+            kpis: this.selectedKpiIds.length
+        };
+    }
+
+    // ----- save -----
+    async handleSave() {
+        const payload = {
+            gameName: this.gameName,
+            startDate: this.startDate || null,
+            endDate: this.endDate || null,
+            isActive: this.isActive,
+            teamName: this.teamName,
+            userIds: this.selectedUserIds,
+            kpis: this.awardRows.map(r => ({
+                kpiId: r.kpiId,
+                category: r.category,
+                target: r.target ? Number(r.target) : null,
+                points: r.points ? Number(r.points) : null,
+                reward: r.reward
+            }))
+        };
+        try {
+            await saveGameWizard({ wiz: payload });
+            this.toast('Saved', 'Game "' + this.gameName + '" created.', 'success');
+            this.view = 'list';
+            await refreshApex(this._wiredGames);
+        } catch (e) {
+            this.toast('Save failed', this.msg(e), 'error');
+        }
     }
 
     toast(title, message, variant) { this.dispatchEvent(new ShowToastEvent({ title, message, variant })); }

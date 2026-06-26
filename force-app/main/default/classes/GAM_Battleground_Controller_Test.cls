@@ -47,4 +47,29 @@ private class GAM_Battleground_Controller_Test {
         System.assert(GAM_Battleground_Controller.getLookupOptions('User').size() >= 1);
         System.assertEquals(0, GAM_Battleground_Controller.getLookupOptions('Bad__c').size());
     }
+
+    @isTest
+    static void wizardCreatesWholeGame() {
+        Battleground_KPI__c kpi = new Battleground_KPI__c(Name = 'PC', Category__c = 'Coverage', Is_Active__c = true);
+        insert kpi;
+
+        GAM_Battleground_Controller.KpiAward line = new GAM_Battleground_Controller.KpiAward();
+        line.kpiId = kpi.Id; line.category = 'Coverage'; line.target = 10; line.points = 50; line.reward = 'Gift voucher';
+
+        GAM_Battleground_Controller.GameWizard wiz = new GAM_Battleground_Controller.GameWizard();
+        wiz.gameName = 'MI Challenge'; wiz.startDate = Date.today(); wiz.endDate = Date.today().addDays(28);
+        wiz.isActive = true; wiz.teamName = 'Mayora Stars';
+        wiz.userIds = new List<Id>{ UserInfo.getUserId() };
+        wiz.kpis = new List<GAM_Battleground_Controller.KpiAward>{ line };
+
+        Test.startTest();
+        Id gameId = GAM_Battleground_Controller.saveGameWizard(wiz);
+        Test.stopTest();
+
+        System.assertNotEquals(null, gameId);
+        System.assertEquals(1, [SELECT COUNT() FROM Game_Team__c WHERE Game__c = :gameId]);
+        System.assertEquals(1, [SELECT COUNT() FROM Game_KPI__c WHERE Game__c = :gameId]);
+        System.assertEquals(1, [SELECT COUNT() FROM Award__c WHERE Game__c = :gameId]);
+        System.assertEquals(1, [SELECT COUNT() FROM Team_Member__c]);
+    }
 }
