@@ -1,5 +1,6 @@
 /**
- * @description Tests for SPM_SchemeBudget_Batch (BRD §13.2 budget auto-stop).
+ * @description Tests for SPM_SchemeBudget_Batch (BRD 13.2 budget auto-stop).
+ *              Is_Active__c is a formula, so deactivation is asserted via Status.
  *
  * @author  SFA Development Team
  * @date    2026
@@ -11,11 +12,11 @@ private class SPM_SchemeBudget_Batch_Test {
     static void exhaustedSchemeIsDeactivated() {
         Scheme__c s = new Scheme__c(
             Name = 'Budget Exhausted',
+            Status__c = 'Active',
             Start_Date__c = Date.today(),
             End_Date__c = Date.today().addDays(30),
             Budget_Amount__c = 100,
-            Budget_Used__c = 120,
-            Is_Active__c = true
+            Budget_Used__c = 120
         );
         insert s;
 
@@ -23,19 +24,19 @@ private class SPM_SchemeBudget_Batch_Test {
         Database.executeBatch(new SPM_SchemeBudget_Batch());
         Test.stopTest();
 
-        s = [SELECT Is_Active__c FROM Scheme__c WHERE Id = :s.Id];
-        System.assertEquals(false, s.Is_Active__c, 'Scheme over budget should be auto-deactivated');
+        s = [SELECT Status__c FROM Scheme__c WHERE Id = :s.Id];
+        System.assertEquals('Cancelled', s.Status__c, 'Scheme over budget should be auto-deactivated');
     }
 
     @isTest
     static void withinBudgetSchemeStaysActive() {
         Scheme__c s = new Scheme__c(
             Name = 'Within Budget',
+            Status__c = 'Active',
             Start_Date__c = Date.today(),
             End_Date__c = Date.today().addDays(30),
             Budget_Amount__c = 100,
-            Budget_Used__c = 40,
-            Is_Active__c = true
+            Budget_Used__c = 40
         );
         insert s;
 
@@ -43,8 +44,8 @@ private class SPM_SchemeBudget_Batch_Test {
         Database.executeBatch(new SPM_SchemeBudget_Batch());
         Test.stopTest();
 
-        s = [SELECT Is_Active__c FROM Scheme__c WHERE Id = :s.Id];
-        System.assertEquals(true, s.Is_Active__c, 'Scheme within budget should stay active');
+        s = [SELECT Status__c FROM Scheme__c WHERE Id = :s.Id];
+        System.assertEquals('Active', s.Status__c, 'Scheme within budget should stay active');
     }
 
     @isTest
