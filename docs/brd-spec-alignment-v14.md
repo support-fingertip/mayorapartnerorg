@@ -97,6 +97,26 @@ Scope: Salesforce backend + setup/config + the Apex that lives in Salesforce.
   existing `TriggerHandler` framework. (Compile/run validated in a sandbox, per
   the team's established practice in `brd-gap-build.md`.)
 
+### Admin configuration experience (Salesforce = the setup/reporting home)
+The org already ships LWC admin managers (Scheme Manager/Definition, Product
+Management Hub/Catalog, Target Allocation, KPI Metric Manager, Survey/Expense/
+Beat/Employee managers, dashboards). To make the **new** objects equally easy to
+configure and to give admins one place for everything:
+- **`Mayora SFA Admin` Lightning app** (`applications/Mayora_SFA_Admin.app`) —
+  a single navigation gathering all config tabs: schemes (+ Scheme Basket),
+  products, targets, KPIs, **gamification (Game, Game Score)**, surveys,
+  expenses, beats, employees, incentives, stock, **Retail Asset**, **Stock
+  Check**, **Beat Day Request**, must-sell config, and dashboards.
+- **Page layouts** for all 10 new objects (fields grouped into Information /
+  System Information sections).
+- **List views** — `All` on every new object, plus `Active Games`,
+  `Active Baskets`, `Pending Requests`, `Active Assets`.
+- Gamification is configured by standard records: create a **Game**, add its
+  **Game KPI** slabs (qualifier vs coin), assign users via team; the mobile app
+  reads/writes **Game Score** via the existing API layer.
+- The app is visible to System Administrators via the App Launcher; assign it to
+  other profiles in Setup if needed (no profiles are shipped in this repo).
+
 ### Still recommended for a sandbox follow-up
 - Gamification scoring batch (`Game_Score__c` EOD coins/qualification from KPIs)
   following the existing `*_Batch`/`*_Service` patterns — deferred because it

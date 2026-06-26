@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomApplication xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Admin configuration and reporting home for the Mayora SFA solution (schemes, products, targets, gamification, KPIs, surveys, expenses, beats and the SFA setup objects). Field activity is captured in the mobile app via API.</description>
+    <formFactors>Large</formFactors>
+    <label>Mayora SFA Admin</label>
+    <navType>Standard</navType>
+    <tabs>standard-home</tabs>
+    <tabs>Scheme_Manager</tabs>
+    <tabs>Scheme_Definition</tabs>
+    <tabs>Scheme__c</tabs>
+    <tabs>Scheme_Basket__c</tabs>
+    <tabs>Product_Management_Hub</tabs>
+    <tabs>Product_Catalog</tabs>
+    <tabs>Product_Extension__c</tabs>
+    <tabs>Target_Allocation</tabs>
+    <tabs>Target_Criteria_Manager</tabs>
+    <tabs>Target__c</tabs>
+    <tabs>KPI_Metric_Manager</tabs>
+    <tabs>KPI_Dashboard</tabs>
+    <tabs>Game__c</tabs>
+    <tabs>Game_Score__c</tabs>
+    <tabs>Survey_Manager</tabs>
+    <tabs>Expense_Manager</tabs>
+    <tabs>Expense_Eligibility_Admin</tabs>
+    <tabs>Beat_Manager</tabs>
+    <tabs>Beat_Calendar</tabs>
+    <tabs>Employee_Manager</tabs>
+    <tabs>Incentive_Slab_Manager</tabs>
+    <tabs>Incentive_Dashboard</tabs>
+    <tabs>Stock_Dashboard</tabs>
+    <tabs>Stock_Check__c</tabs>
+    <tabs>Retail_Asset__c</tabs>
+    <tabs>Beat_Day_Request__c</tabs>
+    <tabs>Must_Sell_Config__c</tabs>
+    <tabs>Dynamic_KPI_Dashboard</tabs>
+    <uiType>Lightning</uiType>
+</CustomApplication>
