@@ -5,6 +5,7 @@
     <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
     <label>Remaining Amount</label>
     <required>false</required>
+    <precision>18</precision>
     <scale>2</scale>
     <trackTrending>false</trackTrending>
     <type>Currency</type>

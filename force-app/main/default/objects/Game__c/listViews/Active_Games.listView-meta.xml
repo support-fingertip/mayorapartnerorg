@@ -5,7 +5,7 @@
     <filters>
         <field>Game__c.Is_Active__c</field>
         <operation>equals</operation>
-        <value>true</value>
+        <value>1</value>
     </filters>
     <label>Active Games</label>
     <columns>NAME</columns>
