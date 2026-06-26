@@ -63,22 +63,44 @@ objects that already exist under another name.
   no custom `Admin` profile, so a permission set is the portable way to grant
   this.)
 
-## Existing objects are NOT touched
+## Existing objects: definitions unchanged, fields added additively
 
-Every change in this build is a **brand-new file** — no existing object or field
-definition is modified, renamed, or duplicated. Only net-new objects (and the
-fields inside them) are added "on top of" the existing model.
+No existing object/field definition is modified, renamed, or removed. Per
+owner approval, brand-new fields are now **added onto** existing objects
+(purely additive — existing fields untouched), alongside net-new objects.
+Scope: Salesforce backend + setup/config + the Apex that lives in Salesforce.
+**No REST/API** is added (the org already ships `API_*_Rest` mobile endpoints).
 
-### Deferred (would require touching existing objects — intentionally not done)
-These small gaps live naturally on existing objects, so adding them would touch
-existing object folders. They are **left out** to keep existing objects
-untouched; re-add only on explicit request:
-- `Scheme__c.Is_Bundle_Scheme__c` — bundle-first priority (BRD §13.3). Note
-  `Scheme__c.Is_Stackable__c` already exists.
-- `Order_Line_Item__c.Is_Must_Sell__c` — must-sell line flag (BRD §17). The new
-  `Must_Sell_No_Sale__c` object already captures the no-sale reason.
-- `Survey_Question__c` / `Survey_Answer__c` MT fields — brand alias, before/after
-  photo, paid/unpaid visibility (BRD §18.2 / §21.19).
+### Additive fields on existing objects
+- `Scheme__c.Is_Bundle_Scheme__c` — bundle-first priority (BRD §13.3).
+- `Order_Line_Item__c.Is_Must_Sell__c` — must-sell line flag (BRD §17).
+- `Survey_Question__c.Brand_Alias__c`; `Survey_Answer__c.Brand_Alias__c`,
+  `Photo_Before_URL__c`, `Photo_After_URL__c`, `Visibility_Type__c` — MT
+  merchandising surveys (BRD §18.2 / §21.19).
+
+### Additional net-new objects
+- `Scheme_Basket__c` / `Scheme_Basket_Product__c` — bundle-scheme basket and its
+  SKU/min-qty lines (BRD §13.3).
+- `Beat_Day_Request__c` — no-PJP-day and beat-switch requests (BRD §7.4).
+
+### Setup / configuration (declarative)
+- **Validation rules** (BRD): must-sell no-sale reason required; beat-day-request
+  reason required + original beat required for switch; game end-after-start;
+  basket min-qty positive; retail-asset status required.
+- **Custom tabs** for the new top-level objects (Game, Game Score, Retail Asset,
+  Scheme Basket, Beat Day Request, Stock Check), surfaced via the permission set.
+
+### Apex (Salesforce-side, framework-matched, with tests)
+- `Beat_Day_Request_Trigger` → `BPM_BeatDayRequest_TriggerHandler` — defaults +
+  enforces the **BRD §7.4 cap of 3 approved No-PJP-Day requests per Journey Cycle
+  per salesperson**. Test: `BPM_BeatDayRequest_TriggerHandler_Test`. Built on the
+  existing `TriggerHandler` framework. (Compile/run validated in a sandbox, per
+  the team's established practice in `brd-gap-build.md`.)
+
+### Still recommended for a sandbox follow-up
+- Gamification scoring batch (`Game_Score__c` EOD coins/qualification from KPIs)
+  following the existing `*_Batch`/`*_Service` patterns — deferred because it
+  depends on KPI-evaluation semantics best validated against a live org.
 
 ## Deliberately NOT forked (divergences, already covered)
 

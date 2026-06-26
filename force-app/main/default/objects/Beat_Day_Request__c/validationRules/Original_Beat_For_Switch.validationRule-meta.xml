@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Original_Beat_For_Switch</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(ISPICKVAL(Request_Type__c,'Beat Switch'), ISBLANK(Original_Beat__c))</errorConditionFormula>
+    <errorMessage>Original Beat is required for a Beat Switch request (BRD 7.4).</errorMessage>
+</ValidationRule>
