@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ReportType xmlns="http://soap.sforce.com/2006/04/metadata">
+    <baseObject>MAP_Order__c</baseObject>
+    <category>other</category>
+    <deployed>true</deployed>
+    <description>MAP order and actuals reporting (BRD 4.8).</description>
+    <label>Mayora MAP Orders</label>
+    <sections>
+        <columns>
+            <checkedByDefault>true</checkedByDefault>
+            <field>Name</field>
+            <table>MAP_Order__c</table>
+        </columns>
+        <columns>
+            <checkedByDefault>true</checkedByDefault>
+            <field>MAP_Budget__c</field>
+            <table>MAP_Order__c</table>
+        </columns>
+        <columns>
+            <checkedByDefault>true</checkedByDefault>
+            <field>Amount__c</field>
+            <table>MAP_Order__c</table>
+        </columns>
+        <columns>
+            <checkedByDefault>true</checkedByDefault>
+            <field>Actuals__c</field>
+            <table>MAP_Order__c</table>
+        </columns>
+        <columns>
+            <checkedByDefault>false</checkedByDefault>
+            <field>Remaining_Amount__c</field>
+            <table>MAP_Order__c</table>
+        </columns>
+        <columns>
+            <checkedByDefault>false</checkedByDefault>
+            <field>Status__c</field>
+            <table>MAP_Order__c</table>
+        </columns>
+        <masterLabel>Mayora MAP Orders</masterLabel>
+    </sections>
+</ReportType>

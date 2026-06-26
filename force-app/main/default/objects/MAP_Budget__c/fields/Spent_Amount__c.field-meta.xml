@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Spent_Amount__c</fullName>
+    <description>Roll-up of approved MAP Order amounts.</description>
+    <label>Spent Amount</label>
+    <summarizedField>MAP_Order__c.Amount__c</summarizedField>
+    <summaryForeignKey>MAP_Order__c.MAP_Budget__c</summaryForeignKey>
+    <summaryOperation>sum</summaryOperation>
+    <trackTrending>false</trackTrending>
+    <type>Summary</type>
+</CustomField>

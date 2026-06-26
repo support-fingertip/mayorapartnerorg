@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ReportType xmlns="http://soap.sforce.com/2006/04/metadata">
+    <baseObject>MAP_Budget__c</baseObject>
+    <category>other</category>
+    <deployed>true</deployed>
+    <description>MAP budget vs spend reporting (BRD 4.8).</description>
+    <label>Mayora MAP Budgets</label>
+    <sections>
+        <columns>
+            <checkedByDefault>true</checkedByDefault>
+            <field>Name</field>
+            <table>MAP_Budget__c</table>
+        </columns>
+        <columns>
+            <checkedByDefault>true</checkedByDefault>
+            <field>Brand_Name__c</field>
+            <table>MAP_Budget__c</table>
+        </columns>
+        <columns>
+            <checkedByDefault>true</checkedByDefault>
+            <field>Budget_Date__c</field>
+            <table>MAP_Budget__c</table>
+        </columns>
+        <columns>
+            <checkedByDefault>true</checkedByDefault>
+            <field>Amount__c</field>
+            <table>MAP_Budget__c</table>
+        </columns>
+        <columns>
+            <checkedByDefault>false</checkedByDefault>
+            <field>Spent_Amount__c</field>
+            <table>MAP_Budget__c</table>
+        </columns>
+        <columns>
+            <checkedByDefault>false</checkedByDefault>
+            <field>Remaining_Amount__c</field>
+            <table>MAP_Budget__c</table>
+        </columns>
+        <columns>
+            <checkedByDefault>false</checkedByDefault>
+            <field>Status__c</field>
+            <table>MAP_Budget__c</table>
+        </columns>
+        <masterLabel>Mayora MAP Budgets</masterLabel>
+    </sections>
+</ReportType>

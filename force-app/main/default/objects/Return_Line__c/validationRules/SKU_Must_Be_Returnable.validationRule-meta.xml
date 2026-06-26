@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>SKU_Must_Be_Returnable</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(NOT(ISBLANK(Product_Ext__c)), NOT(Product_Ext__r.Is_Returnable__c))</errorConditionFormula>
+    <errorMessage>This SKU is not marked returnable in the product master, so it cannot be returned (BRD 16.3).</errorMessage>
+</ValidationRule>

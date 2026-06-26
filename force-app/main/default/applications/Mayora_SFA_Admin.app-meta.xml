@@ -33,5 +33,8 @@
     <tabs>Beat_Day_Request__c</tabs>
     <tabs>Must_Sell_Config__c</tabs>
     <tabs>Dynamic_KPI_Dashboard</tabs>
+    <tabs>MAP_Budget__c</tabs>
+    <tabs>MAP_Order__c</tabs>
+    <tabs>DA_Policy__c</tabs>
     <uiType>Lightning</uiType>
 </CustomApplication>
