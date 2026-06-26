@@ -5,14 +5,9 @@
     <label>Mayora SFA Admin</label>
     <navType>Standard</navType>
     <tabs>standard-home</tabs>
-    <tabs>Game_Builder</tabs>
-    <tabs>MAP_Manager</tabs>
-    <tabs>DA_Policy_Manager</tabs>
-    <tabs>Scheme_Basket_Manager</tabs>
     <tabs>Scheme_Manager</tabs>
     <tabs>Scheme_Definition</tabs>
     <tabs>Scheme__c</tabs>
-    <tabs>Scheme_Basket__c</tabs>
     <tabs>Product_Management_Hub</tabs>
     <tabs>Product_Catalog</tabs>
     <tabs>Product_Extension__c</tabs>
@@ -21,8 +16,6 @@
     <tabs>Target__c</tabs>
     <tabs>KPI_Metric_Manager</tabs>
     <tabs>KPI_Dashboard</tabs>
-    <tabs>Game__c</tabs>
-    <tabs>Game_Score__c</tabs>
     <tabs>Survey_Manager</tabs>
     <tabs>Expense_Manager</tabs>
     <tabs>Expense_Eligibility_Admin</tabs>
@@ -32,13 +25,7 @@
     <tabs>Incentive_Slab_Manager</tabs>
     <tabs>Incentive_Dashboard</tabs>
     <tabs>Stock_Dashboard</tabs>
-    <tabs>Stock_Check__c</tabs>
-    <tabs>Retail_Asset__c</tabs>
-    <tabs>Beat_Day_Request__c</tabs>
     <tabs>Must_Sell_Config__c</tabs>
     <tabs>Dynamic_KPI_Dashboard</tabs>
-    <tabs>MAP_Budget__c</tabs>
-    <tabs>MAP_Order__c</tabs>
-    <tabs>DA_Policy__c</tabs>
     <uiType>Lightning</uiType>
 </CustomApplication>
