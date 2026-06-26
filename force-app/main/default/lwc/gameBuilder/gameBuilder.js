@@ -3,6 +3,7 @@ import { refreshApex } from '@salesforce/apex';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getGames from '@salesforce/apex/GAM_Battleground_Controller.getGames';
 import getKpis from '@salesforce/apex/GAM_Battleground_Controller.getKpis';
+import saveKpis from '@salesforce/apex/GAM_Battleground_Controller.saveKpis';
 import getLookupOptions from '@salesforce/apex/GAM_Battleground_Controller.getLookupOptions';
 import saveGameWizard from '@salesforce/apex/GAM_Battleground_Controller.saveGameWizard';
 
@@ -13,13 +14,33 @@ const GAME_COLUMNS = [
     { label: 'Status', fieldName: 'statusLabel' }
 ];
 
+const P = (...v) => v.map(x => ({ label: x, value: x }));
+const KPI_COLUMNS = [
+    { label: 'KPI Name', field: 'Name', type: 'text' },
+    { label: 'UI Name', field: 'UI_Name__c', type: 'text' },
+    { label: 'Category', field: 'Category__c', type: 'picklist', options: P('Qualifier', 'Discipline', 'Coverage', 'Sales') },
+    { label: 'Frequency', field: 'Frequency__c', type: 'picklist', options: P('Daily', 'Weekly', 'Monthly', 'Journey Cycle') },
+    { label: 'Objective', field: 'Objective__c', type: 'picklist', options: P('Sales', 'Coverage', 'Discipline', 'Quality', 'Other') },
+    { label: 'Calculation', field: 'Calculation__c', type: 'picklist', options: P('App', 'Query') },
+    { label: 'Measure', field: 'Measure__c', type: 'picklist', options: P('Number', 'Decimal', 'Percent', 'Currency', 'Duration') },
+    { label: 'KPI Type', field: 'KPI_Type__c', type: 'picklist', options: P('Positive', 'Negative') },
+    { label: 'Tier', field: 'Tier__c', type: 'picklist', options: P('Basic', 'Advanced') },
+    { label: 'Seq', field: 'Sequence__c', type: 'number' },
+    { label: 'Qualifier', field: 'Is_Qualifier__c', type: 'checkbox' },
+    { label: 'Incentive', field: 'Is_Incentive__c', type: 'checkbox' },
+    { label: 'Active', field: 'Is_Active__c', type: 'checkbox' }
+];
+
 export default class GameBuilder extends LightningElement {
     gameColumns = GAME_COLUMNS;
+    kpiColumns = KPI_COLUMNS;
     @track games = [];
+    @track kpiRows = [];
     @track userOptions = [];
     @track kpiOptions = [];
     kpiMeta = {};
     _wiredGames;
+    _wiredKpis;
 
     // wizard state
     @track view = 'list';
@@ -44,30 +65,44 @@ export default class GameBuilder extends LightningElement {
         }
     }
 
-    connectedCallback() { this.loadOptions(); }
-
-    async loadOptions() {
-        try {
-            const [users, kpis] = await Promise.all([
-                getLookupOptions({ objectApiName: 'User' }),
-                getKpis()
-            ]);
-            this.userOptions = (users || []).map(u => ({ label: u.label, value: u.value }));
-            this.kpiOptions = (kpis || []).map(k => ({
+    @wire(getKpis)
+    wiredKpis(result) {
+        this._wiredKpis = result;
+        if (result.data) {
+            this.kpiRows = result.data;
+            this.kpiOptions = result.data.map(k => ({
                 label: (k.Category__c ? k.Category__c + ' — ' : '') + k.Name,
                 value: k.Id
             }));
             this.kpiMeta = {};
-            (kpis || []).forEach(k => { this.kpiMeta[k.Id] = { name: k.Name, category: k.Category__c }; });
+            result.data.forEach(k => { this.kpiMeta[k.Id] = { name: k.Name, category: k.Category__c }; });
+        }
+    }
+
+    connectedCallback() { this.loadUsers(); }
+
+    async loadUsers() {
+        try {
+            const users = await getLookupOptions({ objectApiName: 'User' });
+            this.userOptions = (users || []).map(u => ({ label: u.label, value: u.value }));
         } catch (e) {
             this.toast('Error', this.msg(e), 'error');
         }
     }
 
-    // ----- list view -----
+    // ----- views -----
     get isList() { return this.view === 'list'; }
     get isWizard() { return this.view === 'wizard'; }
+    get isKpis() { return this.view === 'kpis'; }
     get hasGames() { return this.games && this.games.length > 0; }
+
+    handleManageKpis() { this.view = 'kpis'; }
+    handleBackToList() { this.view = 'list'; }
+    handleSaveKpis(event) {
+        saveKpis({ records: event.detail.rows })
+            .then(() => { this.toast('Saved', 'Battleground KPIs saved.', 'success'); return refreshApex(this._wiredKpis); })
+            .catch(e => this.toast('Save failed', this.msg(e), 'error'));
+    }
 
     handleNewGame() { this.resetWizard(); this.view = 'wizard'; }
     handleCancel() { this.view = 'list'; }

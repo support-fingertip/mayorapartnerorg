@@ -3,6 +3,7 @@
 
         <!-- ===== LANDING: all games + status ===== -->
         <template if:true={isList}>
+            <lightning-button slot="actions" label="Manage KPIs" icon-name="utility:metrics" onclick={handleManageKpis} class="slds-m-right_x-small"></lightning-button>
             <lightning-button slot="actions" label="Create Game" variant="brand" icon-name="utility:add" onclick={handleNewGame}></lightning-button>
             <div class="slds-p-horizontal_small slds-p-bottom_small">
                 <template if:true={hasGames}>
@@ -13,6 +14,17 @@
                         No games yet — click <strong>Create Game</strong> to set one up.
                     </p>
                 </template>
+            </div>
+        </template>
+
+        <!-- ===== MANAGE BATTLEGROUND KPIs ===== -->
+        <template if:true={isKpis}>
+            <lightning-button slot="actions" label="Back to Games" icon-name="utility:back" onclick={handleBackToList}></lightning-button>
+            <div class="slds-p-horizontal_small slds-p-bottom_small">
+                <p class="slds-text-color_weak slds-p-bottom_x-small">
+                    Define the Battleground KPIs here first — they appear in the "Select KPIs" step when you create a game.
+                </p>
+                <c-bulk-entry-grid title="Battleground KPIs" columns={kpiColumns} records={kpiRows} onsave={handleSaveKpis}></c-bulk-entry-grid>
             </div>
         </template>
 
