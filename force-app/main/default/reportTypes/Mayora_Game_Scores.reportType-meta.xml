@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ReportType xmlns="http://soap.sforce.com/2006/04/metadata">
+    <baseObject>Game_Score__c</baseObject>
+    <category>other</category>
+    <deployed>true</deployed>
+    <description>Gamification leaderboard and coin reporting (BRD 20.1/20.4).</description>
+    <label>Mayora Game Scores</label>
+    <sections>
+        <columns>
+            <checkedByDefault>true</checkedByDefault>
+            <field>Name</field>
+            <table>Game_Score__c</table>
+        </columns>
+        <columns>
+            <checkedByDefault>true</checkedByDefault>
+            <field>Game__c</field>
+            <table>Game_Score__c</table>
+        </columns>
+        <columns>
+            <checkedByDefault>true</checkedByDefault>
+            <field>Salesperson__c</field>
+            <table>Game_Score__c</table>
+        </columns>
+        <columns>
+            <checkedByDefault>true</checkedByDefault>
+            <field>Game_KPI__c</field>
+            <table>Game_Score__c</table>
+        </columns>
+        <columns>
+            <checkedByDefault>false</checkedByDefault>
+            <field>Score_Date__c</field>
+            <table>Game_Score__c</table>
+        </columns>
+        <columns>
+            <checkedByDefault>false</checkedByDefault>
+            <field>Is_Qualified__c</field>
+            <table>Game_Score__c</table>
+        </columns>
+        <columns>
+            <checkedByDefault>false</checkedByDefault>
+            <field>Achievement__c</field>
+            <table>Game_Score__c</table>
+        </columns>
+        <columns>
+            <checkedByDefault>false</checkedByDefault>
+            <field>Target__c</field>
+            <table>Game_Score__c</table>
+        </columns>
+        <columns>
+            <checkedByDefault>false</checkedByDefault>
+            <field>Target_Coins__c</field>
+            <table>Game_Score__c</table>
+        </columns>
+        <columns>
+            <checkedByDefault>false</checkedByDefault>
+            <field>Coins_Awarded__c</field>
+            <table>Game_Score__c</table>
+        </columns>
+        <masterLabel>Mayora Game Scores</masterLabel>
+    </sections>
+</ReportType>

@@ -117,10 +117,30 @@ configure and to give admins one place for everything:
 - The app is visible to System Administrators via the App Launcher; assign it to
   other profiles in Setup if needed (no profiles are shipped in this repo).
 
-### Still recommended for a sandbox follow-up
-- Gamification scoring batch (`Game_Score__c` EOD coins/qualification from KPIs)
-  following the existing `*_Batch`/`*_Service` patterns — deferred because it
-  depends on KPI-evaluation semantics best validated against a live org.
+### Apex engines + record pages + reporting (end-to-end)
+- **Gamification scoring** — `GAM_GameScore_Service` (slab evaluation: highest
+  met cutoff, qualifier-awards-no-coins) + `GAM_GameScore_Batch`
+  (Batchable + Schedulable, recomputes coins/qualification for active games at
+  EOD) + `GAM_GameScore_Service_Test`. Schedule daily:
+  `System.schedule('GAM Game Score','0 0 23 * * ?', new GAM_GameScore_Batch());`
+- **Retail Asset** — `Retail_Asset_Trigger` → `DFO_RetailAsset_TriggerHandler`
+  (defaults Status=Active, Given Date=today) + test.
+- **FlexiPage record pages** for Game, Game Score, Scheme Basket, Stock Check,
+  Retail Asset, Beat Day Request — header highlights + Details/Related tabs; the
+  related-list container surfaces master-detail children (Game KPIs, Basket
+  Products, Stock Check Items) inline. Activate as the org default per object in
+  Setup (source deploys the page; activation is a one-click Setup step).
+- **Custom report types** (`reportTypes/Mayora_*`) for Game Scores, Beat Day
+  Requests, Retail Assets, Stock Checks, Scheme Baskets — enables BRD §20.4-style
+  reports/dashboards on the new objects.
+
+### Notes for deployment
+- Apex is written to the repo's `TriggerHandler` / `*_Service` / `*_Batch`
+  conventions; **compile/run-validate in a sandbox** (this environment has no
+  org). Tests included for all new Apex.
+- Stock-check visit-completion stamping and richer KPI-actual sourcing for
+  gamification can be layered onto the existing `API_*_Rest` / `DFO_*` services
+  in a sandbox.
 
 ## Deliberately NOT forked (divergences, already covered)
 

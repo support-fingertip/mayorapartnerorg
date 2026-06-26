@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ReportType xmlns="http://soap.sforce.com/2006/04/metadata">
+    <baseObject>Stock_Check__c</baseObject>
+    <category>other</category>
+    <deployed>true</deployed>
+    <description>In-visit retailer stock-check reporting (BRD 18/21.15).</description>
+    <label>Mayora Stock Checks</label>
+    <sections>
+        <columns>
+            <checkedByDefault>true</checkedByDefault>
+            <field>Name</field>
+            <table>Stock_Check__c</table>
+        </columns>
+        <columns>
+            <checkedByDefault>true</checkedByDefault>
+            <field>Visit__c</field>
+            <table>Stock_Check__c</table>
+        </columns>
+        <columns>
+            <checkedByDefault>true</checkedByDefault>
+            <field>Outlet__c</field>
+            <table>Stock_Check__c</table>
+        </columns>
+        <columns>
+            <checkedByDefault>true</checkedByDefault>
+            <field>Check_Date_Time__c</field>
+            <table>Stock_Check__c</table>
+        </columns>
+        <masterLabel>Mayora Stock Checks</masterLabel>
+    </sections>
+</ReportType>
