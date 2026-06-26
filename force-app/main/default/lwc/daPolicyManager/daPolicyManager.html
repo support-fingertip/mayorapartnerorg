@@ -1,0 +1,64 @@
+<template>
+    <lightning-card title="DA Policies" icon-name="standard:default">
+        <lightning-button slot="actions" label="New DA Policy" variant="brand" onclick={handleNewParent}></lightning-button>
+        <div class="slds-p-horizontal_small slds-p-bottom_small">
+            <lightning-datatable key-field="Id" data={parents} columns={parentColumns}
+                onrowaction={handleParentRowAction} hide-checkbox-column></lightning-datatable>
+        </div>
+    </lightning-card>
+
+    <template if:true={hasSelection}>
+        <lightning-card title={childPanelTitle} icon-name="standard:related_list" class="slds-m-top_small">
+            <lightning-button slot="actions" label="Add KPI Target" variant="neutral" onclick={handleNewChild}></lightning-button>
+            <div class="slds-p-horizontal_small slds-p-bottom_small">
+                <lightning-datatable key-field="Id" data={children} columns={childColumns} hide-checkbox-column></lightning-datatable>
+            </div>
+        </lightning-card>
+    </template>
+
+    <template if:true={showParentForm}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeParentForm}>
+                        <lightning-icon icon-name="utility:close" size="small" variant="inverse"></lightning-icon>
+                    </button>
+                    <h2 class="slds-modal__title slds-hyphenate">{parentFormTitle}</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <lightning-record-form object-api-name={parentObject} record-id={recordId}
+                        fields={parentFields} columns="2" mode="edit"
+                        onsuccess={handleParentSuccess} oncancel={closeParentForm}></lightning-record-form>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <template if:true={showChildForm}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeChildForm}>
+                        <lightning-icon icon-name="utility:close" size="small" variant="inverse"></lightning-icon>
+                    </button>
+                    <h2 class="slds-modal__title slds-hyphenate">New KPI Target</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <lightning-record-edit-form object-api-name={childObject} onsuccess={handleChildSuccess}>
+                        <lightning-messages></lightning-messages>
+                        <lightning-input-field field-name={childParentField} value={selectedId}></lightning-input-field>
+                        <lightning-input-field field-name="KPI_Metric__c"></lightning-input-field>
+            <lightning-input-field field-name="Half_Day_Target__c"></lightning-input-field>
+            <lightning-input-field field-name="Full_Day_Target__c"></lightning-input-field>
+                        <div class="slds-m-top_medium slds-text-align_right">
+                            <lightning-button label="Cancel" onclick={closeChildForm} class="slds-m-right_x-small"></lightning-button>
+                            <lightning-button label="Save" type="submit" variant="brand"></lightning-button>
+                        </div>
+                    </lightning-record-edit-form>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

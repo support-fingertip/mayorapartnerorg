@@ -5,6 +5,10 @@
     <label>Mayora SFA Admin</label>
     <navType>Standard</navType>
     <tabs>standard-home</tabs>
+    <tabs>Game_Builder</tabs>
+    <tabs>MAP_Manager</tabs>
+    <tabs>DA_Policy_Manager</tabs>
+    <tabs>Scheme_Basket_Manager</tabs>
     <tabs>Scheme_Manager</tabs>
     <tabs>Scheme_Definition</tabs>
     <tabs>Scheme__c</tabs>
