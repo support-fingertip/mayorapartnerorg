@@ -5,7 +5,7 @@
     <label>Mayora SFA Admin</label>
     <navType>Standard</navType>
     <tabs>standard-home</tabs>
-    <tabs>Game_Builder</tabs>
+    <tabs>FA_Battleground</tabs>
     <tabs>DA_Policy_Manager</tabs>
     <tabs>Scheme_Basket_Manager</tabs>
     <tabs>Scheme_Manager</tabs>
@@ -20,8 +20,6 @@
     <tabs>Target__c</tabs>
     <tabs>KPI_Metric_Manager</tabs>
     <tabs>KPI_Dashboard</tabs>
-    <tabs>Game__c</tabs>
-    <tabs>Game_Score__c</tabs>
     <tabs>Survey_Manager</tabs>
     <tabs>Expense_Manager</tabs>
     <tabs>Expense_Eligibility_Admin</tabs>

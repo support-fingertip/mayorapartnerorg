@@ -1,0 +1,43 @@
+<template>
+    <lightning-card title="FA Battleground — Gamification Console" icon-name="standard:reward">
+        <div class="slds-p-horizontal_small">
+            <lightning-tabset variant="scoped">
+
+                <lightning-tab label="Games">
+                    <c-bulk-entry-grid title="Games" columns={gameColumns} records={gameRows} onsave={handleSaveGames}></c-bulk-entry-grid>
+                    <div class="slds-box slds-theme_shade slds-m-vertical_small">
+                        <lightning-combobox label="Configure teams & KPIs for game" placeholder="Select a game"
+                            options={gameOptions} value={selectedGameId} onchange={handleGameSelect}></lightning-combobox>
+                    </div>
+                    <template if:true={hasGameSelected}>
+                        <c-bulk-entry-grid title="Teams in this game" columns={gameTeamColumns} records={gameTeamRows} onsave={handleSaveGameTeams}></c-bulk-entry-grid>
+                        <c-bulk-entry-grid title="KPIs in this game" columns={gameKpiColumns} records={gameKpiRows} onsave={handleSaveGameKpis}></c-bulk-entry-grid>
+                    </template>
+                </lightning-tab>
+
+                <lightning-tab label="Teams">
+                    <c-bulk-entry-grid title="Battleground Teams" columns={teamColumns} records={teamRows} onsave={handleSaveTeams}></c-bulk-entry-grid>
+                </lightning-tab>
+
+                <lightning-tab label="Battleground KPIs">
+                    <c-bulk-entry-grid title="Battleground KPIs" columns={kpiColumns} records={kpiRows} onsave={handleSaveKpis}></c-bulk-entry-grid>
+                </lightning-tab>
+
+                <lightning-tab label="Awards">
+                    <c-bulk-entry-grid title="Awards" columns={awardColumns} records={awardRows} onsave={handleSaveAwards}></c-bulk-entry-grid>
+                </lightning-tab>
+
+                <lightning-tab label="User-Team Mapping">
+                    <div class="slds-box slds-theme_shade slds-m-bottom_small">
+                        <lightning-combobox label="Map users to team" placeholder="Select a team"
+                            options={teamOptions} value={selectedTeamId} onchange={handleTeamSelect}></lightning-combobox>
+                    </div>
+                    <template if:true={hasTeamSelected}>
+                        <c-bulk-entry-grid title="Team Members" columns={memberColumns} records={memberRows} onsave={handleSaveMembers}></c-bulk-entry-grid>
+                    </template>
+                </lightning-tab>
+
+            </lightning-tabset>
+        </div>
+    </lightning-card>
+</template>

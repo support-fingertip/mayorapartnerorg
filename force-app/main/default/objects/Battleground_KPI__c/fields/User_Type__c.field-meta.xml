@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>User_Type__c</fullName>
+    <label>User Type</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>All Field Users</fullName>
+                <default>false</default>
+                <label>All Field Users</label>
+            </value>
+            <value>
+                <fullName>SR</fullName>
+                <default>false</default>
+                <label>SR</label>
+            </value>
+            <value>
+                <fullName>MES</fullName>
+                <default>false</default>
+                <label>MES</label>
+            </value>
+            <value>
+                <fullName>DBSM</fullName>
+                <default>false</default>
+                <label>DBSM</label>
+            </value>
+            <value>
+                <fullName>DO</fullName>
+                <default>false</default>
+                <label>DO</label>
+            </value>
+            <value>
+                <fullName>Manager</fullName>
+                <default>false</default>
+                <label>Manager</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>
