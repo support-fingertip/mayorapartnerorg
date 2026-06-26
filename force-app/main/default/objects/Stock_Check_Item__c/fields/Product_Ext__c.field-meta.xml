@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Product_Ext__c</fullName>
-    <description>Existing product master (Product_Extension__c).</description>
     <deleteConstraint>SetNull</deleteConstraint>
+    <description>Existing product master (Product_Extension__c).</description>
     <label>Product</label>
     <referenceTo>Product_Extension__c</referenceTo>
     <relationshipName>Stock_Check_Items</relationshipName>
