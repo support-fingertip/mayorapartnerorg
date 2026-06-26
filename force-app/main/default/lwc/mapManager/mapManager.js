@@ -2,63 +2,73 @@ import { LightningElement, wire, track } from 'lwc';
 import { refreshApex } from '@salesforce/apex';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getParents from '@salesforce/apex/SFA_MasterAdmin_Controller.getMapBudgets';
+import saveParents from '@salesforce/apex/SFA_MasterAdmin_Controller.saveMapBudgets';
 import getChildren from '@salesforce/apex/SFA_MasterAdmin_Controller.getMapOrders';
+import saveChildren from '@salesforce/apex/SFA_MasterAdmin_Controller.saveMapOrders';
 
-const PARENT_COLUMNS = [{"label": "Budget", "fieldName": "Name"}, {"label": "Brand", "fieldName": "Brand_Name__c"}, {"label": "Amount", "fieldName": "Amount__c", "type": "currency"}, {"label": "Spent", "fieldName": "Spent_Amount__c", "type": "currency"}, {"label": "Remaining", "fieldName": "Remaining_Amount__c", "type": "currency"}, {"label": "Status", "fieldName": "Status__c"}, {"type": "action", "typeAttributes": {"rowActions": [{"label": "Manage Lines", "name": "lines"}, {"label": "Edit", "name": "edit"}]}}];
-const CHILD_COLUMNS = [{"label": "Order", "fieldName": "Name"}, {"label": "Amount", "fieldName": "Amount__c", "type": "currency"}, {"label": "Actuals", "fieldName": "Actuals__c", "type": "currency"}, {"label": "Remaining", "fieldName": "Remaining_Amount__c", "type": "currency"}, {"label": "Status", "fieldName": "Status__c"}];
+const PARENT_COLUMNS = [{"label": "Brand", "field": "Brand_Name__c", "type": "text"}, {"label": "Date", "field": "Budget_Date__c", "type": "date"}, {"label": "Amount", "field": "Amount__c", "type": "number"}, {"label": "Status", "field": "Status__c", "type": "picklist", "options": [{"label": "Draft", "value": "Draft"}, {"label": "Pending Approval", "value": "Pending Approval"}, {"label": "Approved", "value": "Approved"}, {"label": "Rejected", "value": "Rejected"}]}, {"label": "Active", "field": "Is_Active__c", "type": "checkbox"}];
+const CHILD_COLUMNS = [{"label": "Amount", "field": "Amount__c", "type": "number"}, {"label": "Actuals", "field": "Actuals__c", "type": "number"}, {"label": "Description", "field": "Description__c", "type": "text"}, {"label": "Status", "field": "Status__c", "type": "picklist", "options": [{"label": "Draft", "value": "Draft"}, {"label": "Pending Approval", "value": "Pending Approval"}, {"label": "Approved", "value": "Approved"}, {"label": "Rejected", "value": "Rejected"}]}];
 
-export default class mapManager extends LightningElement {
-    parentObject = 'MAP_Budget__c';
-    childObject = 'MAP_Order__c';
-    parentFields = ["Brand_Name__c", "Budget_Date__c", "Amount__c", "Status__c", "Description__c", "Is_Active__c"];
-    childParentField = 'MAP_Budget__c';
+export default class MapManager extends LightningElement {
     parentColumns = PARENT_COLUMNS;
-    childColumns = CHILD_COLUMNS;
-
-    parents;
-    children;
+    @track childColumns = CHILD_COLUMNS;
+    @track parentRows = [];
+    @track childRows = [];
+    @track parentOptions = [];
+    @track selectedParentId;
     _wiredParents;
     _wiredChildren;
-    @track selectedId;
-    @track selectedName;
-    @track recordId;
-    @track showParentForm = false;
-    @track showChildForm = false;
 
     @wire(getParents)
-    wiredParents(result) { this._wiredParents = result; if (result.data) { this.parents = result.data; } }
+    wiredParents(result) {
+        this._wiredParents = result;
+        if (result.data) {
+            this.parentRows = result.data;
+            this.parentOptions = result.data.map(p => ({ label: p.Name, value: p.Id }));
+        }
+    }
 
-    @wire(getChildren, { budgetId: '$selectedId' })
-    wiredChildren(result) { this._wiredChildren = result; if (result.data) { this.children = result.data; } }
+    @wire(getChildren, { budgetId: '$selectedParentId' })
+    wiredChildren(result) {
+        this._wiredChildren = result;
+        if (result.data) { this.childRows = result.data; }
+    }
 
-    get hasSelection() { return !!this.selectedId; }
-    get parentFormTitle() { return this.recordId ? 'Edit MAP Budget' : 'New MAP Budget'; }
-    get childPanelTitle() { return this.selectedName ? 'MAP Orders \u2014 ' + this.selectedName : 'MAP Orders'; }
+    get hasParentSelected() { return !!this.selectedParentId; }
 
-    handleNewParent() { this.recordId = null; this.showParentForm = true; }
-    handleParentRowAction(event) {
-        const action = event.detail.action.name;
-        const row = event.detail.row;
-        if (action === 'edit') { this.recordId = row.Id; this.showParentForm = true; }
-        else if (action === 'lines') { this.selectedId = row.Id; this.selectedName = row.Name; }
+    handleParentSelect(event) { this.selectedParentId = event.detail.value; }
+
+    async handleSaveParents(event) {
+        try {
+            await saveParents({ records: event.detail.rows });
+            this.toast('Saved', 'MAP Budget records saved.', 'success');
+            await refreshApex(this._wiredParents);
+        } catch (e) {
+            this.toast('Save failed', this.msg(e), 'error');
+        }
     }
-    closeParentForm() { this.showParentForm = false; }
-    handleParentSuccess() {
-        this.showParentForm = false;
-        this.toast('Saved', 'MAP Budget saved.', 'success');
-        return refreshApex(this._wiredParents);
+
+    async handleSaveChildren(event) {
+        if (!this.selectedParentId) {
+            this.toast('Select first', 'Choose a MAP Budget above.', 'warning');
+            return;
+        }
+        const rows = event.detail.rows.map(r => ({ ...r, MAP_Budget__c: this.selectedParentId }));
+        try {
+            await saveChildren({ records: rows });
+            this.toast('Saved', 'MAP Order records saved.', 'success');
+            await refreshApex(this._wiredChildren);
+        } catch (e) {
+            this.toast('Save failed', this.msg(e), 'error');
+        }
     }
-    handleNewChild() {
-        if (!this.selectedId) { this.toast('Select first', 'Pick a MAP Budget row first.', 'warning'); return; }
-        this.showChildForm = true;
-    }
-    closeChildForm() { this.showChildForm = false; }
-    handleChildSuccess() {
-        this.showChildForm = false;
-        this.toast('Saved', 'MAP Order saved.', 'success');
-        return refreshApex(this._wiredChildren);
-    }
+
     toast(title, message, variant) {
         this.dispatchEvent(new ShowToastEvent({ title, message, variant }));
+    }
+    msg(e) {
+        if (e && e.body && e.body.message) { return e.body.message; }
+        if (e && e.message) { return e.message; }
+        return 'Unknown error';
     }
 }

@@ -2,63 +2,84 @@ import { LightningElement, wire, track } from 'lwc';
 import { refreshApex } from '@salesforce/apex';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getParents from '@salesforce/apex/SFA_MasterAdmin_Controller.getSchemeBaskets';
+import saveParents from '@salesforce/apex/SFA_MasterAdmin_Controller.saveSchemeBaskets';
 import getChildren from '@salesforce/apex/SFA_MasterAdmin_Controller.getBasketProducts';
+import saveChildren from '@salesforce/apex/SFA_MasterAdmin_Controller.saveBasketProducts';
+import getLookupOptions from '@salesforce/apex/SFA_MasterAdmin_Controller.getLookupOptions';
 
-const PARENT_COLUMNS = [{"label": "Basket", "fieldName": "Name"}, {"label": "Code", "fieldName": "Basket_Code__c"}, {"label": "Channel", "fieldName": "Channel__c"}, {"label": "Active", "fieldName": "Is_Active__c", "type": "boolean"}, {"type": "action", "typeAttributes": {"rowActions": [{"label": "Manage Lines", "name": "lines"}, {"label": "Edit", "name": "edit"}]}}];
-const CHILD_COLUMNS = [{"label": "Line", "fieldName": "Name"}, {"label": "Min Qty", "fieldName": "Min_Qty__c", "type": "number"}];
+const PARENT_COLUMNS = [{"label": "Basket Name", "field": "Name", "type": "text"}, {"label": "Code", "field": "Basket_Code__c", "type": "text"}, {"label": "Channel", "field": "Channel__c", "type": "picklist", "options": [{"label": "GT", "value": "GT"}, {"label": "MT", "value": "MT"}, {"label": "Both", "value": "Both"}]}, {"label": "Active", "field": "Is_Active__c", "type": "checkbox"}];
+const CHILD_COLUMNS = [{"label": "Product", "field": "Product_Ext__c", "type": "lookup", "lookup": "Product_Extension__c"}, {"label": "Min Qty", "field": "Min_Qty__c", "type": "number"}];
 
-export default class schemeBasketManager extends LightningElement {
-    parentObject = 'Scheme_Basket__c';
-    childObject = 'Scheme_Basket_Product__c';
-    parentFields = ["Name", "Basket_Code__c", "Channel__c", "Description__c", "Is_Active__c"];
-    childParentField = 'Scheme_Basket__c';
+export default class SchemeBasketManager extends LightningElement {
     parentColumns = PARENT_COLUMNS;
-    childColumns = CHILD_COLUMNS;
-
-    parents;
-    children;
+    @track childColumns = CHILD_COLUMNS;
+    @track parentRows = [];
+    @track childRows = [];
+    @track parentOptions = [];
+    @track selectedParentId;
     _wiredParents;
     _wiredChildren;
-    @track selectedId;
-    @track selectedName;
-    @track recordId;
-    @track showParentForm = false;
-    @track showChildForm = false;
 
     @wire(getParents)
-    wiredParents(result) { this._wiredParents = result; if (result.data) { this.parents = result.data; } }
+    wiredParents(result) {
+        this._wiredParents = result;
+        if (result.data) {
+            this.parentRows = result.data;
+            this.parentOptions = result.data.map(p => ({ label: p.Name, value: p.Id }));
+        }
+    }
 
-    @wire(getChildren, { basketId: '$selectedId' })
-    wiredChildren(result) { this._wiredChildren = result; if (result.data) { this.children = result.data; } }
+    @wire(getChildren, { basketId: '$selectedParentId' })
+    wiredChildren(result) {
+        this._wiredChildren = result;
+        if (result.data) { this.childRows = result.data; }
+    }
 
-    get hasSelection() { return !!this.selectedId; }
-    get parentFormTitle() { return this.recordId ? 'Edit Scheme Basket' : 'New Scheme Basket'; }
-    get childPanelTitle() { return this.selectedName ? 'Basket Products \u2014 ' + this.selectedName : 'Basket Products'; }
+    connectedCallback() { this.loadLookups(); }
+    async loadLookups() {
+        try {
+            const results = await Promise.all([getLookupOptions({ objectApiName: 'Product_Extension__c' })]);
+            const opt0 = (results[0] || []).map(o => ({ label: o.label, value: o.value }));
+            this.childColumns = this.childColumns.map(col => col.field === 'Product_Ext__c' ? { ...col, options: opt0 } : col);
+        } catch (e) {
+            this.toast('Error', this.msg(e), 'error');
+        }
+    }
+    get hasParentSelected() { return !!this.selectedParentId; }
 
-    handleNewParent() { this.recordId = null; this.showParentForm = true; }
-    handleParentRowAction(event) {
-        const action = event.detail.action.name;
-        const row = event.detail.row;
-        if (action === 'edit') { this.recordId = row.Id; this.showParentForm = true; }
-        else if (action === 'lines') { this.selectedId = row.Id; this.selectedName = row.Name; }
+    handleParentSelect(event) { this.selectedParentId = event.detail.value; }
+
+    async handleSaveParents(event) {
+        try {
+            await saveParents({ records: event.detail.rows });
+            this.toast('Saved', 'Scheme Basket records saved.', 'success');
+            await refreshApex(this._wiredParents);
+        } catch (e) {
+            this.toast('Save failed', this.msg(e), 'error');
+        }
     }
-    closeParentForm() { this.showParentForm = false; }
-    handleParentSuccess() {
-        this.showParentForm = false;
-        this.toast('Saved', 'Scheme Basket saved.', 'success');
-        return refreshApex(this._wiredParents);
+
+    async handleSaveChildren(event) {
+        if (!this.selectedParentId) {
+            this.toast('Select first', 'Choose a Scheme Basket above.', 'warning');
+            return;
+        }
+        const rows = event.detail.rows.map(r => ({ ...r, Scheme_Basket__c: this.selectedParentId }));
+        try {
+            await saveChildren({ records: rows });
+            this.toast('Saved', 'Basket Product records saved.', 'success');
+            await refreshApex(this._wiredChildren);
+        } catch (e) {
+            this.toast('Save failed', this.msg(e), 'error');
+        }
     }
-    handleNewChild() {
-        if (!this.selectedId) { this.toast('Select first', 'Pick a Scheme Basket row first.', 'warning'); return; }
-        this.showChildForm = true;
-    }
-    closeChildForm() { this.showChildForm = false; }
-    handleChildSuccess() {
-        this.showChildForm = false;
-        this.toast('Saved', 'Basket Product saved.', 'success');
-        return refreshApex(this._wiredChildren);
-    }
+
     toast(title, message, variant) {
         this.dispatchEvent(new ShowToastEvent({ title, message, variant }));
+    }
+    msg(e) {
+        if (e && e.body && e.body.message) { return e.body.message; }
+        if (e && e.message) { return e.message; }
+        return 'Unknown error';
     }
 }

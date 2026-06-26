@@ -1,0 +1,54 @@
+<template>
+    <lightning-card title={title} icon-name="utility:table">
+        <lightning-button slot="actions" label="Add Row" icon-name="utility:add" onclick={handleAddRow}></lightning-button>
+        <lightning-button slot="actions" label="Save All" variant="brand" onclick={handleSave} class="slds-m-left_x-small"></lightning-button>
+        <div class="slds-p-around_small slds-scrollable_x">
+            <template if:true={hasColumns}>
+                <table class="slds-table slds-table_bordered slds-table_cell-buffer slds-table_fixed-layout">
+                    <thead>
+                        <tr class="slds-line-height_reset">
+                            <template for:each={headerCells} for:item="h">
+                                <th key={h.key} scope="col"><div class="slds-truncate" title={h.label}>{h.label}</div></th>
+                            </template>
+                            <th scope="col" style="width:3rem"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={rows} for:item="row">
+                            <tr key={row._key}>
+                                <template for:each={row._cells} for:item="cell">
+                                    <td key={cell.field}>
+                                        <template if:true={cell.isText}>
+                                            <lightning-input variant="label-hidden" type="text" value={cell.value}
+                                                data-key={row._key} data-field={cell.field} data-type="text" onchange={handleChange}></lightning-input>
+                                        </template>
+                                        <template if:true={cell.isNumber}>
+                                            <lightning-input variant="label-hidden" type="number" value={cell.value} step="any"
+                                                data-key={row._key} data-field={cell.field} data-type="number" onchange={handleChange}></lightning-input>
+                                        </template>
+                                        <template if:true={cell.isDate}>
+                                            <lightning-input variant="label-hidden" type="date" value={cell.value}
+                                                data-key={row._key} data-field={cell.field} data-type="date" onchange={handleChange}></lightning-input>
+                                        </template>
+                                        <template if:true={cell.isCheckbox}>
+                                            <lightning-input variant="label-hidden" type="checkbox" checked={cell.checked}
+                                                data-key={row._key} data-field={cell.field} data-type="checkbox" onchange={handleChange}></lightning-input>
+                                        </template>
+                                        <template if:true={cell.isPicklist}>
+                                            <lightning-combobox variant="label-hidden" value={cell.value} options={cell.options} placeholder="Select"
+                                                data-key={row._key} data-field={cell.field} data-type="picklist" onchange={handleChange}></lightning-combobox>
+                                        </template>
+                                    </td>
+                                </template>
+                                <td>
+                                    <lightning-button-icon icon-name="utility:delete" variant="border-filled"
+                                        data-key={row._key} onclick={handleRemoveRow} alternative-text="Remove row"></lightning-button-icon>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </template>
+        </div>
+    </lightning-card>
+</template>
