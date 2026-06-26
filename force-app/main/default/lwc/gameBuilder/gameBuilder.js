@@ -3,8 +3,11 @@ import { refreshApex } from '@salesforce/apex';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getGames from '@salesforce/apex/GAM_Battleground_Controller.getGames';
 import getKpis from '@salesforce/apex/GAM_Battleground_Controller.getKpis';
+import saveKpis from '@salesforce/apex/GAM_Battleground_Controller.saveKpis';
 import getLookupOptions from '@salesforce/apex/GAM_Battleground_Controller.getLookupOptions';
 import saveGameWizard from '@salesforce/apex/GAM_Battleground_Controller.saveGameWizard';
+
+const P = (...v) => v.map(x => ({ label: x, value: x }));
 
 const GAME_COLUMNS = [
     { label: 'Game', fieldName: 'Name' },
@@ -24,29 +27,29 @@ const KPI_LIST_COLUMNS = [
     { type: 'action', typeAttributes: { rowActions: [{ label: 'Edit', name: 'edit' }] } }
 ];
 
-const KPI_FIELDS = [
-    'Name', 'UI_Name__c', 'Category__c', 'Frequency__c', 'Objective__c',
-    'Calculation__c', 'Measure__c', 'KPI_Type__c', 'Tier__c', 'Sequence__c',
-    'KPI_Metric__c', 'Is_Qualifier__c', 'Is_Incentive__c', 'Description__c', 'Is_Active__c'
-];
+const EMPTY_KPI = {
+    Id: null, Name: '', UI_Name__c: '', Category__c: '', Frequency__c: '', Objective__c: '',
+    Calculation__c: '', Measure__c: '', KPI_Type__c: '', Tier__c: '', Sequence__c: null,
+    KPI_Metric__c: '', Description__c: '', Is_Qualifier__c: false, Is_Incentive__c: false, Is_Active__c: true
+};
 
 export default class GameBuilder extends LightningElement {
     gameColumns = GAME_COLUMNS;
     kpiListColumns = KPI_LIST_COLUMNS;
-    kpiObject = 'Battleground_KPI__c';
-    kpiFields = KPI_FIELDS;
 
     @track games = [];
     @track kpiRows = [];
     @track userOptions = [];
     @track kpiOptions = [];
+    @track metricOptions = [];
     kpiMeta = {};
     _wiredGames;
     _wiredKpis;
 
     @track view = 'list';
     @track kpiSubView = 'list';
-    @track kpiRecordId;
+    @track kpiForm = { ...EMPTY_KPI };
+    @track savingKpi = false;
 
     // wizard state
     @track step = 1;
@@ -81,12 +84,17 @@ export default class GameBuilder extends LightningElement {
         }
     }
 
-    connectedCallback() { this.loadUsers(); }
+    connectedCallback() { this.loadLookups(); }
 
-    async loadUsers() {
+    async loadLookups() {
         try {
-            const users = await getLookupOptions({ objectApiName: 'User' });
+            const [users, metrics] = await Promise.all([
+                getLookupOptions({ objectApiName: 'User' }),
+                getLookupOptions({ objectApiName: 'KPI_Metric__c' })
+            ]);
             this.userOptions = (users || []).map(u => ({ label: u.label, value: u.value }));
+            this.metricOptions = [{ label: '-- None --', value: '' }]
+                .concat((metrics || []).map(m => ({ label: m.label, value: m.value })));
         } catch (e) {
             this.toast('Error', this.msg(e), 'error');
         }
@@ -102,23 +110,53 @@ export default class GameBuilder extends LightningElement {
     handleManageKpis() { this.view = 'kpis'; this.kpiSubView = 'list'; }
     handleBackToList() { this.view = 'list'; }
 
-    // ----- KPI management (clean list + form) -----
+    // ----- KPI form -----
     get isKpiList() { return this.kpiSubView === 'list'; }
     get isKpiForm() { return this.kpiSubView === 'form'; }
-    get kpiFormTitle() { return this.kpiRecordId ? 'Edit Battleground KPI' : 'New Battleground KPI'; }
+    get kpiFormTitle() { return this.kpiForm.Id ? 'Edit Battleground KPI' : 'New Battleground KPI'; }
+    get categoryOptions() { return P('Qualifier', 'Discipline', 'Coverage', 'Sales'); }
+    get frequencyOptions() { return P('Daily', 'Weekly', 'Monthly', 'Journey Cycle'); }
+    get objectiveOptions() { return P('Sales', 'Coverage', 'Discipline', 'Quality', 'Other'); }
+    get calculationOptions() { return P('App', 'Query'); }
+    get measureOptions() { return P('Number', 'Decimal', 'Percent', 'Currency', 'Duration'); }
+    get kpiTypeOptions() { return P('Positive', 'Negative'); }
+    get tierOptions() { return P('Basic', 'Advanced'); }
+    get kpiSaveLabel() { return this.savingKpi ? 'Saving...' : 'Save KPI'; }
 
-    handleNewKpi() { this.kpiRecordId = null; this.kpiSubView = 'form'; }
+    handleNewKpi() { this.kpiForm = { ...EMPTY_KPI }; this.kpiSubView = 'form'; }
     handleKpiRowAction(event) {
         if (event.detail.action.name === 'edit') {
-            this.kpiRecordId = event.detail.row.Id;
+            const r = event.detail.row;
+            this.kpiForm = { ...EMPTY_KPI, ...r };
             this.kpiSubView = 'form';
         }
     }
     handleKpiCancel() { this.kpiSubView = 'list'; }
-    handleKpiSuccess() {
-        this.kpiSubView = 'list';
-        this.toast('Saved', 'Battleground KPI saved.', 'success');
-        return refreshApex(this._wiredKpis);
+    handleKpiField(event) {
+        const field = event.target.dataset.field;
+        const value = event.target.type === 'checkbox' ? event.target.checked : event.detail.value;
+        this.kpiForm = { ...this.kpiForm, [field]: value };
+    }
+
+    async handleKpiSave() {
+        if (!this.kpiForm.Name) { this.toast('Required', 'Enter a KPI name.', 'warning'); return; }
+        if (!this.kpiForm.Category__c) { this.toast('Required', 'Select a category.', 'warning'); return; }
+        const rec = { ...this.kpiForm };
+        if (!rec.Id) { delete rec.Id; }
+        if (rec.Sequence__c === '' || rec.Sequence__c === null) { delete rec.Sequence__c; }
+        else { rec.Sequence__c = Number(rec.Sequence__c); }
+        if (!rec.KPI_Metric__c) { delete rec.KPI_Metric__c; }
+        this.savingKpi = true;
+        try {
+            await saveKpis({ records: [rec] });
+            this.toast('Saved', 'KPI "' + this.kpiForm.Name + '" saved.', 'success');
+            this.kpiSubView = 'list';
+            await refreshApex(this._wiredKpis);
+        } catch (e) {
+            this.toast('Save failed', this.msg(e), 'error');
+        } finally {
+            this.savingKpi = false;
+        }
     }
 
     // ----- game wizard -----

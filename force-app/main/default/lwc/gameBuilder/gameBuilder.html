@@ -42,9 +42,53 @@
                 <template if:true={isKpiForm}>
                     <div class="slds-box slds-m-top_x-small slds-p-around_medium">
                         <h3 class="slds-text-heading_small slds-m-bottom_medium">{kpiFormTitle}</h3>
-                        <lightning-record-form object-api-name={kpiObject} record-id={kpiRecordId}
-                            fields={kpiFields} columns="2" mode="edit"
-                            onsuccess={handleKpiSuccess} oncancel={handleKpiCancel}></lightning-record-form>
+                        <div class="slds-grid slds-wrap slds-gutters">
+                            <div class="slds-col slds-size_1-of-2 slds-p-bottom_x-small">
+                                <lightning-input label="KPI Name" value={kpiForm.Name} data-field="Name" onchange={handleKpiField} required></lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_1-of-2 slds-p-bottom_x-small">
+                                <lightning-input label="UI Name" value={kpiForm.UI_Name__c} data-field="UI_Name__c" onchange={handleKpiField}></lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_1-of-2 slds-p-bottom_x-small">
+                                <lightning-combobox label="Category" value={kpiForm.Category__c} options={categoryOptions} data-field="Category__c" onchange={handleKpiField} required placeholder="Select"></lightning-combobox>
+                            </div>
+                            <div class="slds-col slds-size_1-of-2 slds-p-bottom_x-small">
+                                <lightning-combobox label="Frequency" value={kpiForm.Frequency__c} options={frequencyOptions} data-field="Frequency__c" onchange={handleKpiField} placeholder="Select"></lightning-combobox>
+                            </div>
+                            <div class="slds-col slds-size_1-of-2 slds-p-bottom_x-small">
+                                <lightning-combobox label="Objective" value={kpiForm.Objective__c} options={objectiveOptions} data-field="Objective__c" onchange={handleKpiField} placeholder="Select"></lightning-combobox>
+                            </div>
+                            <div class="slds-col slds-size_1-of-2 slds-p-bottom_x-small">
+                                <lightning-combobox label="Calculation" value={kpiForm.Calculation__c} options={calculationOptions} data-field="Calculation__c" onchange={handleKpiField} placeholder="Select"></lightning-combobox>
+                            </div>
+                            <div class="slds-col slds-size_1-of-2 slds-p-bottom_x-small">
+                                <lightning-combobox label="Measure" value={kpiForm.Measure__c} options={measureOptions} data-field="Measure__c" onchange={handleKpiField} placeholder="Select"></lightning-combobox>
+                            </div>
+                            <div class="slds-col slds-size_1-of-2 slds-p-bottom_x-small">
+                                <lightning-combobox label="KPI Type" value={kpiForm.KPI_Type__c} options={kpiTypeOptions} data-field="KPI_Type__c" onchange={handleKpiField} placeholder="Select"></lightning-combobox>
+                            </div>
+                            <div class="slds-col slds-size_1-of-2 slds-p-bottom_x-small">
+                                <lightning-combobox label="Tier" value={kpiForm.Tier__c} options={tierOptions} data-field="Tier__c" onchange={handleKpiField} placeholder="Select"></lightning-combobox>
+                            </div>
+                            <div class="slds-col slds-size_1-of-2 slds-p-bottom_x-small">
+                                <lightning-input type="number" label="Sequence" value={kpiForm.Sequence__c} data-field="Sequence__c" onchange={handleKpiField}></lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_1-of-2 slds-p-bottom_x-small">
+                                <lightning-combobox label="KPI Metric (for the actual)" value={kpiForm.KPI_Metric__c} options={metricOptions} data-field="KPI_Metric__c" onchange={handleKpiField} placeholder="-- None --"></lightning-combobox>
+                            </div>
+                            <div class="slds-col slds-size_1-of-2 slds-grid slds-grid_vertical-align-end slds-p-bottom_x-small">
+                                <lightning-input type="checkbox" label="Qualifier" checked={kpiForm.Is_Qualifier__c} data-field="Is_Qualifier__c" onchange={handleKpiField} class="slds-p-right_medium"></lightning-input>
+                                <lightning-input type="checkbox" label="Incentive" checked={kpiForm.Is_Incentive__c} data-field="Is_Incentive__c" onchange={handleKpiField} class="slds-p-right_medium"></lightning-input>
+                                <lightning-input type="checkbox" label="Active" checked={kpiForm.Is_Active__c} data-field="Is_Active__c" onchange={handleKpiField}></lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-p-bottom_x-small">
+                                <lightning-textarea label="Description" value={kpiForm.Description__c} data-field="Description__c" onchange={handleKpiField}></lightning-textarea>
+                            </div>
+                        </div>
+                        <div class="slds-m-top_medium slds-text-align_right">
+                            <lightning-button label="Cancel" onclick={handleKpiCancel} class="slds-m-right_x-small"></lightning-button>
+                            <lightning-button label={kpiSaveLabel} variant="brand" onclick={handleKpiSave} disabled={savingKpi}></lightning-button>
+                        </div>
                     </div>
                 </template>
             </div>
