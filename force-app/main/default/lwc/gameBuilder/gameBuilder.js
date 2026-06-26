@@ -3,7 +3,6 @@ import { refreshApex } from '@salesforce/apex';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getGames from '@salesforce/apex/GAM_Battleground_Controller.getGames';
 import getKpis from '@salesforce/apex/GAM_Battleground_Controller.getKpis';
-import saveKpis from '@salesforce/apex/GAM_Battleground_Controller.saveKpis';
 import getLookupOptions from '@salesforce/apex/GAM_Battleground_Controller.getLookupOptions';
 import saveGameWizard from '@salesforce/apex/GAM_Battleground_Controller.saveGameWizard';
 
@@ -14,26 +13,29 @@ const GAME_COLUMNS = [
     { label: 'Status', fieldName: 'statusLabel' }
 ];
 
-const P = (...v) => v.map(x => ({ label: x, value: x }));
-const KPI_COLUMNS = [
-    { label: 'KPI Name', field: 'Name', type: 'text' },
-    { label: 'UI Name', field: 'UI_Name__c', type: 'text' },
-    { label: 'Category', field: 'Category__c', type: 'picklist', options: P('Qualifier', 'Discipline', 'Coverage', 'Sales') },
-    { label: 'Frequency', field: 'Frequency__c', type: 'picklist', options: P('Daily', 'Weekly', 'Monthly', 'Journey Cycle') },
-    { label: 'Objective', field: 'Objective__c', type: 'picklist', options: P('Sales', 'Coverage', 'Discipline', 'Quality', 'Other') },
-    { label: 'Calculation', field: 'Calculation__c', type: 'picklist', options: P('App', 'Query') },
-    { label: 'Measure', field: 'Measure__c', type: 'picklist', options: P('Number', 'Decimal', 'Percent', 'Currency', 'Duration') },
-    { label: 'KPI Type', field: 'KPI_Type__c', type: 'picklist', options: P('Positive', 'Negative') },
-    { label: 'Tier', field: 'Tier__c', type: 'picklist', options: P('Basic', 'Advanced') },
-    { label: 'Seq', field: 'Sequence__c', type: 'number' },
-    { label: 'Qualifier', field: 'Is_Qualifier__c', type: 'checkbox' },
-    { label: 'Incentive', field: 'Is_Incentive__c', type: 'checkbox' },
-    { label: 'Active', field: 'Is_Active__c', type: 'checkbox' }
+const KPI_LIST_COLUMNS = [
+    { label: 'KPI Name', fieldName: 'Name' },
+    { label: 'Category', fieldName: 'Category__c' },
+    { label: 'Frequency', fieldName: 'Frequency__c' },
+    { label: 'KPI Type', fieldName: 'KPI_Type__c' },
+    { label: 'Tier', fieldName: 'Tier__c' },
+    { label: 'Qualifier', fieldName: 'Is_Qualifier__c', type: 'boolean' },
+    { label: 'Active', fieldName: 'Is_Active__c', type: 'boolean' },
+    { type: 'action', typeAttributes: { rowActions: [{ label: 'Edit', name: 'edit' }] } }
+];
+
+const KPI_FIELDS = [
+    'Name', 'UI_Name__c', 'Category__c', 'Frequency__c', 'Objective__c',
+    'Calculation__c', 'Measure__c', 'KPI_Type__c', 'Tier__c', 'Sequence__c',
+    'KPI_Metric__c', 'Is_Qualifier__c', 'Is_Incentive__c', 'Description__c', 'Is_Active__c'
 ];
 
 export default class GameBuilder extends LightningElement {
     gameColumns = GAME_COLUMNS;
-    kpiColumns = KPI_COLUMNS;
+    kpiListColumns = KPI_LIST_COLUMNS;
+    kpiObject = 'Battleground_KPI__c';
+    kpiFields = KPI_FIELDS;
+
     @track games = [];
     @track kpiRows = [];
     @track userOptions = [];
@@ -42,8 +44,11 @@ export default class GameBuilder extends LightningElement {
     _wiredGames;
     _wiredKpis;
 
-    // wizard state
     @track view = 'list';
+    @track kpiSubView = 'list';
+    @track kpiRecordId;
+
+    // wizard state
     @track step = 1;
     @track gameName = '';
     @track startDate;
@@ -58,10 +63,7 @@ export default class GameBuilder extends LightningElement {
     wiredGames(result) {
         this._wiredGames = result;
         if (result.data) {
-            this.games = result.data.map(g => ({
-                ...g,
-                statusLabel: g.Is_Active__c ? 'Active' : 'Inactive'
-            }));
+            this.games = result.data.map(g => ({ ...g, statusLabel: g.Is_Active__c ? 'Active' : 'Inactive' }));
         }
     }
 
@@ -95,15 +97,31 @@ export default class GameBuilder extends LightningElement {
     get isWizard() { return this.view === 'wizard'; }
     get isKpis() { return this.view === 'kpis'; }
     get hasGames() { return this.games && this.games.length > 0; }
+    get hasKpis() { return this.kpiRows && this.kpiRows.length > 0; }
 
-    handleManageKpis() { this.view = 'kpis'; }
+    handleManageKpis() { this.view = 'kpis'; this.kpiSubView = 'list'; }
     handleBackToList() { this.view = 'list'; }
-    handleSaveKpis(event) {
-        saveKpis({ records: event.detail.rows })
-            .then(() => { this.toast('Saved', 'Battleground KPIs saved.', 'success'); return refreshApex(this._wiredKpis); })
-            .catch(e => this.toast('Save failed', this.msg(e), 'error'));
+
+    // ----- KPI management (clean list + form) -----
+    get isKpiList() { return this.kpiSubView === 'list'; }
+    get isKpiForm() { return this.kpiSubView === 'form'; }
+    get kpiFormTitle() { return this.kpiRecordId ? 'Edit Battleground KPI' : 'New Battleground KPI'; }
+
+    handleNewKpi() { this.kpiRecordId = null; this.kpiSubView = 'form'; }
+    handleKpiRowAction(event) {
+        if (event.detail.action.name === 'edit') {
+            this.kpiRecordId = event.detail.row.Id;
+            this.kpiSubView = 'form';
+        }
+    }
+    handleKpiCancel() { this.kpiSubView = 'list'; }
+    handleKpiSuccess() {
+        this.kpiSubView = 'list';
+        this.toast('Saved', 'Battleground KPI saved.', 'success');
+        return refreshApex(this._wiredKpis);
     }
 
+    // ----- game wizard -----
     handleNewGame() { this.resetWizard(); this.view = 'wizard'; }
     handleCancel() { this.view = 'list'; }
 
@@ -119,18 +137,14 @@ export default class GameBuilder extends LightningElement {
         this.awardRows = [];
     }
 
-    // ----- step state -----
     get isStep1() { return this.step === 1; }
     get isStep2() { return this.step === 2; }
     get isStep3() { return this.step === 3; }
     get isStep4() { return this.step === 4; }
     get showBack() { return this.step > 1; }
     get isLastStep() { return this.step === 4; }
-    get stepLabel() {
-        return ['Game & Team', 'Select KPIs', 'Awards', 'Review & Save'][this.step - 1];
-    }
+    get stepLabel() { return ['Game & Team', 'Select KPIs', 'Awards', 'Review & Save'][this.step - 1]; }
 
-    // ----- field handlers -----
     handleField(event) {
         const field = event.target.dataset.field;
         this[field] = event.target.type === 'checkbox' ? event.target.checked : event.target.value;
@@ -144,7 +158,6 @@ export default class GameBuilder extends LightningElement {
         if (row) { row[field] = event.target.value; }
     }
 
-    // ----- navigation -----
     handleBack() { if (this.step > 1) { this.step -= 1; } }
     handleNext() {
         if (this.step === 1 && !this.gameName) { this.toast('Required', 'Enter a game name.', 'warning'); return; }
@@ -172,14 +185,8 @@ export default class GameBuilder extends LightningElement {
         });
     }
 
-    get reviewSummary() {
-        return {
-            users: this.selectedUserIds.length,
-            kpis: this.selectedKpiIds.length
-        };
-    }
+    get reviewSummary() { return { users: this.selectedUserIds.length, kpis: this.selectedKpiIds.length }; }
 
-    // ----- save -----
     async handleSave() {
         const payload = {
             gameName: this.gameName,

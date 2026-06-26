@@ -17,14 +17,36 @@
             </div>
         </template>
 
-        <!-- ===== MANAGE BATTLEGROUND KPIs ===== -->
+        <!-- ===== MANAGE BATTLEGROUND KPIs (clean list + form) ===== -->
         <template if:true={isKpis}>
             <lightning-button slot="actions" label="Back to Games" icon-name="utility:back" onclick={handleBackToList}></lightning-button>
             <div class="slds-p-horizontal_small slds-p-bottom_small">
-                <p class="slds-text-color_weak slds-p-bottom_x-small">
+                <p class="slds-text-color_weak slds-p-bottom_small">
                     Define the Battleground KPIs here first — they appear in the "Select KPIs" step when you create a game.
                 </p>
-                <c-bulk-entry-grid title="Battleground KPIs" columns={kpiColumns} records={kpiRows} onsave={handleSaveKpis}></c-bulk-entry-grid>
+
+                <template if:true={isKpiList}>
+                    <div class="slds-clearfix slds-m-bottom_small">
+                        <lightning-button class="slds-float_right" label="New KPI" variant="brand" icon-name="utility:add" onclick={handleNewKpi}></lightning-button>
+                    </div>
+                    <template if:true={hasKpis}>
+                        <lightning-datatable key-field="Id" data={kpiRows} columns={kpiListColumns} onrowaction={handleKpiRowAction} hide-checkbox-column></lightning-datatable>
+                    </template>
+                    <template if:false={hasKpis}>
+                        <p class="slds-text-color_weak slds-p-vertical_medium slds-text-align_center">
+                            No KPIs yet — click <strong>New KPI</strong> to add one.
+                        </p>
+                    </template>
+                </template>
+
+                <template if:true={isKpiForm}>
+                    <div class="slds-box slds-m-top_x-small slds-p-around_medium">
+                        <h3 class="slds-text-heading_small slds-m-bottom_medium">{kpiFormTitle}</h3>
+                        <lightning-record-form object-api-name={kpiObject} record-id={kpiRecordId}
+                            fields={kpiFields} columns="2" mode="edit"
+                            onsuccess={handleKpiSuccess} oncancel={handleKpiCancel}></lightning-record-form>
+                    </div>
+                </template>
             </div>
         </template>
 
