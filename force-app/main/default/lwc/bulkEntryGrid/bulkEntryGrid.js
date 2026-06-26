@@ -4,6 +4,10 @@ import { LightningElement, api, track } from 'lwc';
  * Reusable bulk data-entry grid. Renders an editable table from a column config,
  * lets the user add/remove rows and edit cells inline (text/number/date/checkbox/
  * picklist/lookup), and emits a `save` event with all rows for a bulk upsert.
+ *
+ * Robust to async option loading: when columns change (e.g. lookup options arrive)
+ * the existing rows are re-decorated in place, preserving the user's edits and new
+ * rows rather than rebuilding from the wired records.
  */
 export default class BulkEntryGrid extends LightningElement {
     @api title = 'Records';
@@ -12,16 +16,27 @@ export default class BulkEntryGrid extends LightningElement {
     _columns = [];
     @api
     get columns() { return this._columns; }
-    set columns(value) { this._columns = value || []; this.rebuild(); }
+    set columns(value) { this._columns = value || []; this.applyColumns(); }
 
     _records = [];
     @api
     get records() { return this._records; }
-    set records(value) { this._records = value || []; this.rebuild(); }
+    set records(value) { this._records = value || []; this.seedFromRecords(); }
 
-    rebuild() {
+    // Build rows from the wired records (initial load / after save refresh).
+    seedFromRecords() {
         if (!this._columns || this._columns.length === 0) { return; }
         this.rows = (this._records || []).map((r, i) => this.decorate({ ...r }, i));
+    }
+
+    // Columns changed (e.g. options loaded). Keep current rows + edits; just refresh cells.
+    applyColumns() {
+        if (!this._columns || this._columns.length === 0) { return; }
+        if (this.rows && this.rows.length) {
+            this.rows = this.rows.map((r, i) => this.decorate(r, i));
+        } else {
+            this.seedFromRecords();
+        }
     }
 
     decorate(row, index) {
@@ -44,6 +59,7 @@ export default class BulkEntryGrid extends LightningElement {
 
     get headerCells() { return (this._columns || []).map(c => ({ key: c.field, label: c.label })); }
     get hasColumns() { return this._columns && this._columns.length > 0; }
+    get isEmpty() { return !this.rows || this.rows.length === 0; }
 
     handleChange(event) {
         const key = event.target.dataset.key;

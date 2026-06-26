@@ -48,6 +48,11 @@
                         </template>
                     </tbody>
                 </table>
+                <template if:true={isEmpty}>
+                    <p class="slds-text-color_weak slds-p-vertical_small slds-text-align_center">
+                        No rows yet — click <strong>Add Row</strong> to start, then <strong>Save All</strong>.
+                    </p>
+                </template>
             </template>
         </div>
     </lightning-card>
