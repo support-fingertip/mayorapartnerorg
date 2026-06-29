@@ -18,6 +18,34 @@ public with sharing class GAM_Battleground_Controller {
     }
     @AuraEnabled public static void saveTeams(List<Battleground_Team__c> records) { upsert records; }
 
+    /**
+     * Creates / updates a team and replaces its membership in one transaction so the
+     * Teams area can save a team and its selected users together.
+     */
+    @AuraEnabled
+    public static Id saveTeamWithMembers(Battleground_Team__c team, List<Id> memberIds) {
+        upsert team;
+        delete [SELECT Id FROM Team_Member__c WHERE Battleground_Team__c = :team.Id];
+        if (memberIds != null && !memberIds.isEmpty()) {
+            List<Team_Member__c> members = new List<Team_Member__c>();
+            for (Id uid : memberIds) {
+                members.add(new Team_Member__c(Battleground_Team__c = team.Id, Member__c = uid));
+            }
+            insert members;
+        }
+        return team.Id;
+    }
+
+    /** Member user Ids for a team (used to pre-select the multi-select on edit). */
+    @AuraEnabled(cacheable=true)
+    public static List<Id> getTeamMemberIds(Id teamId) {
+        List<Id> ids = new List<Id>();
+        for (Team_Member__c tm : [SELECT Member__c FROM Team_Member__c WHERE Battleground_Team__c = :teamId]) {
+            if (tm.Member__c != null) { ids.add(tm.Member__c); }
+        }
+        return ids;
+    }
+
     // ----- User-Team Mapping -----
     @AuraEnabled(cacheable=true)
     public static List<Team_Member__c> getTeamMembers(Id teamId) {
@@ -92,84 +120,93 @@ public with sharing class GAM_Battleground_Controller {
     }
 
     // ===== Guided game wizard (create/update a whole game in one transaction) =====
+    public class Slab {
+        @AuraEnabled public Decimal target { get; set; }
+        @AuraEnabled public Decimal coins { get; set; }
+    }
     public class KpiAward {
         @AuraEnabled public Id kpiId { get; set; }
         @AuraEnabled public String category { get; set; }
-        @AuraEnabled public Decimal target { get; set; }
-        @AuraEnabled public Decimal points { get; set; }
+        @AuraEnabled public String measure { get; set; }
+        @AuraEnabled public Boolean isQualifier { get; set; }
+        @AuraEnabled public Boolean useSlabs { get; set; }
+        @AuraEnabled public Boolean isContinuous { get; set; }
         @AuraEnabled public String reward { get; set; }
+        @AuraEnabled public List<Slab> slabs { get; set; }
     }
     public class GameWizard {
         @AuraEnabled public Id gameId { get; set; }
         @AuraEnabled public String gameName { get; set; }
         @AuraEnabled public Date startDate { get; set; }
         @AuraEnabled public Date endDate { get; set; }
+        @AuraEnabled public String gameType { get; set; }   // Daily / Monthly
         @AuraEnabled public Boolean isActive { get; set; }
-        @AuraEnabled public String teamName { get; set; }
-        @AuraEnabled public Id teamId { get; set; }
-        @AuraEnabled public List<Id> userIds { get; set; }
+        @AuraEnabled public List<Id> teamIds { get; set; }  // teams the game applies to
         @AuraEnabled public List<KpiAward> kpis { get; set; }
     }
 
     @AuraEnabled
     public static Id saveGameWizard(GameWizard wiz) {
-        // 1) Game header
         Game__c game = new Game__c();
         if (wiz.gameId != null) { game.Id = wiz.gameId; }
         game.Name = wiz.gameName;
         game.Start_Date__c = wiz.startDate;
         game.End_Date__c = wiz.endDate;
+        game.Type__c = wiz.gameType;
         game.Is_Active__c = wiz.isActive == true;
         upsert game;
 
-        // On edit, clear prior teams/KPIs/awards so the wizard is the source of truth.
         if (wiz.gameId != null) {
             delete [SELECT Id FROM Game_Team__c WHERE Game__c = :game.Id];
             delete [SELECT Id FROM Game_KPI__c WHERE Game__c = :game.Id];
             delete [SELECT Id FROM Award__c WHERE Game__c = :game.Id];
         }
 
-        // 2) Team (reuse selected team or create a new one) + members
-        Id teamId = wiz.teamId;
-        if (teamId == null && String.isNotBlank(wiz.teamName)) {
-            Battleground_Team__c team = new Battleground_Team__c(Name = wiz.teamName, Is_Active__c = true);
-            insert team;
-            teamId = team.Id;
-        }
-        if (teamId != null) {
-            if (wiz.userIds != null && !wiz.userIds.isEmpty()) {
-                Set<Id> existing = new Set<Id>();
-                for (Team_Member__c m : [SELECT Member__c FROM Team_Member__c WHERE Battleground_Team__c = :teamId]) {
-                    existing.add(m.Member__c);
-                }
-                List<Team_Member__c> members = new List<Team_Member__c>();
-                for (Id uid : wiz.userIds) {
-                    if (!existing.contains(uid)) {
-                        members.add(new Team_Member__c(Battleground_Team__c = teamId, Member__c = uid));
-                    }
-                }
-                if (!members.isEmpty()) { insert members; }
+        // Teams the game applies to
+        if (wiz.teamIds != null && !wiz.teamIds.isEmpty()) {
+            List<Game_Team__c> gts = new List<Game_Team__c>();
+            for (Id tId : wiz.teamIds) {
+                gts.add(new Game_Team__c(Game__c = game.Id, Battleground_Team__c = tId));
             }
-            insert new Game_Team__c(Game__c = game.Id, Battleground_Team__c = teamId);
+            insert gts;
         }
 
-        // 3) KPIs the game focuses on + Awards (points & reward per KPI)
+        // KPIs + slab rows + a summary Award per KPI
         if (wiz.kpis != null && !wiz.kpis.isEmpty()) {
             List<Game_KPI__c> gks = new List<Game_KPI__c>();
             List<Award__c> awards = new List<Award__c>();
             for (KpiAward k : wiz.kpis) {
-                gks.add(new Game_KPI__c(
-                    Game__c = game.Id, Battleground_KPI__c = k.kpiId, Category__c = k.category,
-                    Cutoff_Value__c = k.target, Reward_Coins__c = k.points
-                ));
+                List<Slab> slabs = (k.slabs != null && !k.slabs.isEmpty()) ? k.slabs : new List<Slab>{ new Slab() };
+                Decimal totalCoins = 0;
+                Integer slabNo = 0;
+                for (Slab s : slabs) {
+                    slabNo++;
+                    gks.add(new Game_KPI__c(
+                        Game__c = game.Id, Battleground_KPI__c = k.kpiId, Category__c = k.category,
+                        Measure__c = k.measure, Is_Qualifier__c = k.isQualifier == true,
+                        Use_Slabs__c = k.useSlabs == true, Is_Continuous__c = k.isContinuous == true,
+                        Slab_Number__c = slabNo, Cutoff_Value__c = s.target, Reward_Coins__c = s.coins
+                    ));
+                    if (s.coins != null) { totalCoins += s.coins; }
+                }
                 awards.add(new Award__c(
                     Game__c = game.Id, Battleground_KPI__c = k.kpiId,
-                    Coins__c = k.points, Description__c = k.reward, Is_Active__c = true
+                    Coins__c = totalCoins, Description__c = k.reward, Is_Active__c = true
                 ));
             }
             insert gks;
             insert awards;
         }
         return game.Id;
+    }
+
+    /**
+     * UI-triggered scoring. Pass a user Id to recompute that one salesperson's
+     * scores across every active game they belong to, or null to score everyone.
+     */
+    @AuraEnabled
+    public static void recalculate(Id userId) {
+        Set<Id> ids = userId == null ? null : new Set<Id>{ userId };
+        GAM_GameScore_Service.calculateScores(ids);
     }
 }

@@ -50,16 +50,28 @@ private class GAM_Battleground_Controller_Test {
 
     @isTest
     static void wizardCreatesWholeGame() {
+        Battleground_Team__c team = new Battleground_Team__c(Name = 'Mayora Stars', Is_Active__c = true);
+        insert team;
+        insert new Team_Member__c(Battleground_Team__c = team.Id, Member__c = UserInfo.getUserId());
+
         Battleground_KPI__c kpi = new Battleground_KPI__c(Name = 'PC', Category__c = 'Coverage', Is_Active__c = true);
         insert kpi;
 
+        GAM_Battleground_Controller.Slab s1 = new GAM_Battleground_Controller.Slab();
+        s1.target = 10; s1.coins = 50;
+        GAM_Battleground_Controller.Slab s2 = new GAM_Battleground_Controller.Slab();
+        s2.target = 20; s2.coins = 100;
+
         GAM_Battleground_Controller.KpiAward line = new GAM_Battleground_Controller.KpiAward();
-        line.kpiId = kpi.Id; line.category = 'Coverage'; line.target = 10; line.points = 50; line.reward = 'Gift voucher';
+        line.kpiId = kpi.Id; line.category = 'Coverage'; line.measure = 'Number';
+        line.isQualifier = false; line.useSlabs = true; line.isContinuous = false;
+        line.reward = 'Gift voucher';
+        line.slabs = new List<GAM_Battleground_Controller.Slab>{ s1, s2 };
 
         GAM_Battleground_Controller.GameWizard wiz = new GAM_Battleground_Controller.GameWizard();
         wiz.gameName = 'MI Challenge'; wiz.startDate = Date.today(); wiz.endDate = Date.today().addDays(28);
-        wiz.isActive = true; wiz.teamName = 'Mayora Stars';
-        wiz.userIds = new List<Id>{ UserInfo.getUserId() };
+        wiz.isActive = true; wiz.gameType = 'Daily';
+        wiz.teamIds = new List<Id>{ team.Id };
         wiz.kpis = new List<GAM_Battleground_Controller.KpiAward>{ line };
 
         Test.startTest();
@@ -68,8 +80,33 @@ private class GAM_Battleground_Controller_Test {
 
         System.assertNotEquals(null, gameId);
         System.assertEquals(1, [SELECT COUNT() FROM Game_Team__c WHERE Game__c = :gameId]);
-        System.assertEquals(1, [SELECT COUNT() FROM Game_KPI__c WHERE Game__c = :gameId]);
+        System.assertEquals(2, [SELECT COUNT() FROM Game_KPI__c WHERE Game__c = :gameId]);
         System.assertEquals(1, [SELECT COUNT() FROM Award__c WHERE Game__c = :gameId]);
-        System.assertEquals(1, [SELECT COUNT() FROM Team_Member__c]);
+        System.assertEquals('Daily', [SELECT Type__c FROM Game__c WHERE Id = :gameId].Type__c);
+    }
+
+    @isTest
+    static void schedulerScoresUsers() {
+        Battleground_Team__c team = new Battleground_Team__c(Name = 'Scorers', Is_Active__c = true);
+        insert team;
+        insert new Team_Member__c(Battleground_Team__c = team.Id, Member__c = UserInfo.getUserId());
+
+        Battleground_KPI__c kpi = new Battleground_KPI__c(Name = 'Calls', Category__c = 'Coverage', Is_Active__c = true);
+        insert kpi;
+
+        Game__c game = new Game__c(Name = 'Score Game', Type__c = 'Daily', Is_Active__c = true,
+            Start_Date__c = Date.today().addDays(-1), End_Date__c = Date.today().addDays(1));
+        insert game;
+        insert new Game_Team__c(Game__c = game.Id, Battleground_Team__c = team.Id);
+        insert new Game_KPI__c(Game__c = game.Id, Battleground_KPI__c = kpi.Id, Category__c = 'Coverage',
+            Slab_Number__c = 1, Cutoff_Value__c = 0, Reward_Coins__c = 25);
+
+        Test.startTest();
+        GAM_Battleground_Controller.recalculate(UserInfo.getUserId());
+        new GAM_GameScore_Scheduler().execute(null);
+        Test.stopTest();
+
+        System.assert([SELECT COUNT() FROM Game_Score__c WHERE Game__c = :game.Id] >= 1,
+            'Scoring should have created at least one Game Score');
     }
 }

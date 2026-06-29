@@ -4,16 +4,37 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getGames from '@salesforce/apex/GAM_Battleground_Controller.getGames';
 import getKpis from '@salesforce/apex/GAM_Battleground_Controller.getKpis';
 import saveKpis from '@salesforce/apex/GAM_Battleground_Controller.saveKpis';
+import getTeams from '@salesforce/apex/GAM_Battleground_Controller.getTeams';
+import getTeamMemberIds from '@salesforce/apex/GAM_Battleground_Controller.getTeamMemberIds';
+import saveTeamWithMembers from '@salesforce/apex/GAM_Battleground_Controller.saveTeamWithMembers';
 import getLookupOptions from '@salesforce/apex/GAM_Battleground_Controller.getLookupOptions';
 import saveGameWizard from '@salesforce/apex/GAM_Battleground_Controller.saveGameWizard';
+import recalculate from '@salesforce/apex/GAM_Battleground_Controller.recalculate';
 
 const P = (...v) => v.map(x => ({ label: x, value: x }));
 
+const CATEGORIES = [
+    { key: 'Qualifier', label: 'Qualifiers' },
+    { key: 'Discipline', label: 'Discipline' },
+    { key: 'Coverage', label: 'Coverage' },
+    { key: 'Sales', label: 'Sales' }
+];
+
 const GAME_COLUMNS = [
     { label: 'Game', fieldName: 'Name' },
+    { label: 'Type', fieldName: 'Type__c' },
     { label: 'Start', fieldName: 'Start_Date__c', type: 'date-local' },
     { label: 'End', fieldName: 'End_Date__c', type: 'date-local' },
     { label: 'Status', fieldName: 'statusLabel' }
+];
+
+const TEAM_COLUMNS = [
+    { label: 'Team', fieldName: 'Name' },
+    { label: 'Code', fieldName: 'Team_Code__c' },
+    { label: 'Level', fieldName: 'Level__c' },
+    { label: 'State', fieldName: 'State__c' },
+    { label: 'Active', fieldName: 'Is_Active__c', type: 'boolean' },
+    { type: 'action', typeAttributes: { rowActions: [{ label: 'Edit', name: 'edit' }] } }
 ];
 
 const KPI_LIST_COLUMNS = [
@@ -33,34 +54,50 @@ const EMPTY_KPI = {
     KPI_Metric__c: '', Description__c: '', Is_Qualifier__c: false, Is_Incentive__c: false, Is_Active__c: true
 };
 
+const EMPTY_TEAM = {
+    Id: null, Name: '', Team_Code__c: '', Level__c: '', State__c: '', Is_Active__c: true
+};
+
 export default class GameBuilder extends LightningElement {
     gameColumns = GAME_COLUMNS;
+    teamColumns = TEAM_COLUMNS;
     kpiListColumns = KPI_LIST_COLUMNS;
 
     @track games = [];
     @track kpiRows = [];
+    @track teamRows = [];
     @track userOptions = [];
-    @track kpiOptions = [];
     @track metricOptions = [];
-    kpiMeta = {};
+    kpiById = {};
     _wiredGames;
     _wiredKpis;
+    _wiredTeams;
 
     @track view = 'list';
+
+    // ----- KPI management -----
     @track kpiSubView = 'list';
     @track kpiForm = { ...EMPTY_KPI };
     @track savingKpi = false;
 
-    // wizard state
+    // ----- Team management -----
+    @track teamSubView = 'list';
+    @track teamForm = { ...EMPTY_TEAM };
+    @track teamMemberIds = [];
+    @track savingTeam = false;
+
+    // ----- Game wizard -----
     @track step = 1;
     @track gameName = '';
+    @track gameType = 'Daily';
     @track startDate;
     @track endDate;
     @track isActive = true;
-    @track teamName = '';
-    @track selectedUserIds = [];
+    @track selectedTeamIds = [];
     @track selectedKpiIds = [];
-    @track awardRows = [];
+    @track kpiParams = {};
+    @track catSearch = {};
+    @track saving = false;
 
     @wire(getGames)
     wiredGames(result) {
@@ -75,13 +112,15 @@ export default class GameBuilder extends LightningElement {
         this._wiredKpis = result;
         if (result.data) {
             this.kpiRows = result.data;
-            this.kpiOptions = result.data.map(k => ({
-                label: (k.Category__c ? k.Category__c + ' — ' : '') + k.Name,
-                value: k.Id
-            }));
-            this.kpiMeta = {};
-            result.data.forEach(k => { this.kpiMeta[k.Id] = { name: k.Name, category: k.Category__c }; });
+            this.kpiById = {};
+            result.data.forEach(k => { this.kpiById[k.Id] = k; });
         }
+    }
+
+    @wire(getTeams)
+    wiredTeams(result) {
+        this._wiredTeams = result;
+        if (result.data) { this.teamRows = result.data; }
     }
 
     connectedCallback() { this.loadLookups(); }
@@ -100,17 +139,75 @@ export default class GameBuilder extends LightningElement {
         }
     }
 
-    // ----- views -----
+    // ===== top-level views =====
     get isList() { return this.view === 'list'; }
-    get isWizard() { return this.view === 'wizard'; }
+    get isTeams() { return this.view === 'teams'; }
     get isKpis() { return this.view === 'kpis'; }
+    get isWizard() { return this.view === 'wizard'; }
     get hasGames() { return this.games && this.games.length > 0; }
     get hasKpis() { return this.kpiRows && this.kpiRows.length > 0; }
+    get hasTeams() { return this.teamRows && this.teamRows.length > 0; }
 
+    handleManageTeams() { this.view = 'teams'; this.teamSubView = 'list'; }
     handleManageKpis() { this.view = 'kpis'; this.kpiSubView = 'list'; }
     handleBackToList() { this.view = 'list'; }
 
-    // ----- KPI form -----
+    async handleRecalcAll() {
+        try {
+            await recalculate({ userId: null });
+            this.toast('Scoring started', 'Scores recalculated for all team members.', 'success');
+        } catch (e) {
+            this.toast('Failed', this.msg(e), 'error');
+        }
+    }
+
+    // ===== Teams area =====
+    get isTeamList() { return this.teamSubView === 'list'; }
+    get isTeamForm() { return this.teamSubView === 'form'; }
+    get teamFormTitle() { return this.teamForm.Id ? 'Edit Team' : 'New Team'; }
+    get levelOptions() { return P('L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8'); }
+    get teamSaveLabel() { return this.savingTeam ? 'Saving...' : 'Save Team'; }
+
+    handleNewTeam() { this.teamForm = { ...EMPTY_TEAM }; this.teamMemberIds = []; this.teamSubView = 'form'; }
+    async handleTeamRowAction(event) {
+        if (event.detail.action.name === 'edit') {
+            const r = event.detail.row;
+            this.teamForm = { ...EMPTY_TEAM, ...r };
+            this.teamSubView = 'form';
+            try {
+                this.teamMemberIds = await getTeamMemberIds({ teamId: r.Id });
+            } catch (e) {
+                this.teamMemberIds = [];
+            }
+        }
+    }
+    handleTeamCancel() { this.teamSubView = 'list'; }
+    handleTeamField(event) {
+        const field = event.target.dataset.field;
+        const value = event.target.type === 'checkbox' ? event.target.checked : event.detail.value;
+        this.teamForm = { ...this.teamForm, [field]: value };
+    }
+    handleTeamUsers(event) { this.teamMemberIds = event.detail.value; }
+
+    async handleTeamSave() {
+        if (!this.teamForm.Name) { this.toast('Required', 'Enter a team name.', 'warning'); return; }
+        const rec = { ...this.teamForm };
+        if (!rec.Id) { delete rec.Id; }
+        if (!rec.Level__c) { delete rec.Level__c; }
+        this.savingTeam = true;
+        try {
+            await saveTeamWithMembers({ team: rec, memberIds: this.teamMemberIds });
+            this.toast('Saved', 'Team "' + this.teamForm.Name + '" saved.', 'success');
+            this.teamSubView = 'list';
+            await refreshApex(this._wiredTeams);
+        } catch (e) {
+            this.toast('Save failed', this.msg(e), 'error');
+        } finally {
+            this.savingTeam = false;
+        }
+    }
+
+    // ===== KPI management =====
     get isKpiList() { return this.kpiSubView === 'list'; }
     get isKpiForm() { return this.kpiSubView === 'form'; }
     get kpiFormTitle() { return this.kpiForm.Id ? 'Edit Battleground KPI' : 'New Battleground KPI'; }
@@ -159,88 +256,230 @@ export default class GameBuilder extends LightningElement {
         }
     }
 
-    // ----- game wizard -----
+    // ===== Game wizard =====
     handleNewGame() { this.resetWizard(); this.view = 'wizard'; }
     handleCancel() { this.view = 'list'; }
 
     resetWizard() {
         this.step = 1;
         this.gameName = '';
+        this.gameType = 'Daily';
         this.startDate = null;
         this.endDate = null;
         this.isActive = true;
-        this.teamName = '';
-        this.selectedUserIds = [];
+        this.selectedTeamIds = [];
         this.selectedKpiIds = [];
-        this.awardRows = [];
+        this.kpiParams = {};
+        this.catSearch = {};
     }
 
+    get gameTypeOptions() { return P('Daily', 'Monthly'); }
     get isStep1() { return this.step === 1; }
     get isStep2() { return this.step === 2; }
     get isStep3() { return this.step === 3; }
     get isStep4() { return this.step === 4; }
+    get isStep5() { return this.step === 5; }
     get showBack() { return this.step > 1; }
-    get isLastStep() { return this.step === 4; }
-    get stepLabel() { return ['Game & Team', 'Select KPIs', 'Awards', 'Review & Save'][this.step - 1]; }
+    get isLastStep() { return this.step === 5; }
+    get saveLabel() { return this.saving ? 'Saving...' : 'Save Game'; }
+    get stepLabel() {
+        return ['Game', 'Teams', 'KPIs', 'Parameters', 'Review'][this.step - 1];
+    }
 
     handleField(event) {
         const field = event.target.dataset.field;
         this[field] = event.target.type === 'checkbox' ? event.target.checked : event.target.value;
     }
-    handleUsers(event) { this.selectedUserIds = event.detail.value; }
-    handleKpis(event) { this.selectedKpiIds = event.detail.value; }
-    handleAward(event) {
+    handleGameType(event) { this.gameType = event.detail.value; }
+
+    // ----- step 2: teams (checkbox list) -----
+    get teamChecks() {
+        return (this.teamRows || []).map(t => ({
+            id: t.Id,
+            name: t.Name,
+            sub: [t.Team_Code__c, t.Level__c, t.State__c].filter(Boolean).join(' · '),
+            checked: this.selectedTeamIds.includes(t.Id)
+        }));
+    }
+    handleTeamCheck(event) {
         const id = event.target.dataset.id;
-        const field = event.target.dataset.field;
-        const row = this.awardRows.find(r => r.kpiId === id);
-        if (row) { row[field] = event.target.value; }
+        const set = new Set(this.selectedTeamIds);
+        if (event.target.checked) { set.add(id); } else { set.delete(id); }
+        this.selectedTeamIds = [...set];
     }
 
-    handleBack() { if (this.step > 1) { this.step -= 1; } }
-    handleNext() {
-        if (this.step === 1 && !this.gameName) { this.toast('Required', 'Enter a game name.', 'warning'); return; }
-        if (this.step === 2) {
-            if (!this.selectedKpiIds.length) { this.toast('Required', 'Select at least one KPI.', 'warning'); return; }
-            this.buildAwardRows();
+    // ----- step 3: KPI category columns -----
+    get kpiColumns() {
+        return CATEGORIES.map(c => {
+            const q = (this.catSearch[c.key] || '').toLowerCase();
+            const items = (this.kpiRows || [])
+                .filter(k => (k.Category__c || 'Sales') === c.key && k.Is_Active__c !== false)
+                .filter(k => !q
+                    || (k.Name || '').toLowerCase().includes(q)
+                    || (k.UI_Name__c || '').toLowerCase().includes(q))
+                .map(k => ({
+                    id: k.Id,
+                    name: k.UI_Name__c || k.Name,
+                    sub: k.Frequency__c || '',
+                    checked: this.selectedKpiIds.includes(k.Id)
+                }));
+            return { key: c.key, label: c.label, items, count: items.length, hasItems: items.length > 0 };
+        });
+    }
+    handleCatSearch(event) {
+        const cat = event.target.dataset.cat;
+        this.catSearch = { ...this.catSearch, [cat]: event.target.value };
+    }
+    handleKpiCheck(event) {
+        const id = event.target.dataset.id;
+        const set = new Set(this.selectedKpiIds);
+        if (event.target.checked) {
+            set.add(id);
+            this.ensureParam(id);
+        } else {
+            set.delete(id);
+            delete this.kpiParams[id];
+            this.kpiParams = { ...this.kpiParams };
         }
-        if (this.step < 4) { this.step += 1; }
+        this.selectedKpiIds = [...set];
     }
 
-    buildAwardRows() {
-        const existing = {};
-        this.awardRows.forEach(r => { existing[r.kpiId] = r; });
-        this.awardRows = this.selectedKpiIds.map(id => {
-            const prev = existing[id] || {};
-            const meta = this.kpiMeta[id] || {};
+    ensureParam(id) {
+        if (this.kpiParams[id]) { return; }
+        const k = this.kpiById[id] || {};
+        const isQual = (k.Category__c === 'Qualifier') || k.Is_Qualifier__c === true;
+        this.kpiParams = {
+            ...this.kpiParams,
+            [id]: {
+                isQualifier: isQual,
+                useSlabs: false,
+                isContinuous: false,
+                measure: k.Measure__c || '',
+                reward: '',
+                slabs: [{ target: null, coins: null }]
+            }
+        };
+    }
+
+    // ----- step 4: parameter cards -----
+    get kpiParamCards() {
+        return this.selectedKpiIds.map(id => {
+            const k = this.kpiById[id] || {};
+            const p = this.kpiParams[id] || { slabs: [{}] };
+            const slabList = p.useSlabs ? p.slabs : p.slabs.slice(0, 1);
             return {
-                kpiId: id,
-                kpiName: meta.name || id,
-                category: meta.category || '',
-                target: prev.target || null,
-                points: prev.points || null,
-                reward: prev.reward || ''
+                id,
+                name: k.UI_Name__c || k.Name || id,
+                category: k.Category__c || '',
+                isQualifier: p.isQualifier,
+                notQualifier: !p.isQualifier,
+                useSlabs: p.useSlabs,
+                isContinuous: p.isContinuous,
+                measure: p.measure,
+                reward: p.reward,
+                showAddSlab: p.useSlabs,
+                slabs: slabList.map((s, i) => ({
+                    idx: String(i),
+                    key: id + '-' + i,
+                    label: p.useSlabs ? ('Slab ' + (i + 1)) : 'Target',
+                    target: s.target,
+                    coins: s.coins,
+                    canRemove: p.useSlabs && p.slabs.length > 1
+                }))
             };
         });
     }
 
-    get reviewSummary() { return { users: this.selectedUserIds.length, kpis: this.selectedKpiIds.length }; }
+    handleParamToggle(event) {
+        const id = event.target.dataset.id;
+        const field = event.target.dataset.field;
+        const p = this.kpiParams[id];
+        if (!p) { return; }
+        p[field] = event.target.checked;
+        if (field === 'useSlabs' && event.target.checked && p.slabs.length < 2) {
+            p.slabs.push({ target: null, coins: null });
+        }
+        this.kpiParams = { ...this.kpiParams };
+    }
+    handleParamField(event) {
+        const id = event.target.dataset.id;
+        const field = event.target.dataset.field;
+        const p = this.kpiParams[id];
+        if (!p) { return; }
+        p[field] = event.detail ? event.detail.value : event.target.value;
+        this.kpiParams = { ...this.kpiParams };
+    }
+    handleSlabField(event) {
+        const id = event.target.dataset.id;
+        const idx = Number(event.target.dataset.idx);
+        const field = event.target.dataset.field;
+        const p = this.kpiParams[id];
+        if (!p || !p.slabs[idx]) { return; }
+        p.slabs[idx][field] = event.target.value;
+        this.kpiParams = { ...this.kpiParams };
+    }
+    handleAddSlab(event) {
+        const id = event.target.dataset.id;
+        const p = this.kpiParams[id];
+        if (!p) { return; }
+        p.slabs.push({ target: null, coins: null });
+        this.kpiParams = { ...this.kpiParams };
+    }
+    handleRemoveSlab(event) {
+        const id = event.target.dataset.id;
+        const idx = Number(event.target.dataset.idx);
+        const p = this.kpiParams[id];
+        if (!p || p.slabs.length <= 1) { return; }
+        p.slabs.splice(idx, 1);
+        this.kpiParams = { ...this.kpiParams };
+    }
+
+    // ----- navigation -----
+    handleBack() { if (this.step > 1) { this.step -= 1; } }
+    handleNext() {
+        if (this.step === 1 && !this.gameName) { this.toast('Required', 'Enter a game name.', 'warning'); return; }
+        if (this.step === 2 && !this.selectedTeamIds.length) { this.toast('Required', 'Select at least one team.', 'warning'); return; }
+        if (this.step === 3 && !this.selectedKpiIds.length) { this.toast('Required', 'Select at least one KPI.', 'warning'); return; }
+        if (this.step < 5) { this.step += 1; }
+    }
+
+    get reviewSummary() {
+        return {
+            type: this.gameType,
+            teams: this.selectedTeamIds.length,
+            kpis: this.selectedKpiIds.length
+        };
+    }
 
     async handleSave() {
+        const num = v => (v !== null && v !== undefined && v !== '' ? Number(v) : null);
         const payload = {
             gameName: this.gameName,
             startDate: this.startDate || null,
             endDate: this.endDate || null,
+            gameType: this.gameType,
             isActive: this.isActive,
-            teamName: this.teamName,
-            userIds: this.selectedUserIds,
-            kpis: this.awardRows.map(r => ({
-                kpiId: r.kpiId,
-                category: r.category,
-                target: r.target ? Number(r.target) : null,
-                points: r.points ? Number(r.points) : null,
-                reward: r.reward
-            }))
+            teamIds: this.selectedTeamIds,
+            kpis: this.selectedKpiIds.map(id => {
+                const k = this.kpiById[id] || {};
+                const p = this.kpiParams[id];
+                const rawSlabs = p.useSlabs ? p.slabs : p.slabs.slice(0, 1);
+                return {
+                    kpiId: id,
+                    category: k.Category__c,
+                    measure: p.measure,
+                    isQualifier: p.isQualifier,
+                    useSlabs: p.useSlabs,
+                    isContinuous: p.isContinuous,
+                    reward: p.reward,
+                    slabs: rawSlabs.map(s => ({
+                        target: num(s.target),
+                        coins: p.isQualifier ? null : num(s.coins)
+                    }))
+                };
+            })
         };
+        this.saving = true;
         try {
             await saveGameWizard({ wiz: payload });
             this.toast('Saved', 'Game "' + this.gameName + '" created.', 'success');
@@ -248,6 +487,8 @@ export default class GameBuilder extends LightningElement {
             await refreshApex(this._wiredGames);
         } catch (e) {
             this.toast('Save failed', this.msg(e), 'error');
+        } finally {
+            this.saving = false;
         }
     }
 

@@ -11,6 +11,14 @@
         <apexClass>GAM_Battleground_Controller</apexClass>
         <enabled>true</enabled>
     </classAccesses>
+    <classAccesses>
+        <apexClass>GAM_GameScore_Service</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>GAM_GameScore_Scheduler</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
     <fieldPermissions>
         <editable>true</editable>
         <field>Award__c.Battleground_KPI__c</field>
@@ -258,6 +266,26 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Game_KPI__c.Is_Continuous__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Game_KPI__c.Is_Qualifier__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Game_KPI__c.Measure__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Game_KPI__c.Use_Slabs__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Game_Score__c.Achievement__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -344,6 +372,11 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>Game__c.Start_Date__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Game__c.Type__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
