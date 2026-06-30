@@ -143,6 +143,17 @@ private class GAM_Battleground_Controller_Test {
         System.assertEquals(1, many.size(), 'One summary per requested user');
         System.assertEquals(30, many[0].totalCoins, 'Stored coins total for the user');
         System.assertEquals(0, GAM_Battleground_Controller.getUsersCoins(new List<Id>(), true).size());
+
+        // game-wise + KPI-wise breakdown, filtered to the one game
+        List<GAM_Battleground_Controller.CoinSummary> detailed =
+            GAM_Battleground_Controller.getCoins(new List<Id>{ UserInfo.getUserId() }, game.Id, true, false);
+        System.assertEquals(1, detailed.size());
+        System.assertEquals(1, detailed[0].games.size(), 'Only the requested game returned');
+        System.assertEquals(game.Id, detailed[0].games[0].gameId);
+        System.assertEquals(30, detailed[0].games[0].coins, 'Game coins');
+        System.assert(detailed[0].games[0].kpis != null && detailed[0].games[0].kpis.size() >= 1,
+            'KPI-wise breakdown should be present');
+        System.assertEquals(30, detailed[0].games[0].kpis[0].coins, 'KPI coins');
     }
 
     @isTest

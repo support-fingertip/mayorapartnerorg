@@ -320,10 +320,16 @@ public with sharing class GAM_Battleground_Controller {
     }
 
     // ===== On-demand coins read (for a real-time API/app call) =====
+    public class KpiCoins {
+        @AuraEnabled public Id kpiId;
+        @AuraEnabled public String kpiName;
+        @AuraEnabled public Integer coins;
+    }
     public class GameCoins {
         @AuraEnabled public Id gameId;
         @AuraEnabled public String gameName;
         @AuraEnabled public Integer coins;
+        @AuraEnabled public List<KpiCoins> kpis;   // populated only when includeKpis = true
     }
     public class CoinSummary {
         @AuraEnabled public Id userId;
@@ -334,18 +340,24 @@ public with sharing class GAM_Battleground_Controller {
     }
 
     /**
-     * Returns CURRENT coins for today for a SET of users, optionally recomputing
-     * first. Lightweight read meant for a real-time API/app call — NOT the batch.
-     * Pass recalc=true to score those users live before reading. Every requested
-     * user gets a summary back (totalCoins = 0 if they have no scores yet).
+     * Returns today's coins for a SET of users — game-wise, with an optional
+     * per-KPI breakdown and an optional single-game filter. Lightweight read for a
+     * real-time API/app call (NOT the batch). Reads stored scores by default;
+     * pass recalc=true to score those users live first.
+     *
+     * @param userIds     users to return (each gets a summary, 0 if no scores)
+     * @param gameId      null = all active games; set = only that game
+     * @param includeKpis true to populate each game's per-KPI coins
+     * @param recalc      true to recompute those users live before reading
      */
     @AuraEnabled
-    public static List<CoinSummary> getUsersCoins(List<Id> userIds, Boolean recalc) {
+    public static List<CoinSummary> getCoins(List<Id> userIds, Id gameId, Boolean includeKpis, Boolean recalc) {
         List<CoinSummary> results = new List<CoinSummary>();
         if (userIds == null || userIds.isEmpty()) { return results; }
         Set<Id> idSet = new Set<Id>(userIds);
         idSet.remove(null);
         if (idSet.isEmpty()) { return results; }
+        Boolean withKpis = includeKpis == true;
 
         if (recalc == true) {
             GAM_GameScore_Service.calculateScores(idSet);
@@ -359,22 +371,46 @@ public with sharing class GAM_Battleground_Controller {
             byUser.put(uid, s);
         }
 
-        for (AggregateResult ar : [
-            SELECT Salesperson__c uid, Game__c gid, MAX(Game__r.Name) gname, SUM(Coins_Awarded__c) coins
-            FROM Game_Score__c
-            WHERE Salesperson__c IN :idSet AND Score_Date__c = :Date.today()
-                  AND Game__r.Is_Active__c = true
-            GROUP BY Salesperson__c, Game__c
-        ]) {
+        Date scoreDate = Date.today();
+        String q = 'SELECT Salesperson__c uid, Game__c gid, MAX(Game__r.Name) gname';
+        if (withKpis) {
+            q += ', Game_KPI__r.Battleground_KPI__c kid'
+               + ', MAX(Game_KPI__r.Battleground_KPI__r.UI_Name__c) kui'
+               + ', MAX(Game_KPI__r.Battleground_KPI__r.Name) kname';
+        }
+        q += ', SUM(Coins_Awarded__c) coins FROM Game_Score__c'
+           + ' WHERE Salesperson__c IN :idSet AND Score_Date__c = :scoreDate AND Game__r.Is_Active__c = true';
+        if (gameId != null) { q += ' AND Game__c = :gameId'; }
+        q += ' GROUP BY Salesperson__c, Game__c';
+        if (withKpis) { q += ', Game_KPI__r.Battleground_KPI__c'; }
+
+        Map<Id, Map<Id, GameCoins>> gameByUser = new Map<Id, Map<Id, GameCoins>>();
+        for (AggregateResult ar : Database.query(q)) {
             CoinSummary s = byUser.get((Id) ar.get('uid'));
             if (s == null) { continue; }
-            GameCoins gc = new GameCoins();
-            gc.gameId = (Id) ar.get('gid');
-            gc.gameName = (String) ar.get('gname');
-            Decimal c = (Decimal) ar.get('coins');
-            gc.coins = c == null ? 0 : (Integer) c;
-            s.totalCoins += gc.coins;
-            s.games.add(gc);
+            Id gid = (Id) ar.get('gid');
+            if (!gameByUser.containsKey(s.userId)) { gameByUser.put(s.userId, new Map<Id, GameCoins>()); }
+            Map<Id, GameCoins> gmap = gameByUser.get(s.userId);
+            GameCoins gc = gmap.get(gid);
+            if (gc == null) {
+                gc = new GameCoins();
+                gc.gameId = gid; gc.gameName = (String) ar.get('gname'); gc.coins = 0;
+                gc.kpis = withKpis ? new List<KpiCoins>() : null;
+                gmap.put(gid, gc);
+                s.games.add(gc);
+            }
+            Decimal rc = (Decimal) ar.get('coins');
+            Integer rowCoins = rc == null ? 0 : rc.intValue();
+            if (withKpis) {
+                KpiCoins kc = new KpiCoins();
+                kc.kpiId = (Id) ar.get('kid');
+                String kui = (String) ar.get('kui');
+                kc.kpiName = String.isNotBlank(kui) ? kui : (String) ar.get('kname');
+                kc.coins = rowCoins;
+                gc.kpis.add(kc);
+            }
+            gc.coins += rowCoins;
+            s.totalCoins += rowCoins;
         }
 
         for (Employee__c emp : [SELECT Id, User__c FROM Employee__c WHERE User__c IN :idSet]) {
@@ -386,7 +422,13 @@ public with sharing class GAM_Battleground_Controller {
         return results;
     }
 
-    /** Single-user convenience over getUsersCoins (real-time API/app call). */
+    /** Set-of-users coins (game-wise, all games). Reads stored unless recalc=true. */
+    @AuraEnabled
+    public static List<CoinSummary> getUsersCoins(List<Id> userIds, Boolean recalc) {
+        return getCoins(userIds, null, false, recalc);
+    }
+
+    /** Single-user coins (game-wise, all games). Reads stored unless recalc=true. */
     @AuraEnabled
     public static CoinSummary getUserCoins(Id userId, Boolean recalc) {
         if (userId == null) {
@@ -394,7 +436,7 @@ public with sharing class GAM_Battleground_Controller {
             empty.asOf = Date.today(); empty.totalCoins = 0; empty.games = new List<GameCoins>();
             return empty;
         }
-        List<CoinSummary> list = getUsersCoins(new List<Id>{ userId }, recalc);
+        List<CoinSummary> list = getCoins(new List<Id>{ userId }, null, false, recalc);
         return list.isEmpty() ? null : list[0];
     }
 }
