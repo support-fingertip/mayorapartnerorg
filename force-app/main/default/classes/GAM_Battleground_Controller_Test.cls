@@ -122,13 +122,20 @@ private class GAM_Battleground_Controller_Test {
             Slab_Number__c = 1, Cutoff_Value__c = 1, Reward_Coins__c = 30);
 
         Test.startTest();
-        GAM_Battleground_Controller.recalculate(UserInfo.getUserId());
+        // recalc=true scores this one user live, then reads current coins
+        GAM_Battleground_Controller.CoinSummary summary =
+            GAM_Battleground_Controller.getUserCoins(UserInfo.getUserId(), true);
         Test.stopTest();
 
         List<Game_Score__c> scores = [SELECT Achievement__c, Coins_Awarded__c, Employee__c FROM Game_Score__c WHERE Game__c = :game.Id];
         System.assertEquals(1, scores.size(), 'One score expected');
         System.assert(scores[0].Achievement__c >= 1, 'Actual should count the seeded task');
         System.assertEquals(emp.Id, scores[0].Employee__c, 'Score should carry the resolved Employee');
+
+        System.assertEquals(30, summary.totalCoins, 'Live coins read should total the awarded coins');
+        System.assertEquals(emp.Id, summary.employeeId, 'Summary should resolve the Employee');
+        System.assertEquals(1, summary.games.size(), 'One active game in the summary');
+        System.assertEquals(0, GAM_Battleground_Controller.getUserCoins(null, false).totalCoins);
     }
 
     @isTest

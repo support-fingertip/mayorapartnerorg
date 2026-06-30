@@ -318,4 +318,58 @@ public with sharing class GAM_Battleground_Controller {
         Set<Id> ids = userId == null ? null : new Set<Id>{ userId };
         GAM_GameScore_Service.calculateScores(ids);
     }
+
+    // ===== On-demand coins read (for a real-time API/app call) =====
+    public class GameCoins {
+        @AuraEnabled public Id gameId;
+        @AuraEnabled public String gameName;
+        @AuraEnabled public Integer coins;
+    }
+    public class CoinSummary {
+        @AuraEnabled public Id userId;
+        @AuraEnabled public Id employeeId;
+        @AuraEnabled public Date asOf;
+        @AuraEnabled public Integer totalCoins;
+        @AuraEnabled public List<GameCoins> games;
+    }
+
+    /**
+     * Returns a user's CURRENT coins for today, optionally recomputing first.
+     * Lightweight single-user read meant for a real-time API/app call — NOT the
+     * batch. Pass recalc=true to score that one user live before reading, or
+     * false to just read the already-stored scores.
+     */
+    @AuraEnabled
+    public static CoinSummary getUserCoins(Id userId, Boolean recalc) {
+        if (recalc == true && userId != null) {
+            GAM_GameScore_Service.runForUser(userId);
+        }
+        CoinSummary summary = new CoinSummary();
+        summary.userId = userId;
+        summary.asOf = Date.today();
+        summary.totalCoins = 0;
+        summary.games = new List<GameCoins>();
+        if (userId == null) { return summary; }
+
+        for (AggregateResult ar : [
+            SELECT Game__c gid, MAX(Game__r.Name) gname, SUM(Coins_Awarded__c) coins
+            FROM Game_Score__c
+            WHERE Salesperson__c = :userId AND Score_Date__c = :Date.today()
+                  AND Game__r.Is_Active__c = true
+            GROUP BY Game__c
+        ]) {
+            GameCoins gc = new GameCoins();
+            gc.gameId = (Id) ar.get('gid');
+            gc.gameName = (String) ar.get('gname');
+            Decimal c = (Decimal) ar.get('coins');
+            gc.coins = c == null ? 0 : (Integer) c;
+            summary.totalCoins += gc.coins;
+            summary.games.add(gc);
+        }
+
+        for (Employee__c emp : [SELECT Id FROM Employee__c WHERE User__c = :userId LIMIT 1]) {
+            summary.employeeId = emp.Id;
+        }
+        return summary;
+    }
 }
