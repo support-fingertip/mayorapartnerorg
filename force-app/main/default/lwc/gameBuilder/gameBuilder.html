@@ -114,12 +114,36 @@
                             <div class="slds-col slds-size_1-of-2 slds-p-bottom_x-small">
                                 <lightning-combobox label="Measure" value={kpiForm.Measure__c} options={measureOptions} data-field="Measure__c" onchange={handleKpiField} placeholder="Select"></lightning-combobox>
                             </div>
-                            <div class="slds-col slds-size_1-of-2 slds-p-bottom_x-small">
-                                <lightning-combobox label="KPI Metric (source for the actual)" value={kpiForm.KPI_Metric__c} options={metricOptions} data-field="KPI_Metric__c" onchange={handleKpiField} placeholder="-- None --"></lightning-combobox>
-                            </div>
                             <div class="slds-col slds-size_1-of-2 slds-grid slds-grid_vertical-align-end slds-p-bottom_x-small">
                                 <lightning-input type="checkbox" label="Qualifier (gate, no coins)" checked={kpiForm.Is_Qualifier__c} data-field="Is_Qualifier__c" onchange={handleKpiField} class="slds-p-right_medium"></lightning-input>
                                 <lightning-input type="checkbox" label="Active" checked={kpiForm.Is_Active__c} data-field="Is_Active__c" onchange={handleKpiField}></lightning-input>
+                            </div>
+                        </div>
+
+                        <!-- How the actual is calculated (config-driven, not hardcoded) -->
+                        <div class="slds-box slds-theme_shade slds-m-top_small slds-p-around_small">
+                            <p class="slds-text-title_caps slds-m-bottom_x-small">How to calculate the actual</p>
+                            <p class="slds-text-body_small slds-text-color_weak slds-m-bottom_small">
+                                Pick the object and fields the scheduler reads to compute each user's actual for this KPI.
+                            </p>
+                            <div class="slds-grid slds-wrap slds-gutters">
+                                <div class="slds-col slds-size_1-of-2 slds-p-bottom_x-small">
+                                    <lightning-combobox label="Source Object" value={kpiForm.Source_Object__c} options={sourceObjectOptions} data-field="Source_Object__c" onchange={handleKpiField} placeholder="-- Select object --"></lightning-combobox>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2 slds-p-bottom_x-small">
+                                    <lightning-combobox label="Aggregation" value={kpiForm.Aggregation__c} options={aggregationOptions} data-field="Aggregation__c" onchange={handleKpiField} disabled={aggregationDisabled}></lightning-combobox>
+                                </div>
+                                <template if:true={needsAggregateField}>
+                                    <div class="slds-col slds-size_1-of-2 slds-p-bottom_x-small">
+                                        <lightning-combobox label="Field to Aggregate" value={kpiForm.Aggregate_Field__c} options={numberFieldOptions} data-field="Aggregate_Field__c" onchange={handleKpiField} placeholder="-- None --"></lightning-combobox>
+                                    </div>
+                                </template>
+                                <div class="slds-col slds-size_1-of-2 slds-p-bottom_x-small">
+                                    <lightning-combobox label="Date Field (for game period)" value={kpiForm.Date_Field__c} options={dateFieldOptions} data-field="Date_Field__c" onchange={handleKpiField} placeholder="-- None --"></lightning-combobox>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2 slds-p-bottom_x-small">
+                                    <lightning-combobox label="User Field (the salesperson)" value={kpiForm.User_Field__c} options={userFieldOptions} data-field="User_Field__c" onchange={handleKpiField} placeholder="-- None --"></lightning-combobox>
+                                </div>
                             </div>
                         </div>
                         <div class="slds-m-top_medium slds-text-align_right">

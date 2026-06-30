@@ -130,16 +130,26 @@ public without sharing class GAM_GameScore_Service {
             bgKpiIds.add(gk.Battleground_KPI__c);
         }
 
-        Map<Id, Id> kpiToMetric = new Map<Id, Id>();
-        for (Battleground_KPI__c bk : [SELECT Id, KPI_Metric__c FROM Battleground_KPI__c WHERE Id IN :bgKpiIds]) {
-            kpiToMetric.put(bk.Id, bk.KPI_Metric__c);
+        // Per-KPI calculation mapping: prefer the KPI's own Source Object / fields,
+        // fall back to the linked KPI_Metric for any legacy KPIs.
+        Map<Id, Src> kpiSource = new Map<Id, Src>();
+        for (Battleground_KPI__c bk : [
+            SELECT Id, Source_Object__c, Aggregation__c, Aggregate_Field__c, Date_Field__c, User_Field__c,
+                   KPI_Metric__r.Source_Object__c, KPI_Metric__r.Aggregation__c, KPI_Metric__r.Aggregate_Field__c,
+                   KPI_Metric__r.Date_Field__c, KPI_Metric__r.User_Field__c
+            FROM Battleground_KPI__c WHERE Id IN :bgKpiIds
+        ]) {
+            Src s = new Src();
+            if (String.isNotBlank(bk.Source_Object__c)) {
+                s.obj = bk.Source_Object__c; s.agg = bk.Aggregation__c; s.aggField = bk.Aggregate_Field__c;
+                s.dateField = bk.Date_Field__c; s.userField = bk.User_Field__c;
+            } else if (bk.KPI_Metric__r != null) {
+                s.obj = bk.KPI_Metric__r.Source_Object__c; s.agg = bk.KPI_Metric__r.Aggregation__c;
+                s.aggField = bk.KPI_Metric__r.Aggregate_Field__c; s.dateField = bk.KPI_Metric__r.Date_Field__c;
+                s.userField = bk.KPI_Metric__r.User_Field__c;
+            }
+            kpiSource.put(bk.Id, s);
         }
-        Set<Id> metricIds = new Set<Id>(kpiToMetric.values());
-        metricIds.remove(null);
-        Map<Id, KPI_Metric__c> metrics = new Map<Id, KPI_Metric__c>([
-            SELECT Id, Source_Object__c, Aggregation__c, Aggregate_Field__c, Date_Field__c, User_Field__c
-            FROM KPI_Metric__c WHERE Id IN :metricIds
-        ]);
 
         Date scoreDate = Date.today();
         Map<String, Game_Score__c> existing = new Map<String, Game_Score__c>();
@@ -163,7 +173,7 @@ public without sharing class GAM_GameScore_Service {
             for (Id userId : users) {
                 for (Id bgKpiId : kpiMap.keySet()) {
                     List<Game_KPI__c> slabs = kpiMap.get(bgKpiId);
-                    Decimal actual = computeActual(metrics.get(kpiToMetric.get(bgKpiId)), userId, game.Start_Date__c, game.End_Date__c);
+                    Decimal actual = computeActual(kpiSource.get(bgKpiId), userId, game.Start_Date__c, game.End_Date__c);
                     Game_KPI__c best;
                     Decimal bestCoins = -1;
                     Boolean qualified = false;
@@ -213,22 +223,31 @@ public without sharing class GAM_GameScore_Service {
         return actual >= t;
     }
 
-    private static Decimal computeActual(KPI_Metric__c metric, Id userId, Date fromDate, Date toDate) {
-        if (metric == null || String.isBlank(metric.Source_Object__c)
-            || String.isBlank(metric.User_Field__c) || String.isBlank(metric.Date_Field__c)) {
+    /** Calculation mapping for a KPI's actual (object + aggregation + filter fields). */
+    public class Src {
+        public String obj;
+        public String agg;
+        public String aggField;
+        public String dateField;
+        public String userField;
+    }
+
+    private static Decimal computeActual(Src s, Id userId, Date fromDate, Date toDate) {
+        if (s == null || String.isBlank(s.obj)
+            || String.isBlank(s.userField) || String.isBlank(s.dateField)) {
             return 0;
         }
         try {
-            String agg = String.isBlank(metric.Aggregation__c) ? 'COUNT' : metric.Aggregation__c.toUpperCase();
-            String sel = (agg == 'COUNT' || String.isBlank(metric.Aggregate_Field__c))
+            String agg = String.isBlank(s.agg) ? 'COUNT' : s.agg.toUpperCase();
+            String sel = (agg == 'COUNT' || String.isBlank(s.aggField))
                 ? 'COUNT(Id) val'
-                : agg + '(' + metric.Aggregate_Field__c + ') val';
+                : agg + '(' + s.aggField + ') val';
             Date fromD = fromDate == null ? Date.today() : fromDate;
             Date toD = toDate == null ? Date.today() : toDate;
-            String q = 'SELECT ' + sel + ' FROM ' + metric.Source_Object__c
-                + ' WHERE ' + metric.User_Field__c + ' = :userId'
-                + ' AND ' + metric.Date_Field__c + ' >= :fromD'
-                + ' AND ' + metric.Date_Field__c + ' <= :toD';
+            String q = 'SELECT ' + sel + ' FROM ' + s.obj
+                + ' WHERE ' + s.userField + ' = :userId'
+                + ' AND ' + s.dateField + ' >= :fromD'
+                + ' AND ' + s.dateField + ' <= :toD';
             List<AggregateResult> rs = Database.query(q);
             if (rs.isEmpty() || rs[0].get('val') == null) { return 0; }
             return (Decimal) rs[0].get('val');

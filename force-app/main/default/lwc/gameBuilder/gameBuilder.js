@@ -8,6 +8,8 @@ import getTeams from '@salesforce/apex/GAM_Battleground_Controller.getTeams';
 import getTeamMemberIds from '@salesforce/apex/GAM_Battleground_Controller.getTeamMemberIds';
 import saveTeamWithMembers from '@salesforce/apex/GAM_Battleground_Controller.saveTeamWithMembers';
 import getLookupOptions from '@salesforce/apex/GAM_Battleground_Controller.getLookupOptions';
+import getSourceObjects from '@salesforce/apex/GAM_Battleground_Controller.getSourceObjects';
+import getObjectFields from '@salesforce/apex/GAM_Battleground_Controller.getObjectFields';
 import saveGameWizard from '@salesforce/apex/GAM_Battleground_Controller.saveGameWizard';
 import getGameForEdit from '@salesforce/apex/GAM_Battleground_Controller.getGameForEdit';
 import recalculate from '@salesforce/apex/GAM_Battleground_Controller.recalculate';
@@ -52,7 +54,8 @@ const KPI_LIST_COLUMNS = [
 const EMPTY_KPI = {
     Id: null, Name: '', UI_Name__c: '', Category__c: '', Frequency__c: '', Objective__c: '',
     Calculation__c: '', Measure__c: '', KPI_Type__c: '', Tier__c: '', Sequence__c: null,
-    KPI_Metric__c: '', Description__c: '', Is_Qualifier__c: false, Is_Incentive__c: false, Is_Active__c: true
+    KPI_Metric__c: '', Description__c: '', Is_Qualifier__c: false, Is_Incentive__c: false, Is_Active__c: true,
+    Source_Object__c: '', Aggregation__c: 'COUNT', Aggregate_Field__c: '', Date_Field__c: '', User_Field__c: ''
 };
 
 const EMPTY_TEAM = {
@@ -69,6 +72,10 @@ export default class GameBuilder extends LightningElement {
     @track teamRows = [];
     @track userOptions = [];
     @track metricOptions = [];
+    @track sourceObjectOptions = [];
+    @track numberFieldOptions = [];
+    @track dateFieldOptions = [];
+    @track userFieldOptions = [];
     kpiById = {};
     _wiredGames;
     _wiredKpis;
@@ -129,15 +136,37 @@ export default class GameBuilder extends LightningElement {
 
     async loadLookups() {
         try {
-            const [users, metrics] = await Promise.all([
+            const [users, objects] = await Promise.all([
                 getLookupOptions({ objectApiName: 'User' }),
-                getLookupOptions({ objectApiName: 'KPI_Metric__c' })
+                getSourceObjects()
             ]);
             this.userOptions = (users || []).map(u => ({ label: u.label, value: u.value }));
-            this.metricOptions = [{ label: '-- None --', value: '' }]
-                .concat((metrics || []).map(m => ({ label: m.label, value: m.value })));
+            this.sourceObjectOptions = [{ label: '-- Select object --', value: '' }]
+                .concat((objects || []).map(o => ({ label: o.label, value: o.value })));
         } catch (e) {
             this.toast('Error', this.msg(e), 'error');
+        }
+    }
+
+    async loadFieldOptions(objectApiName) {
+        if (!objectApiName) {
+            this.numberFieldOptions = [];
+            this.dateFieldOptions = [];
+            this.userFieldOptions = [];
+            return;
+        }
+        const none = [{ label: '-- None --', value: '' }];
+        try {
+            const [nums, dates, usrs] = await Promise.all([
+                getObjectFields({ objectApiName, kind: 'number' }),
+                getObjectFields({ objectApiName, kind: 'date' }),
+                getObjectFields({ objectApiName, kind: 'user' })
+            ]);
+            this.numberFieldOptions = none.concat((nums || []).map(f => ({ label: f.label, value: f.value })));
+            this.dateFieldOptions = none.concat((dates || []).map(f => ({ label: f.label, value: f.value })));
+            this.userFieldOptions = none.concat((usrs || []).map(f => ({ label: f.label, value: f.value })));
+        } catch (e) {
+            this.toast('Error loading fields', this.msg(e), 'error');
         }
     }
 
@@ -222,18 +251,44 @@ export default class GameBuilder extends LightningElement {
     get tierOptions() { return P('Basic', 'Advanced'); }
     get kpiSaveLabel() { return this.savingKpi ? 'Saving...' : 'Save KPI'; }
 
-    handleNewKpi() { this.kpiForm = { ...EMPTY_KPI }; this.kpiSubView = 'form'; }
+    get aggregationOptions() {
+        return [
+            { label: 'Count of records', value: 'COUNT' },
+            { label: 'Sum of a field', value: 'SUM' },
+            { label: 'Average of a field', value: 'AVG' },
+            { label: 'Minimum of a field', value: 'MIN' },
+            { label: 'Maximum of a field', value: 'MAX' }
+        ];
+    }
+    get needsAggregateField() { return this.hasSourceObject && this.kpiForm.Aggregation__c && this.kpiForm.Aggregation__c !== 'COUNT'; }
+    get hasSourceObject() { return !!this.kpiForm.Source_Object__c; }
+    get aggregationDisabled() { return !this.kpiForm.Source_Object__c; }
+
+    handleNewKpi() {
+        this.kpiForm = { ...EMPTY_KPI };
+        this.numberFieldOptions = [];
+        this.dateFieldOptions = [];
+        this.userFieldOptions = [];
+        this.kpiSubView = 'form';
+    }
     handleKpiRowAction(event) {
         if (event.detail.action.name === 'edit') {
             const r = event.detail.row;
             this.kpiForm = { ...EMPTY_KPI, ...r };
             this.kpiSubView = 'form';
+            this.loadFieldOptions(r.Source_Object__c);
         }
     }
     handleKpiCancel() { this.kpiSubView = 'list'; }
     handleKpiField(event) {
         const field = event.target.dataset.field;
         const value = event.target.type === 'checkbox' ? event.target.checked : event.detail.value;
+        if (field === 'Source_Object__c') {
+            this.kpiForm = { ...this.kpiForm, Source_Object__c: value,
+                Aggregate_Field__c: '', Date_Field__c: '', User_Field__c: '' };
+            this.loadFieldOptions(value);
+            return;
+        }
         this.kpiForm = { ...this.kpiForm, [field]: value };
     }
 
@@ -245,6 +300,14 @@ export default class GameBuilder extends LightningElement {
         if (rec.Sequence__c === '' || rec.Sequence__c === null) { delete rec.Sequence__c; }
         else { rec.Sequence__c = Number(rec.Sequence__c); }
         if (!rec.KPI_Metric__c) { delete rec.KPI_Metric__c; }
+        if (!rec.Source_Object__c) {
+            delete rec.Source_Object__c; delete rec.Aggregation__c;
+            delete rec.Aggregate_Field__c; delete rec.Date_Field__c; delete rec.User_Field__c;
+        } else {
+            if (!rec.Aggregate_Field__c) { delete rec.Aggregate_Field__c; }
+            if (!rec.Date_Field__c) { delete rec.Date_Field__c; }
+            if (!rec.User_Field__c) { delete rec.User_Field__c; }
+        }
         this.savingKpi = true;
         try {
             await saveKpis({ records: [rec] });

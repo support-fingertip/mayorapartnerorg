@@ -59,10 +59,72 @@ public with sharing class GAM_Battleground_Controller {
     public static List<Battleground_KPI__c> getKpis() {
         return [SELECT Id, Name, UI_Name__c, Category__c, Frequency__c, Objective__c,
                        Calculation__c, Measure__c, KPI_Type__c, Tier__c, Sequence__c,
-                       Is_Qualifier__c, Is_Incentive__c, KPI_Metric__c, Is_Active__c
+                       Is_Qualifier__c, Is_Incentive__c, KPI_Metric__c, Is_Active__c,
+                       Source_Object__c, Aggregation__c, Aggregate_Field__c, Date_Field__c, User_Field__c
                 FROM Battleground_KPI__c ORDER BY Category__c, Sequence__c NULLS FIRST];
     }
     @AuraEnabled public static void saveKpis(List<Battleground_KPI__c> records) { upsert records; }
+
+    /** Selectable source objects (custom objects + common standard objects). */
+    @AuraEnabled(cacheable=true)
+    public static List<Map<String, String>> getSourceObjects() {
+        Set<String> standardAllow = new Set<String>{
+            'Account', 'Contact', 'Lead', 'Task', 'Event', 'Opportunity',
+            'OpportunityLineItem', 'Order', 'OrderItem', 'Case'
+        };
+        Map<String, String> byLabel = new Map<String, String>();
+        for (Schema.SObjectType t : Schema.getGlobalDescribe().values()) {
+            Schema.DescribeSObjectResult d = t.getDescribe();
+            String api = d.getName();
+            if (!d.isQueryable() || !d.isAccessible()) { continue; }
+            Boolean isCustom = d.isCustom() && api.endsWith('__c');
+            if (isCustom || standardAllow.contains(api)) {
+                byLabel.put(d.getLabel() + ' (' + api + ')', api);
+            }
+        }
+        return sortedOptions(byLabel);
+    }
+
+    /**
+     * Fields of an object filtered by kind: 'number' (numeric), 'date'
+     * (date/datetime), 'user' (User lookups), or anything else for all fields.
+     */
+    @AuraEnabled(cacheable=true)
+    public static List<Map<String, String>> getObjectFields(String objectApiName, String kind) {
+        Map<String, String> byLabel = new Map<String, String>();
+        if (String.isBlank(objectApiName)) { return new List<Map<String, String>>(); }
+        Schema.SObjectType t = Schema.getGlobalDescribe().get(objectApiName);
+        if (t == null) { return new List<Map<String, String>>(); }
+        for (Schema.SObjectField f : t.getDescribe().fields.getMap().values()) {
+            Schema.DescribeFieldResult fd = f.getDescribe();
+            if (!fd.isAccessible()) { continue; }
+            Schema.DisplayType ty = fd.getType();
+            Boolean ok;
+            if (kind == 'number') {
+                ok = ty == Schema.DisplayType.INTEGER || ty == Schema.DisplayType.DOUBLE
+                    || ty == Schema.DisplayType.CURRENCY || ty == Schema.DisplayType.PERCENT
+                    || ty == Schema.DisplayType.LONG;
+            } else if (kind == 'date') {
+                ok = ty == Schema.DisplayType.DATE || ty == Schema.DisplayType.DATETIME;
+            } else if (kind == 'user') {
+                ok = ty == Schema.DisplayType.REFERENCE && fd.getReferenceTo().contains(User.SObjectType);
+            } else {
+                ok = true;
+            }
+            if (ok) { byLabel.put(fd.getLabel() + ' (' + fd.getName() + ')', fd.getName()); }
+        }
+        return sortedOptions(byLabel);
+    }
+
+    private static List<Map<String, String>> sortedOptions(Map<String, String> byLabel) {
+        List<String> labels = new List<String>(byLabel.keySet());
+        labels.sort();
+        List<Map<String, String>> opts = new List<Map<String, String>>();
+        for (String l : labels) {
+            opts.add(new Map<String, String>{ 'label' => l, 'value' => byLabel.get(l) });
+        }
+        return opts;
+    }
 
     // ----- Games -----
     @AuraEnabled(cacheable=true)

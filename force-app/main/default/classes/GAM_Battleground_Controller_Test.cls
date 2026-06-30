@@ -86,6 +86,49 @@ private class GAM_Battleground_Controller_Test {
     }
 
     @isTest
+    static void describeMetadataHelpers() {
+        System.assert(GAM_Battleground_Controller.getSourceObjects().size() >= 1,
+            'Should list at least one selectable source object');
+        System.assert(GAM_Battleground_Controller.getObjectFields('Task', 'date').size() >= 1,
+            'Task should expose at least one date field');
+        System.assert(GAM_Battleground_Controller.getObjectFields('Task', 'user').size() >= 1,
+            'Task should expose at least one user lookup field');
+        System.assertEquals(0, GAM_Battleground_Controller.getObjectFields('', 'number').size());
+        System.assertEquals(0, GAM_Battleground_Controller.getObjectFields('No_Such_Object__x', 'number').size());
+    }
+
+    @isTest
+    static void kpiWithSourceMappingScores() {
+        Battleground_Team__c team = new Battleground_Team__c(Name = 'Map Team', Is_Active__c = true);
+        insert team;
+        insert new Team_Member__c(Battleground_Team__c = team.Id, Member__c = UserInfo.getUserId());
+
+        // KPI whose actual = count of the user's Tasks in the game window
+        Battleground_KPI__c kpi = new Battleground_KPI__c(
+            Name = 'Task Count', Category__c = 'Coverage', Is_Active__c = true,
+            Source_Object__c = 'Task', Aggregation__c = 'COUNT',
+            Date_Field__c = 'ActivityDate', User_Field__c = 'OwnerId'
+        );
+        insert kpi;
+        insert new Task(Subject = 'Call', OwnerId = UserInfo.getUserId(), ActivityDate = Date.today());
+
+        Game__c game = new Game__c(Name = 'Map Game', Type__c = 'Daily', Is_Active__c = true,
+            Start_Date__c = Date.today().addDays(-1), End_Date__c = Date.today().addDays(1));
+        insert game;
+        insert new Game_Team__c(Game__c = game.Id, Battleground_Team__c = team.Id);
+        insert new Game_KPI__c(Game__c = game.Id, Battleground_KPI__c = kpi.Id, Category__c = 'Coverage',
+            Slab_Number__c = 1, Cutoff_Value__c = 1, Reward_Coins__c = 30);
+
+        Test.startTest();
+        GAM_Battleground_Controller.recalculate(UserInfo.getUserId());
+        Test.stopTest();
+
+        List<Game_Score__c> scores = [SELECT Achievement__c, Coins_Awarded__c FROM Game_Score__c WHERE Game__c = :game.Id];
+        System.assertEquals(1, scores.size(), 'One score expected');
+        System.assert(scores[0].Achievement__c >= 1, 'Actual should count the seeded task');
+    }
+
+    @isTest
     static void schedulerScoresUsers() {
         Battleground_Team__c team = new Battleground_Team__c(Name = 'Scorers', Is_Active__c = true);
         insert team;
