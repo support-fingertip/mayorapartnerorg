@@ -334,42 +334,67 @@ public with sharing class GAM_Battleground_Controller {
     }
 
     /**
-     * Returns a user's CURRENT coins for today, optionally recomputing first.
-     * Lightweight single-user read meant for a real-time API/app call — NOT the
-     * batch. Pass recalc=true to score that one user live before reading, or
-     * false to just read the already-stored scores.
+     * Returns CURRENT coins for today for a SET of users, optionally recomputing
+     * first. Lightweight read meant for a real-time API/app call — NOT the batch.
+     * Pass recalc=true to score those users live before reading. Every requested
+     * user gets a summary back (totalCoins = 0 if they have no scores yet).
      */
     @AuraEnabled
-    public static CoinSummary getUserCoins(Id userId, Boolean recalc) {
-        if (recalc == true && userId != null) {
-            GAM_GameScore_Service.runForUser(userId);
+    public static List<CoinSummary> getUsersCoins(List<Id> userIds, Boolean recalc) {
+        List<CoinSummary> results = new List<CoinSummary>();
+        if (userIds == null || userIds.isEmpty()) { return results; }
+        Set<Id> idSet = new Set<Id>(userIds);
+        idSet.remove(null);
+        if (idSet.isEmpty()) { return results; }
+
+        if (recalc == true) {
+            GAM_GameScore_Service.calculateScores(idSet);
         }
-        CoinSummary summary = new CoinSummary();
-        summary.userId = userId;
-        summary.asOf = Date.today();
-        summary.totalCoins = 0;
-        summary.games = new List<GameCoins>();
-        if (userId == null) { return summary; }
+
+        // One summary per requested user, pre-seeded so zero-score users return too.
+        Map<Id, CoinSummary> byUser = new Map<Id, CoinSummary>();
+        for (Id uid : idSet) {
+            CoinSummary s = new CoinSummary();
+            s.userId = uid; s.asOf = Date.today(); s.totalCoins = 0; s.games = new List<GameCoins>();
+            byUser.put(uid, s);
+        }
 
         for (AggregateResult ar : [
-            SELECT Game__c gid, MAX(Game__r.Name) gname, SUM(Coins_Awarded__c) coins
+            SELECT Salesperson__c uid, Game__c gid, MAX(Game__r.Name) gname, SUM(Coins_Awarded__c) coins
             FROM Game_Score__c
-            WHERE Salesperson__c = :userId AND Score_Date__c = :Date.today()
+            WHERE Salesperson__c IN :idSet AND Score_Date__c = :Date.today()
                   AND Game__r.Is_Active__c = true
-            GROUP BY Game__c
+            GROUP BY Salesperson__c, Game__c
         ]) {
+            CoinSummary s = byUser.get((Id) ar.get('uid'));
+            if (s == null) { continue; }
             GameCoins gc = new GameCoins();
             gc.gameId = (Id) ar.get('gid');
             gc.gameName = (String) ar.get('gname');
             Decimal c = (Decimal) ar.get('coins');
             gc.coins = c == null ? 0 : (Integer) c;
-            summary.totalCoins += gc.coins;
-            summary.games.add(gc);
+            s.totalCoins += gc.coins;
+            s.games.add(gc);
         }
 
-        for (Employee__c emp : [SELECT Id FROM Employee__c WHERE User__c = :userId LIMIT 1]) {
-            summary.employeeId = emp.Id;
+        for (Employee__c emp : [SELECT Id, User__c FROM Employee__c WHERE User__c IN :idSet]) {
+            CoinSummary s = byUser.get(emp.User__c);
+            if (s != null && s.employeeId == null) { s.employeeId = emp.Id; }
         }
-        return summary;
+
+        results.addAll(byUser.values());
+        return results;
+    }
+
+    /** Single-user convenience over getUsersCoins (real-time API/app call). */
+    @AuraEnabled
+    public static CoinSummary getUserCoins(Id userId, Boolean recalc) {
+        if (userId == null) {
+            CoinSummary empty = new CoinSummary();
+            empty.asOf = Date.today(); empty.totalCoins = 0; empty.games = new List<GameCoins>();
+            return empty;
+        }
+        List<CoinSummary> list = getUsersCoins(new List<Id>{ userId }, recalc);
+        return list.isEmpty() ? null : list[0];
     }
 }

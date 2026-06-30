@@ -136,6 +136,13 @@ private class GAM_Battleground_Controller_Test {
         System.assertEquals(emp.Id, summary.employeeId, 'Summary should resolve the Employee');
         System.assertEquals(1, summary.games.size(), 'One active game in the summary');
         System.assertEquals(0, GAM_Battleground_Controller.getUserCoins(null, false).totalCoins);
+
+        // set-of-users read (recalc=false, reads stored scores)
+        List<GAM_Battleground_Controller.CoinSummary> many =
+            GAM_Battleground_Controller.getUsersCoins(new List<Id>{ UserInfo.getUserId() }, false);
+        System.assertEquals(1, many.size(), 'One summary per requested user');
+        System.assertEquals(30, many[0].totalCoins, 'Stored coins total for the user');
+        System.assertEquals(0, GAM_Battleground_Controller.getUsersCoins(new List<Id>(), true).size());
     }
 
     @isTest
