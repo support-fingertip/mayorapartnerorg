@@ -287,6 +287,7 @@ export default class GameBuilder extends LightningElement {
                     isQualifier: ka.isQualifier === true,
                     useSlabs: ka.useSlabs === true,
                     isContinuous: ka.isContinuous === true,
+                    criteria: ka.criteria || 'At least',
                     measure: ka.measure || '',
                     reward: ka.reward || '',
                     slabs
@@ -385,6 +386,16 @@ export default class GameBuilder extends LightningElement {
         this.selectedKpiIds = [...set];
     }
 
+    get criteriaOptions() {
+        return [
+            { label: 'At least (>=)', value: 'At least' },
+            { label: 'Greater than (>)', value: 'Greater than' },
+            { label: 'At most (<=)', value: 'At most' },
+            { label: 'Less than (<)', value: 'Less than' },
+            { label: 'Equal to (=)', value: 'Equal to' }
+        ];
+    }
+
     ensureParam(id) {
         if (this.kpiParams[id]) { return; }
         const k = this.kpiById[id] || {};
@@ -395,6 +406,7 @@ export default class GameBuilder extends LightningElement {
                 isQualifier: isQual,
                 useSlabs: false,
                 isContinuous: false,
+                criteria: 'At least',
                 measure: k.Measure__c || '',
                 reward: '',
                 slabs: [{ target: null, coins: null }]
@@ -416,6 +428,7 @@ export default class GameBuilder extends LightningElement {
                 notQualifier: !p.isQualifier,
                 useSlabs: p.useSlabs,
                 isContinuous: p.isContinuous,
+                criteria: p.criteria || 'At least',
                 measure: p.measure,
                 reward: p.reward,
                 showAddSlab: p.useSlabs,
@@ -513,6 +526,7 @@ export default class GameBuilder extends LightningElement {
                     isQualifier: p.isQualifier,
                     useSlabs: p.useSlabs,
                     isContinuous: p.isContinuous,
+                    criteria: p.criteria || 'At least',
                     reward: p.reward,
                     slabs: rawSlabs.map(s => ({
                         target: num(s.target),

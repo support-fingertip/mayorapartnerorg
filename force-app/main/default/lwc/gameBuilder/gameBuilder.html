@@ -230,35 +230,38 @@
                                             <span class="slds-badge slds-theme_warning slds-m-left_x-small">Qualifier — no coins</span>
                                         </template>
                                     </div>
-                                    <template if:true={card.notQualifier}>
-                                        <div class="slds-grid slds-grid_vertical-align-center">
-                                            <lightning-input type="toggle" label="Use Slabs" checked={card.useSlabs}
-                                                data-id={card.id} data-field="useSlabs" onchange={handleParamToggle}
-                                                class="slds-m-right_medium"></lightning-input>
-                                            <lightning-input type="toggle" label="Is Continuous" checked={card.isContinuous}
-                                                data-id={card.id} data-field="isContinuous" onchange={handleParamToggle}></lightning-input>
-                                        </div>
-                                    </template>
+                                    <div class="slds-grid slds-grid_vertical-align-center">
+                                        <lightning-input type="toggle" label="Use Slabs" checked={card.useSlabs}
+                                            data-id={card.id} data-field="useSlabs" onchange={handleParamToggle}
+                                            class="slds-m-right_medium"></lightning-input>
+                                        <lightning-input type="toggle" label="Is Continuous" checked={card.isContinuous}
+                                            data-id={card.id} data-field="isContinuous" onchange={handleParamToggle}></lightning-input>
+                                    </div>
                                 </div>
 
                                 <div class="slds-grid slds-gutters slds-wrap slds-m-bottom_x-small">
-                                    <div class="slds-col slds-size_1-of-2">
+                                    <div class="slds-col slds-size_1-of-3">
+                                        <lightning-combobox label="Eligibility Criteria" value={card.criteria} options={criteriaOptions}
+                                            data-id={card.id} data-field="criteria" onchange={handleParamField}
+                                            field-level-help="How the user's actual is compared to the target when scoring"></lightning-combobox>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-3">
                                         <lightning-input label="Measure" value={card.measure} data-id={card.id} data-field="measure" onchange={handleParamField} placeholder="e.g. Number, %"></lightning-input>
                                     </div>
                                     <template if:true={card.notQualifier}>
-                                        <div class="slds-col slds-size_1-of-2">
+                                        <div class="slds-col slds-size_1-of-3">
                                             <lightning-input label="Reward for the coins" value={card.reward} data-id={card.id} data-field="reward" onchange={handleParamField} placeholder="e.g. 500 voucher"></lightning-input>
                                         </div>
                                     </template>
                                 </div>
 
-                                <!-- slab rows -->
+                                <!-- slab / eligibility rows -->
                                 <template for:each={card.slabs} for:item="slab">
                                     <div key={slab.key} class="slds-grid slds-gutters slds-grid_vertical-align-end slds-m-bottom_xx-small">
                                         <div class="slds-col slds-size_1-of-2">
                                             <lightning-input type="number" step="any" label={slab.label} value={slab.target}
                                                 data-id={card.id} data-idx={slab.idx} data-field="target" onchange={handleSlabField}
-                                                placeholder="Eligibility / target"></lightning-input>
+                                                placeholder="Eligibility / target value"></lightning-input>
                                         </div>
                                         <template if:true={card.notQualifier}>
                                             <div class="slds-col slds-size_1-of-3">

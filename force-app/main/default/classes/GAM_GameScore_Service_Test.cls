@@ -29,6 +29,29 @@ private class GAM_GameScore_Service_Test {
     }
 
     @isTest
+    static void criteriaOperatorsEvaluate() {
+        System.assertEquals(true,  GAM_GameScore_Service.meetsCriteria(10, 10, 'At least'));
+        System.assertEquals(false, GAM_GameScore_Service.meetsCriteria(9,  10, 'At least'));
+        System.assertEquals(true,  GAM_GameScore_Service.meetsCriteria(11, 10, 'Greater than'));
+        System.assertEquals(false, GAM_GameScore_Service.meetsCriteria(10, 10, 'Greater than'));
+        System.assertEquals(true,  GAM_GameScore_Service.meetsCriteria(10, 10, 'At most'));
+        System.assertEquals(false, GAM_GameScore_Service.meetsCriteria(11, 10, 'At most'));
+        System.assertEquals(true,  GAM_GameScore_Service.meetsCriteria(9,  10, 'Less than'));
+        System.assertEquals(true,  GAM_GameScore_Service.meetsCriteria(10, 10, 'Equal to'));
+        System.assertEquals(true,  GAM_GameScore_Service.meetsCriteria(10, 10, null), 'Null criteria defaults to At least');
+    }
+
+    @isTest
+    static void atMostQualifierEvaluate() {
+        List<Game_KPI__c> slabs = new List<Game_KPI__c>{
+            new Game_KPI__c(KPI_Type__c = 'Qualifier', Cutoff_Value__c = 9,
+                Reward_Coins__c = 0, Eligibility_Criteria__c = 'At most')
+        };
+        GAM_GameScore_Service.SlabResult r = GAM_GameScore_Service.evaluate(8, slabs);
+        System.assertEquals(true, r.qualified, '8 is at most 9 — should qualify');
+    }
+
+    @isTest
     static void belowAllSlabsNoCoins() {
         List<Game_KPI__c> slabs = new List<Game_KPI__c>{
             new Game_KPI__c(KPI_Type__c = 'Sales', Cutoff_Value__c = 10, Reward_Coins__c = 50)

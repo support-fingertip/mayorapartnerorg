@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Eligibility_Criteria__c</fullName>
+    <label>Eligibility Criteria</label>
+    <description>Operator used to compare the user's actual against the slab target when scoring (BRD 20.1 gamification).</description>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>At least</fullName>
+                <default>true</default>
+                <label>At least (&gt;=)</label>
+            </value>
+            <value>
+                <fullName>Greater than</fullName>
+                <default>false</default>
+                <label>Greater than (&gt;)</label>
+            </value>
+            <value>
+                <fullName>At most</fullName>
+                <default>false</default>
+                <label>At most (&lt;=)</label>
+            </value>
+            <value>
+                <fullName>Less than</fullName>
+                <default>false</default>
+                <label>Less than (&lt;)</label>
+            </value>
+            <value>
+                <fullName>Equal to</fullName>
+                <default>false</default>
+                <label>Equal to (=)</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

@@ -266,6 +266,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Game_KPI__c.Eligibility_Criteria__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Game_KPI__c.Is_Continuous__c</field>
         <readable>true</readable>
     </fieldPermissions>

@@ -26,12 +26,14 @@ public without sharing class GAM_GameScore_Service {
             return result;
         }
         Game_KPI__c best;
+        Decimal bestCoins = -1;
         for (Game_KPI__c slab : slabs) {
             Decimal cutoff = slab.Cutoff_Value__c == null ? 0 : slab.Cutoff_Value__c;
-            if (achievement >= cutoff) {
-                Decimal bestCutoff = (best == null || best.Cutoff_Value__c == null) ? -1 : best.Cutoff_Value__c;
-                if (best == null || cutoff > bestCutoff) {
+            if (meetsCriteria(achievement, cutoff, slab.Eligibility_Criteria__c)) {
+                Decimal coins = slab.Reward_Coins__c == null ? 0 : slab.Reward_Coins__c;
+                if (best == null || coins > bestCoins) {
                     best = slab;
+                    bestCoins = coins;
                 }
             }
         }
@@ -61,7 +63,7 @@ public without sharing class GAM_GameScore_Service {
             }
         }
         Map<Id, Game_KPI__c> kpiById = new Map<Id, Game_KPI__c>([
-            SELECT Id, KPI_Type__c, Cutoff_Value__c, Reward_Coins__c
+            SELECT Id, KPI_Type__c, Cutoff_Value__c, Reward_Coins__c, Eligibility_Criteria__c
             FROM Game_KPI__c
             WHERE Id IN :kpiIds
         ]);
@@ -72,7 +74,8 @@ public without sharing class GAM_GameScore_Service {
                 continue;
             }
             Decimal cutoff = kpi.Cutoff_Value__c == null ? 0 : kpi.Cutoff_Value__c;
-            Boolean qualified = score.Achievement__c != null && score.Achievement__c >= cutoff;
+            Boolean qualified = score.Achievement__c != null
+                && meetsCriteria(score.Achievement__c, cutoff, kpi.Eligibility_Criteria__c);
 
             score.Is_Qualified__c = qualified;
             score.Target__c = kpi.Cutoff_Value__c;
@@ -114,7 +117,8 @@ public without sharing class GAM_GameScore_Service {
         Map<Id, Map<Id, List<Game_KPI__c>>> gameKpiSlabs = new Map<Id, Map<Id, List<Game_KPI__c>>>();
         Set<Id> bgKpiIds = new Set<Id>();
         for (Game_KPI__c gk : [
-            SELECT Id, Game__c, Battleground_KPI__c, Is_Qualifier__c, Slab_Number__c, Cutoff_Value__c, Reward_Coins__c
+            SELECT Id, Game__c, Battleground_KPI__c, Is_Qualifier__c, Slab_Number__c,
+                   Cutoff_Value__c, Reward_Coins__c, Eligibility_Criteria__c
             FROM Game_KPI__c WHERE Game__c IN :gameById.keySet()
             ORDER BY Battleground_KPI__c, Slab_Number__c NULLS FIRST
         ]) {
@@ -161,13 +165,14 @@ public without sharing class GAM_GameScore_Service {
                     List<Game_KPI__c> slabs = kpiMap.get(bgKpiId);
                     Decimal actual = computeActual(metrics.get(kpiToMetric.get(bgKpiId)), userId, game.Start_Date__c, game.End_Date__c);
                     Game_KPI__c best;
+                    Decimal bestCoins = -1;
                     Boolean qualified = false;
                     for (Game_KPI__c slab : slabs) {
                         Decimal cut = slab.Cutoff_Value__c == null ? 0 : slab.Cutoff_Value__c;
-                        if (actual >= cut) {
+                        if (meetsCriteria(actual, cut, slab.Eligibility_Criteria__c)) {
                             qualified = true;
-                            Decimal bestCut = (best == null || best.Cutoff_Value__c == null) ? -1 : best.Cutoff_Value__c;
-                            if (best == null || cut > bestCut) { best = slab; }
+                            Decimal coins = slab.Reward_Coins__c == null ? 0 : slab.Reward_Coins__c;
+                            if (best == null || coins > bestCoins) { best = slab; bestCoins = coins; }
                         }
                     }
                     Game_KPI__c ref = best != null ? best : slabs[0];
@@ -190,6 +195,22 @@ public without sharing class GAM_GameScore_Service {
 
     private static String scoreKey(Id kpiId, Id userId, Date d) {
         return String.valueOf(kpiId) + '|' + String.valueOf(userId) + '|' + String.valueOf(d);
+    }
+
+    /**
+     * Applies the slab's Eligibility Criteria operator. Defaults to "At least"
+     * (>=) when no criteria is set, preserving existing behaviour.
+     */
+    public static Boolean meetsCriteria(Decimal actual, Decimal target, String criteria) {
+        if (actual == null) { return false; }
+        Decimal t = target == null ? 0 : target;
+        String c = String.isBlank(criteria) ? 'At least' : criteria;
+        if (c == 'At least')     { return actual >= t; }
+        if (c == 'Greater than') { return actual >  t; }
+        if (c == 'At most')      { return actual <= t; }
+        if (c == 'Less than')    { return actual <  t; }
+        if (c == 'Equal to')     { return actual == t; }
+        return actual >= t;
     }
 
     private static Decimal computeActual(KPI_Metric__c metric, Id userId, Date fromDate, Date toDate) {

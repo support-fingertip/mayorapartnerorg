@@ -131,6 +131,7 @@ public with sharing class GAM_Battleground_Controller {
         @AuraEnabled public Boolean isQualifier { get; set; }
         @AuraEnabled public Boolean useSlabs { get; set; }
         @AuraEnabled public Boolean isContinuous { get; set; }
+        @AuraEnabled public String criteria { get; set; }   // eligibility operator
         @AuraEnabled public String reward { get; set; }
         @AuraEnabled public List<Slab> slabs { get; set; }
     }
@@ -165,7 +166,8 @@ public with sharing class GAM_Battleground_Controller {
         List<Id> order = new List<Id>();
         for (Game_KPI__c gk : [
             SELECT Battleground_KPI__c, Category__c, Measure__c, Is_Qualifier__c,
-                   Use_Slabs__c, Is_Continuous__c, Slab_Number__c, Cutoff_Value__c, Reward_Coins__c
+                   Use_Slabs__c, Is_Continuous__c, Eligibility_Criteria__c,
+                   Slab_Number__c, Cutoff_Value__c, Reward_Coins__c
             FROM Game_KPI__c WHERE Game__c = :gameId
             ORDER BY Battleground_KPI__c, Slab_Number__c NULLS FIRST
         ]) {
@@ -175,7 +177,8 @@ public with sharing class GAM_Battleground_Controller {
                 ka = new KpiAward();
                 ka.kpiId = gk.Battleground_KPI__c; ka.category = gk.Category__c; ka.measure = gk.Measure__c;
                 ka.isQualifier = gk.Is_Qualifier__c == true; ka.useSlabs = gk.Use_Slabs__c == true;
-                ka.isContinuous = gk.Is_Continuous__c == true; ka.reward = rewardByKpi.get(gk.Battleground_KPI__c);
+                ka.isContinuous = gk.Is_Continuous__c == true; ka.criteria = gk.Eligibility_Criteria__c;
+                ka.reward = rewardByKpi.get(gk.Battleground_KPI__c);
                 ka.slabs = new List<Slab>();
                 byKpi.put(gk.Battleground_KPI__c, ka);
                 order.add(gk.Battleground_KPI__c);
@@ -228,6 +231,7 @@ public with sharing class GAM_Battleground_Controller {
                         Game__c = game.Id, Battleground_KPI__c = k.kpiId, Category__c = k.category,
                         Measure__c = k.measure, Is_Qualifier__c = k.isQualifier == true,
                         Use_Slabs__c = k.useSlabs == true, Is_Continuous__c = k.isContinuous == true,
+                        Eligibility_Criteria__c = k.criteria,
                         Slab_Number__c = slabNo, Cutoff_Value__c = s.target, Reward_Coins__c = s.coins
                     ));
                     if (s.coins != null) { totalCoins += s.coins; }
