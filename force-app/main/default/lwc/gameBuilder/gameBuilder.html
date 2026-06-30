@@ -246,11 +246,6 @@
                                         <lightning-input label="Measure" value={card.measure} read-only
                                             field-level-help="Set when the KPI is defined (Manage KPIs)"></lightning-input>
                                     </div>
-                                    <template if:true={card.notQualifier}>
-                                        <div class="slds-col slds-size_1-of-3">
-                                            <lightning-input label="Reward for the coins" value={card.reward} data-id={card.id} data-field="reward" onchange={handleParamField} placeholder="e.g. 500 voucher"></lightning-input>
-                                        </div>
-                                    </template>
                                 </div>
 
                                 <!-- slab / eligibility rows -->
