@@ -451,7 +451,7 @@ public with sharing class GAM_Battleground_Controller {
             empty.asOf = Date.today(); empty.totalCoins = 0; empty.games = new List<GameCoins>();
             return empty;
         }
-        List<CoinSummary> list = getCoins(new List<Id>{ userId }, null, false, recalc);
-        return list.isEmpty() ? null : list[0];
+        List<CoinSummary> summaries = getCoins(new List<Id>{ userId }, null, false, recalc);
+        return summaries.isEmpty() ? null : summaries[0];
     }
 }
