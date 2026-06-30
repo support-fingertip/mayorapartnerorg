@@ -102,6 +102,8 @@ private class GAM_Battleground_Controller_Test {
         Battleground_Team__c team = new Battleground_Team__c(Name = 'Map Team', Is_Active__c = true);
         insert team;
         insert new Team_Member__c(Battleground_Team__c = team.Id, Member__c = UserInfo.getUserId());
+        Employee__c emp = new Employee__c(User__c = UserInfo.getUserId(), Channels__c = 'GT', Is_Active__c = false);
+        insert emp;
 
         // KPI whose actual = count of the user's Tasks in the game window
         Battleground_KPI__c kpi = new Battleground_KPI__c(
@@ -123,9 +125,10 @@ private class GAM_Battleground_Controller_Test {
         GAM_Battleground_Controller.recalculate(UserInfo.getUserId());
         Test.stopTest();
 
-        List<Game_Score__c> scores = [SELECT Achievement__c, Coins_Awarded__c FROM Game_Score__c WHERE Game__c = :game.Id];
+        List<Game_Score__c> scores = [SELECT Achievement__c, Coins_Awarded__c, Employee__c FROM Game_Score__c WHERE Game__c = :game.Id];
         System.assertEquals(1, scores.size(), 'One score expected');
         System.assert(scores[0].Achievement__c >= 1, 'Actual should count the seeded task');
+        System.assertEquals(emp.Id, scores[0].Employee__c, 'Score should carry the resolved Employee');
     }
 
     @isTest

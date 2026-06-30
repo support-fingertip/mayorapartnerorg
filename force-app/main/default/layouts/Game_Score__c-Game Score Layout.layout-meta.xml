@@ -24,7 +24,7 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>Target_Period__c</field>
+                <field>Employee__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>

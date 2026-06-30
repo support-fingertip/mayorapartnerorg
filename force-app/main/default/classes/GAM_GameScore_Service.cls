@@ -161,6 +161,19 @@ public without sharing class GAM_GameScore_Service {
             kpiSource.put(bk.Id, s);
         }
 
+        // Resolve each user's Employee record (Employee.User lookup) so scores
+        // carry the Employee alongside the User.
+        Map<Id, Id> employeeByUser = new Map<Id, Id>();
+        Set<Id> allUserIds = new Set<Id>();
+        for (Set<Id> s : teamMembers.values()) { allUserIds.addAll(s); }
+        if (!allUserIds.isEmpty()) {
+            for (Employee__c emp : [SELECT Id, User__c FROM Employee__c WHERE User__c IN :allUserIds]) {
+                if (emp.User__c != null && !employeeByUser.containsKey(emp.User__c)) {
+                    employeeByUser.put(emp.User__c, emp.Id);
+                }
+            }
+        }
+
         Date scoreDate = Date.today();
         Map<String, Game_Score__c> existing = new Map<String, Game_Score__c>();
         for (Game_Score__c sc : [
@@ -206,6 +219,7 @@ public without sharing class GAM_GameScore_Service {
                     sc.Target_Coins__c = ref.Reward_Coins__c;
                     sc.Is_Qualified__c = qualified;
                     sc.Coins_Awarded__c = coins;
+                    sc.Employee__c = employeeByUser.get(userId);
                     toUpsert.add(sc);
                 }
             }
