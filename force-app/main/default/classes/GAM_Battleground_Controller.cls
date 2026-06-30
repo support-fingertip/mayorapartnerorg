@@ -145,6 +145,49 @@ public with sharing class GAM_Battleground_Controller {
         @AuraEnabled public List<KpiAward> kpis { get; set; }
     }
 
+    /** Loads a whole game back into the wizard structure for editing. */
+    @AuraEnabled
+    public static GameWizard getGameForEdit(Id gameId) {
+        Game__c g = [SELECT Id, Name, Type__c, Start_Date__c, End_Date__c, Is_Active__c
+                     FROM Game__c WHERE Id = :gameId LIMIT 1];
+        GameWizard w = new GameWizard();
+        w.gameId = g.Id; w.gameName = g.Name; w.gameType = g.Type__c;
+        w.startDate = g.Start_Date__c; w.endDate = g.End_Date__c; w.isActive = g.Is_Active__c;
+        w.teamIds = new List<Id>();
+        for (Game_Team__c gt : [SELECT Battleground_Team__c FROM Game_Team__c WHERE Game__c = :gameId]) {
+            if (gt.Battleground_Team__c != null) { w.teamIds.add(gt.Battleground_Team__c); }
+        }
+        Map<Id, String> rewardByKpi = new Map<Id, String>();
+        for (Award__c a : [SELECT Battleground_KPI__c, Description__c FROM Award__c WHERE Game__c = :gameId]) {
+            rewardByKpi.put(a.Battleground_KPI__c, a.Description__c);
+        }
+        Map<Id, KpiAward> byKpi = new Map<Id, KpiAward>();
+        List<Id> order = new List<Id>();
+        for (Game_KPI__c gk : [
+            SELECT Battleground_KPI__c, Category__c, Measure__c, Is_Qualifier__c,
+                   Use_Slabs__c, Is_Continuous__c, Slab_Number__c, Cutoff_Value__c, Reward_Coins__c
+            FROM Game_KPI__c WHERE Game__c = :gameId
+            ORDER BY Battleground_KPI__c, Slab_Number__c NULLS FIRST
+        ]) {
+            if (gk.Battleground_KPI__c == null) { continue; }
+            KpiAward ka = byKpi.get(gk.Battleground_KPI__c);
+            if (ka == null) {
+                ka = new KpiAward();
+                ka.kpiId = gk.Battleground_KPI__c; ka.category = gk.Category__c; ka.measure = gk.Measure__c;
+                ka.isQualifier = gk.Is_Qualifier__c == true; ka.useSlabs = gk.Use_Slabs__c == true;
+                ka.isContinuous = gk.Is_Continuous__c == true; ka.reward = rewardByKpi.get(gk.Battleground_KPI__c);
+                ka.slabs = new List<Slab>();
+                byKpi.put(gk.Battleground_KPI__c, ka);
+                order.add(gk.Battleground_KPI__c);
+            }
+            Slab s = new Slab(); s.target = gk.Cutoff_Value__c; s.coins = gk.Reward_Coins__c;
+            ka.slabs.add(s);
+        }
+        w.kpis = new List<KpiAward>();
+        for (Id kid : order) { w.kpis.add(byKpi.get(kid)); }
+        return w;
+    }
+
     @AuraEnabled
     public static Id saveGameWizard(GameWizard wiz) {
         Game__c game = new Game__c();

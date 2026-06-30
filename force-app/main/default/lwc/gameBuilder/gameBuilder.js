@@ -9,6 +9,7 @@ import getTeamMemberIds from '@salesforce/apex/GAM_Battleground_Controller.getTe
 import saveTeamWithMembers from '@salesforce/apex/GAM_Battleground_Controller.saveTeamWithMembers';
 import getLookupOptions from '@salesforce/apex/GAM_Battleground_Controller.getLookupOptions';
 import saveGameWizard from '@salesforce/apex/GAM_Battleground_Controller.saveGameWizard';
+import getGameForEdit from '@salesforce/apex/GAM_Battleground_Controller.getGameForEdit';
 import recalculate from '@salesforce/apex/GAM_Battleground_Controller.recalculate';
 
 const P = (...v) => v.map(x => ({ label: x, value: x }));
@@ -25,7 +26,8 @@ const GAME_COLUMNS = [
     { label: 'Type', fieldName: 'Type__c' },
     { label: 'Start', fieldName: 'Start_Date__c', type: 'date-local' },
     { label: 'End', fieldName: 'End_Date__c', type: 'date-local' },
-    { label: 'Status', fieldName: 'statusLabel' }
+    { label: 'Status', fieldName: 'statusLabel' },
+    { type: 'action', typeAttributes: { rowActions: [{ label: 'Edit', name: 'edit' }] } }
 ];
 
 const TEAM_COLUMNS = [
@@ -41,8 +43,7 @@ const KPI_LIST_COLUMNS = [
     { label: 'KPI Name', fieldName: 'Name' },
     { label: 'Category', fieldName: 'Category__c' },
     { label: 'Frequency', fieldName: 'Frequency__c' },
-    { label: 'KPI Type', fieldName: 'KPI_Type__c' },
-    { label: 'Tier', fieldName: 'Tier__c' },
+    { label: 'Measure', fieldName: 'Measure__c' },
     { label: 'Qualifier', fieldName: 'Is_Qualifier__c', type: 'boolean' },
     { label: 'Active', fieldName: 'Is_Active__c', type: 'boolean' },
     { type: 'action', typeAttributes: { rowActions: [{ label: 'Edit', name: 'edit' }] } }
@@ -87,6 +88,7 @@ export default class GameBuilder extends LightningElement {
     @track savingTeam = false;
 
     // ----- Game wizard -----
+    @track editGameId = null;
     @track step = 1;
     @track gameName = '';
     @track gameType = 'Daily';
@@ -260,7 +262,46 @@ export default class GameBuilder extends LightningElement {
     handleNewGame() { this.resetWizard(); this.view = 'wizard'; }
     handleCancel() { this.view = 'list'; }
 
+    get wizardTitle() { return this.editGameId ? 'Edit Game' : 'Create Game'; }
+
+    async handleGameRowAction(event) {
+        if (event.detail.action.name !== 'edit') { return; }
+        this.resetWizard();
+        try {
+            const w = await getGameForEdit({ gameId: event.detail.row.Id });
+            this.editGameId = w.gameId;
+            this.gameName = w.gameName || '';
+            this.gameType = w.gameType || 'Daily';
+            this.startDate = w.startDate || null;
+            this.endDate = w.endDate || null;
+            this.isActive = w.isActive !== false;
+            this.selectedTeamIds = (w.teamIds || []).slice();
+            const ids = [];
+            const params = {};
+            (w.kpis || []).forEach(ka => {
+                ids.push(ka.kpiId);
+                const slabs = (ka.slabs && ka.slabs.length)
+                    ? ka.slabs.map(s => ({ target: s.target, coins: s.coins }))
+                    : [{ target: null, coins: null }];
+                params[ka.kpiId] = {
+                    isQualifier: ka.isQualifier === true,
+                    useSlabs: ka.useSlabs === true,
+                    isContinuous: ka.isContinuous === true,
+                    measure: ka.measure || '',
+                    reward: ka.reward || '',
+                    slabs
+                };
+            });
+            this.selectedKpiIds = ids;
+            this.kpiParams = params;
+            this.view = 'wizard';
+        } catch (e) {
+            this.toast('Could not open game', this.msg(e), 'error');
+        }
+    }
+
     resetWizard() {
+        this.editGameId = null;
         this.step = 1;
         this.gameName = '';
         this.gameType = 'Daily';
@@ -454,6 +495,7 @@ export default class GameBuilder extends LightningElement {
     async handleSave() {
         const num = v => (v !== null && v !== undefined && v !== '' ? Number(v) : null);
         const payload = {
+            gameId: this.editGameId || null,
             gameName: this.gameName,
             startDate: this.startDate || null,
             endDate: this.endDate || null,
@@ -482,7 +524,7 @@ export default class GameBuilder extends LightningElement {
         this.saving = true;
         try {
             await saveGameWizard({ wiz: payload });
-            this.toast('Saved', 'Game "' + this.gameName + '" created.', 'success');
+            this.toast('Saved', 'Game "' + this.gameName + '" ' + (this.editGameId ? 'updated.' : 'created.'), 'success');
             this.view = 'list';
             await refreshApex(this._wiredGames);
         } catch (e) {

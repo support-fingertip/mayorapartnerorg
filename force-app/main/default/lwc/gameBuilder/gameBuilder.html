@@ -9,7 +9,7 @@
             <lightning-button slot="actions" label="Create Game" variant="brand" icon-name="utility:add" onclick={handleNewGame}></lightning-button>
             <div class="slds-p-horizontal_small slds-p-bottom_small">
                 <template if:true={hasGames}>
-                    <lightning-datatable key-field="Id" data={games} columns={gameColumns} hide-checkbox-column></lightning-datatable>
+                    <lightning-datatable key-field="Id" data={games} columns={gameColumns} onrowaction={handleGameRowAction} hide-checkbox-column></lightning-datatable>
                 </template>
                 <template if:false={hasGames}>
                     <p class="slds-text-color_weak slds-p-vertical_medium slds-text-align_center">
@@ -106,42 +106,20 @@
                                 <lightning-input label="KPI Name" value={kpiForm.Name} data-field="Name" onchange={handleKpiField} required></lightning-input>
                             </div>
                             <div class="slds-col slds-size_1-of-2 slds-p-bottom_x-small">
-                                <lightning-input label="UI Name" value={kpiForm.UI_Name__c} data-field="UI_Name__c" onchange={handleKpiField}></lightning-input>
-                            </div>
-                            <div class="slds-col slds-size_1-of-2 slds-p-bottom_x-small">
                                 <lightning-combobox label="Category" value={kpiForm.Category__c} options={categoryOptions} data-field="Category__c" onchange={handleKpiField} required placeholder="Select"></lightning-combobox>
                             </div>
                             <div class="slds-col slds-size_1-of-2 slds-p-bottom_x-small">
                                 <lightning-combobox label="Frequency" value={kpiForm.Frequency__c} options={frequencyOptions} data-field="Frequency__c" onchange={handleKpiField} placeholder="Select"></lightning-combobox>
                             </div>
                             <div class="slds-col slds-size_1-of-2 slds-p-bottom_x-small">
-                                <lightning-combobox label="Objective" value={kpiForm.Objective__c} options={objectiveOptions} data-field="Objective__c" onchange={handleKpiField} placeholder="Select"></lightning-combobox>
-                            </div>
-                            <div class="slds-col slds-size_1-of-2 slds-p-bottom_x-small">
-                                <lightning-combobox label="Calculation" value={kpiForm.Calculation__c} options={calculationOptions} data-field="Calculation__c" onchange={handleKpiField} placeholder="Select"></lightning-combobox>
-                            </div>
-                            <div class="slds-col slds-size_1-of-2 slds-p-bottom_x-small">
                                 <lightning-combobox label="Measure" value={kpiForm.Measure__c} options={measureOptions} data-field="Measure__c" onchange={handleKpiField} placeholder="Select"></lightning-combobox>
                             </div>
                             <div class="slds-col slds-size_1-of-2 slds-p-bottom_x-small">
-                                <lightning-combobox label="KPI Type" value={kpiForm.KPI_Type__c} options={kpiTypeOptions} data-field="KPI_Type__c" onchange={handleKpiField} placeholder="Select"></lightning-combobox>
-                            </div>
-                            <div class="slds-col slds-size_1-of-2 slds-p-bottom_x-small">
-                                <lightning-combobox label="Tier" value={kpiForm.Tier__c} options={tierOptions} data-field="Tier__c" onchange={handleKpiField} placeholder="Select"></lightning-combobox>
-                            </div>
-                            <div class="slds-col slds-size_1-of-2 slds-p-bottom_x-small">
-                                <lightning-input type="number" label="Sequence" value={kpiForm.Sequence__c} data-field="Sequence__c" onchange={handleKpiField}></lightning-input>
-                            </div>
-                            <div class="slds-col slds-size_1-of-2 slds-p-bottom_x-small">
-                                <lightning-combobox label="KPI Metric (for the actual)" value={kpiForm.KPI_Metric__c} options={metricOptions} data-field="KPI_Metric__c" onchange={handleKpiField} placeholder="-- None --"></lightning-combobox>
+                                <lightning-combobox label="KPI Metric (source for the actual)" value={kpiForm.KPI_Metric__c} options={metricOptions} data-field="KPI_Metric__c" onchange={handleKpiField} placeholder="-- None --"></lightning-combobox>
                             </div>
                             <div class="slds-col slds-size_1-of-2 slds-grid slds-grid_vertical-align-end slds-p-bottom_x-small">
-                                <lightning-input type="checkbox" label="Qualifier" checked={kpiForm.Is_Qualifier__c} data-field="Is_Qualifier__c" onchange={handleKpiField} class="slds-p-right_medium"></lightning-input>
-                                <lightning-input type="checkbox" label="Incentive" checked={kpiForm.Is_Incentive__c} data-field="Is_Incentive__c" onchange={handleKpiField} class="slds-p-right_medium"></lightning-input>
+                                <lightning-input type="checkbox" label="Qualifier (gate, no coins)" checked={kpiForm.Is_Qualifier__c} data-field="Is_Qualifier__c" onchange={handleKpiField} class="slds-p-right_medium"></lightning-input>
                                 <lightning-input type="checkbox" label="Active" checked={kpiForm.Is_Active__c} data-field="Is_Active__c" onchange={handleKpiField}></lightning-input>
-                            </div>
-                            <div class="slds-col slds-size_1-of-1 slds-p-bottom_x-small">
-                                <lightning-textarea label="Description" value={kpiForm.Description__c} data-field="Description__c" onchange={handleKpiField}></lightning-textarea>
                             </div>
                         </div>
                         <div class="slds-m-top_medium slds-text-align_right">
@@ -156,6 +134,7 @@
         <!-- ===== GAME WIZARD ===== -->
         <template if:true={isWizard}>
             <div class="slds-p-around_medium">
+                <h2 class="slds-text-heading_medium slds-m-bottom_small">{wizardTitle}</h2>
                 <lightning-progress-indicator current-step={stepLabel} type="path">
                     <lightning-progress-step label="Game" value="Game"></lightning-progress-step>
                     <lightning-progress-step label="Teams" value="Teams"></lightning-progress-step>
