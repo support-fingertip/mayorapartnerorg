@@ -34,6 +34,11 @@
                 <default>false</default>
                 <label>Duration</label>
             </value>
+            <value>
+                <fullName>Time</fullName>
+                <default>false</default>
+                <label>Time</label>
+            </value>
         </valueSetDefinition>
     </valueSet>
 </CustomField>

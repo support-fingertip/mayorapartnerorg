@@ -5,15 +5,15 @@
  *                  Frequency (Daily/Weekly/Monthly), Measure (Number/Decimal/Percent/Currency/Duration)
  */
 List<List<String>> rows = new List<List<String>>{
-    new List<String>{'Day Start Time',                          'Qualifier',  'Daily',   'Number'},
+    new List<String>{'Day Start Time',                          'Qualifier',  'Daily',   'Time'},
     new List<String>{'Daily Target (Rs)',                       'Sales',      'Daily',   'Currency'},
     new List<String>{'Daily Target (StdUnit)',                  'Sales',      'Daily',   'Number'},
     new List<String>{'Total Retail Time',                       'Discipline', 'Daily',   'Duration'},
-    new List<String>{'First Call Time',                         'Discipline', 'Daily',   'Number'},
-    new List<String>{'First Physical Call Time',                'Discipline', 'Daily',   'Number'},
-    new List<String>{'Last Physical Call Time',                 'Discipline', 'Daily',   'Number'},
+    new List<String>{'First Call Time',                         'Discipline', 'Daily',   'Time'},
+    new List<String>{'First Physical Call Time',                'Discipline', 'Daily',   'Time'},
+    new List<String>{'Last Physical Call Time',                 'Discipline', 'Daily',   'Time'},
     new List<String>{'TC',                                      'Coverage',   'Daily',   'Number'},
-    new List<String>{'First PC Time',                           'Discipline', 'Daily',   'Number'},
+    new List<String>{'First PC Time',                           'Discipline', 'Daily',   'Time'},
     new List<String>{'Retailing Days',                          'Discipline', 'Monthly', 'Number'},
     new List<String>{'Physical Retail Time',                    'Discipline', 'Daily',   'Duration'},
     new List<String>{'New Outlets to be created Daily',         'Coverage',   'Daily',   'Number'},
@@ -53,29 +53,30 @@ List<List<String>> rows = new List<List<String>>{
     new List<String>{'Total Calls for Month',                   'Coverage',   'Monthly', 'Number'}
 };
 
-Set<String> existing = new Set<String>();
-for (Battleground_KPI__c k : [SELECT Name FROM Battleground_KPI__c]) {
-    if (k.Name != null) { existing.add(k.Name.toLowerCase()); }
+// Index existing sample KPIs by lower-cased name so a re-run corrects their
+// Category / Frequency / Measure instead of creating duplicates.
+Map<String, Battleground_KPI__c> existing = new Map<String, Battleground_KPI__c>();
+for (Battleground_KPI__c k : [SELECT Id, Name FROM Battleground_KPI__c]) {
+    if (k.Name != null) { existing.put(k.Name.toLowerCase(), k); }
 }
 
-List<Battleground_KPI__c> toInsert = new List<Battleground_KPI__c>();
-Integer seq = 0;
+List<Battleground_KPI__c> toUpsert = new List<Battleground_KPI__c>();
+Integer inserted = 0, updated = 0, seq = 0;
 for (List<String> r : rows) {
     seq++;
-    if (existing.contains(r[0].toLowerCase())) { continue; }
-    toInsert.add(new Battleground_KPI__c(
-        Name            = r[0],
-        UI_Name__c      = r[0],
-        Category__c     = r[1],
-        Frequency__c    = r[2],
-        Measure__c      = r[3],
-        Is_Qualifier__c = (r[1] == 'Qualifier'),
-        Is_Active__c    = true,
-        Sequence__c     = seq
-    ));
+    Battleground_KPI__c k = existing.get(r[0].toLowerCase());
+    if (k == null) { k = new Battleground_KPI__c(Name = r[0], Sequence__c = seq); inserted++; }
+    else { updated++; }
+    k.UI_Name__c      = r[0];
+    k.Category__c     = r[1];
+    k.Frequency__c    = r[2];
+    k.Measure__c      = r[3];
+    k.Is_Qualifier__c = (r[1] == 'Qualifier');
+    k.Is_Active__c    = true;
+    toUpsert.add(k);
 }
 
-if (!toInsert.isEmpty()) {
-    insert toInsert;
+if (!toUpsert.isEmpty()) {
+    upsert toUpsert;
 }
-System.debug('>>> Battleground KPIs inserted: ' + toInsert.size() + ' (skipped existing: ' + (rows.size() - toInsert.size()) + ')');
+System.debug('>>> Battleground KPIs upserted: ' + toUpsert.size() + ' (new: ' + inserted + ', updated: ' + updated + ')');

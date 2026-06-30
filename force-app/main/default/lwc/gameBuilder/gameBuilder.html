@@ -243,7 +243,8 @@
                                             field-level-help="How the user's actual is compared to the target when scoring"></lightning-combobox>
                                     </div>
                                     <div class="slds-col slds-size_1-of-3">
-                                        <lightning-input label="Measure" value={card.measure} data-id={card.id} data-field="measure" onchange={handleParamField} placeholder="e.g. Number, %"></lightning-input>
+                                        <lightning-input label="Measure" value={card.measure} read-only
+                                            field-level-help="Set when the KPI is defined (Manage KPIs)"></lightning-input>
                                     </div>
                                     <template if:true={card.notQualifier}>
                                         <div class="slds-col slds-size_1-of-3">
@@ -256,9 +257,9 @@
                                 <template for:each={card.slabs} for:item="slab">
                                     <div key={slab.key} class="slds-grid slds-gutters slds-grid_vertical-align-end slds-m-bottom_xx-small">
                                         <div class="slds-col slds-size_1-of-2">
-                                            <lightning-input type="number" step="any" label={slab.label} value={slab.target}
+                                            <lightning-input type={card.targetType} step="any" label={slab.label} value={slab.target}
                                                 data-id={card.id} data-idx={slab.idx} data-field="target" onchange={handleSlabField}
-                                                placeholder="Eligibility / target value"></lightning-input>
+                                                placeholder={card.targetPlaceholder}></lightning-input>
                                         </div>
                                         <template if:true={card.notQualifier}>
                                             <div class="slds-col slds-size_1-of-3">

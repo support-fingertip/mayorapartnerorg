@@ -217,7 +217,7 @@ export default class GameBuilder extends LightningElement {
     get frequencyOptions() { return P('Daily', 'Weekly', 'Monthly', 'Journey Cycle'); }
     get objectiveOptions() { return P('Sales', 'Coverage', 'Discipline', 'Quality', 'Other'); }
     get calculationOptions() { return P('App', 'Query'); }
-    get measureOptions() { return P('Number', 'Decimal', 'Percent', 'Currency', 'Duration'); }
+    get measureOptions() { return P('Number', 'Decimal', 'Percent', 'Currency', 'Duration', 'Time'); }
     get kpiTypeOptions() { return P('Positive', 'Negative'); }
     get tierOptions() { return P('Basic', 'Advanced'); }
     get kpiSaveLabel() { return this.savingKpi ? 'Saving...' : 'Save KPI'; }
@@ -280,13 +280,13 @@ export default class GameBuilder extends LightningElement {
             const params = {};
             (w.kpis || []).forEach(ka => {
                 ids.push(ka.kpiId);
+                const isTime = (ka.measure === 'Time');
                 const slabs = (ka.slabs && ka.slabs.length)
-                    ? ka.slabs.map(s => ({ target: s.target, coins: s.coins }))
+                    ? ka.slabs.map(s => ({ target: isTime ? this.minutesToTime(s.target) : s.target, coins: s.coins }))
                     : [{ target: null, coins: null }];
                 params[ka.kpiId] = {
                     isQualifier: ka.isQualifier === true,
                     useSlabs: ka.useSlabs === true,
-                    isContinuous: ka.isContinuous === true,
                     criteria: ka.criteria || 'At least',
                     measure: ka.measure || '',
                     reward: ka.reward || '',
@@ -420,6 +420,7 @@ export default class GameBuilder extends LightningElement {
             const k = this.kpiById[id] || {};
             const p = this.kpiParams[id] || { slabs: [{}] };
             const slabList = p.useSlabs ? p.slabs : p.slabs.slice(0, 1);
+            const isTime = (p.measure === 'Time');
             return {
                 id,
                 name: k.UI_Name__c || k.Name || id,
@@ -427,9 +428,11 @@ export default class GameBuilder extends LightningElement {
                 isQualifier: p.isQualifier,
                 notQualifier: !p.isQualifier,
                 useSlabs: p.useSlabs,
-                isContinuous: p.isContinuous,
                 criteria: p.criteria || 'At least',
-                measure: p.measure,
+                measure: p.measure || 'Number',
+                isTime,
+                targetType: isTime ? 'time' : 'number',
+                targetPlaceholder: isTime ? 'Select time' : 'Eligibility / target value',
                 reward: p.reward,
                 showAddSlab: p.useSlabs,
                 slabs: slabList.map((s, i) => ({
@@ -518,6 +521,7 @@ export default class GameBuilder extends LightningElement {
             kpis: this.selectedKpiIds.map(id => {
                 const k = this.kpiById[id] || {};
                 const p = this.kpiParams[id];
+                const isTime = (p.measure === 'Time');
                 const rawSlabs = p.useSlabs ? p.slabs : p.slabs.slice(0, 1);
                 return {
                     kpiId: id,
@@ -525,11 +529,10 @@ export default class GameBuilder extends LightningElement {
                     measure: p.measure,
                     isQualifier: p.isQualifier,
                     useSlabs: p.useSlabs,
-                    isContinuous: p.isContinuous,
                     criteria: p.criteria || 'At least',
                     reward: p.reward,
                     slabs: rawSlabs.map(s => ({
-                        target: num(s.target),
+                        target: isTime ? this.timeToMinutes(s.target) : num(s.target),
                         coins: p.isQualifier ? null : num(s.coins)
                     }))
                 };
@@ -546,6 +549,24 @@ export default class GameBuilder extends LightningElement {
         } finally {
             this.saving = false;
         }
+    }
+
+    // time-of-day <-> minutes-from-midnight (Cutoff_Value__c is numeric)
+    timeToMinutes(t) {
+        if (t === null || t === undefined || t === '') { return null; }
+        const parts = String(t).split(':');
+        const h = Number(parts[0] || 0);
+        const m = Number(parts[1] || 0);
+        if (isNaN(h) || isNaN(m)) { return null; }
+        return h * 60 + m;
+    }
+    minutesToTime(n) {
+        if (n === null || n === undefined || n === '') { return null; }
+        const v = Number(n);
+        if (isNaN(v)) { return null; }
+        const h = Math.floor(v / 60);
+        const m = Math.round(v % 60);
+        return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':00.000';
     }
 
     toast(title, message, variant) { this.dispatchEvent(new ShowToastEvent({ title, message, variant })); }
