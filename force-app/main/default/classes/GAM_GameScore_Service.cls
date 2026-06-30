@@ -92,6 +92,16 @@ public without sharing class GAM_GameScore_Service {
      * each game KPI, and upserts Game Score keyed by (game KPI, user, today).
      * Pass null to score all users, or a set of user Ids to score just those.
      */
+    /** Calculate scores for every team member in every active game. */
+    public static void runForAll() {
+        calculateScores(null);
+    }
+
+    /** Calculate scores for a single salesperson across the active games they're in. */
+    public static void runForUser(Id userId) {
+        calculateScores(userId == null ? null : new Set<Id>{ userId });
+    }
+
     public static void calculateScores(Set<Id> userIds) {
         Map<Id, Game__c> gameById = new Map<Id, Game__c>([
             SELECT Id, Type__c, Start_Date__c, End_Date__c FROM Game__c WHERE Is_Active__c = true

@@ -95,4 +95,17 @@ private class GAM_GameScore_Service_Test {
         Test.stopTest();
         System.assertNotEquals(null, jobId, 'Schedulable should return a job id');
     }
+
+    @isTest
+    static void scheduleDailyAndRunHelpers() {
+        Test.startTest();
+        String jobId = GAM_GameScore_Scheduler.scheduleDaily('GAM Daily Test', 6, 30);
+        GAM_GameScore_Service.runForAll();
+        GAM_GameScore_Service.runForUser(UserInfo.getUserId());
+        GAM_GameScore_Service.runForUser(null);
+        Test.stopTest();
+        System.assertNotEquals(null, jobId, 'scheduleDaily should return a job id');
+        CronTrigger ct = [SELECT CronExpression FROM CronTrigger WHERE Id = :jobId];
+        System.assertEquals('0 30 6 * * ?', ct.CronExpression, 'Cron should reflect 06:30 daily');
+    }
 }
