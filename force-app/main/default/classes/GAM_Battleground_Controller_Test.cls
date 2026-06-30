@@ -157,6 +157,42 @@ private class GAM_Battleground_Controller_Test {
     }
 
     @isTest
+    static void monthlyGameScoresByMonth() {
+        Battleground_Team__c team = new Battleground_Team__c(Name = 'Month Team', Is_Active__c = true);
+        insert team;
+        insert new Team_Member__c(Battleground_Team__c = team.Id, Member__c = UserInfo.getUserId());
+
+        Battleground_KPI__c kpi = new Battleground_KPI__c(
+            Name = 'Monthly Tasks', Category__c = 'Coverage', Is_Active__c = true,
+            Source_Object__c = 'Task', Aggregation__c = 'COUNT',
+            Date_Field__c = 'ActivityDate', User_Field__c = 'OwnerId'
+        );
+        insert kpi;
+        insert new Task(Subject = 'Visit', OwnerId = UserInfo.getUserId(), ActivityDate = Date.today());
+
+        Date monthStart = Date.today().toStartOfMonth();
+        Game__c game = new Game__c(Name = 'Monthly Game', Type__c = 'Monthly', Is_Active__c = true,
+            Start_Date__c = monthStart, End_Date__c = monthStart.addMonths(1).addDays(-1));
+        insert game;
+        insert new Game_Team__c(Game__c = game.Id, Battleground_Team__c = team.Id);
+        insert new Game_KPI__c(Game__c = game.Id, Battleground_KPI__c = kpi.Id, Category__c = 'Coverage',
+            Slab_Number__c = 1, Cutoff_Value__c = 1, Reward_Coins__c = 40);
+
+        Test.startTest();
+        List<GAM_Battleground_Controller.CoinSummary> res =
+            GAM_Battleground_Controller.getCoins(new List<Id>{ UserInfo.getUserId() }, game.Id, true, true);
+        Test.stopTest();
+
+        // Stored on the month's row, not today's (unless today is the 1st)
+        System.assertEquals(1, [SELECT COUNT() FROM Game_Score__c
+            WHERE Game__c = :game.Id AND Score_Date__c = :monthStart]);
+        System.assertEquals(1, res.size());
+        System.assertEquals(1, res[0].games.size(), 'The monthly game is returned');
+        System.assertEquals(40, res[0].games[0].coins, 'Month coins');
+        System.assertEquals(40, res[0].games[0].kpis[0].coins, 'KPI coins for the month');
+    }
+
+    @isTest
     static void schedulerScoresUsers() {
         Battleground_Team__c team = new Battleground_Team__c(Name = 'Scorers', Is_Active__c = true);
         insert team;

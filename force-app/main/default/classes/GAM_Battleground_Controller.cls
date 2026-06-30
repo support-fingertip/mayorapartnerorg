@@ -371,43 +371,58 @@ public with sharing class GAM_Battleground_Controller {
             byUser.put(uid, s);
         }
 
-        Date scoreDate = Date.today();
-        String q = 'SELECT Salesperson__c uid, Game__c gid, MAX(Game__r.Name) gname';
-        if (withKpis) {
-            q += ', Game_KPI__r.Battleground_KPI__c kid'
-               + ', MAX(Game_KPI__r.Battleground_KPI__r.UI_Name__c) kui'
-               + ', MAX(Game_KPI__r.Battleground_KPI__r.Name) kname';
-        }
-        q += ', SUM(Coins_Awarded__c) coins FROM Game_Score__c'
-           + ' WHERE Salesperson__c IN :idSet AND Score_Date__c = :scoreDate AND Game__r.Is_Active__c = true';
+        // Coins are read for the period that matches each game's Type: a Daily
+        // game uses today's row; a Monthly game uses the current month's row
+        // (Score_Date = first of month). Pull both candidate periods, then keep
+        // each row only if it matches its game's type.
+        Date today = Date.today();
+        Date monthStart = today.toStartOfMonth();
+        Set<Date> periodDates = new Set<Date>{ today, monthStart };
+        String q = 'SELECT Salesperson__c, Game__c, Game__r.Name, Game__r.Type__c, Score_Date__c, Coins_Awarded__c, '
+            + 'Game_KPI__r.Battleground_KPI__c, Game_KPI__r.Battleground_KPI__r.UI_Name__c, '
+            + 'Game_KPI__r.Battleground_KPI__r.Name '
+            + 'FROM Game_Score__c WHERE Salesperson__c IN :idSet AND Game__r.Is_Active__c = true '
+            + 'AND Score_Date__c IN :periodDates';
         if (gameId != null) { q += ' AND Game__c = :gameId'; }
-        q += ' GROUP BY Salesperson__c, Game__c';
-        if (withKpis) { q += ', Game_KPI__r.Battleground_KPI__c'; }
 
         Map<Id, Map<Id, GameCoins>> gameByUser = new Map<Id, Map<Id, GameCoins>>();
-        for (AggregateResult ar : Database.query(q)) {
-            CoinSummary s = byUser.get((Id) ar.get('uid'));
+        Map<String, KpiCoins> kpiByKey = new Map<String, KpiCoins>();
+        for (Game_Score__c sc : Database.query(q)) {
+            CoinSummary s = byUser.get(sc.Salesperson__c);
             if (s == null) { continue; }
-            Id gid = (Id) ar.get('gid');
+            String gtype = sc.Game__r != null ? sc.Game__r.Type__c : null;
+            Date expected = gtype == 'Monthly' ? monthStart : today;
+            if (sc.Score_Date__c != expected) { continue; }   // wrong period for this game's type
+
+            Id gid = sc.Game__c;
             if (!gameByUser.containsKey(s.userId)) { gameByUser.put(s.userId, new Map<Id, GameCoins>()); }
             Map<Id, GameCoins> gmap = gameByUser.get(s.userId);
             GameCoins gc = gmap.get(gid);
             if (gc == null) {
                 gc = new GameCoins();
-                gc.gameId = gid; gc.gameName = (String) ar.get('gname'); gc.coins = 0;
+                gc.gameId = gid; gc.gameName = sc.Game__r != null ? sc.Game__r.Name : null; gc.coins = 0;
                 gc.kpis = withKpis ? new List<KpiCoins>() : null;
                 gmap.put(gid, gc);
                 s.games.add(gc);
             }
-            Decimal rc = (Decimal) ar.get('coins');
-            Integer rowCoins = rc == null ? 0 : rc.intValue();
+            Integer rowCoins = sc.Coins_Awarded__c == null ? 0 : sc.Coins_Awarded__c.intValue();
             if (withKpis) {
-                KpiCoins kc = new KpiCoins();
-                kc.kpiId = (Id) ar.get('kid');
-                String kui = (String) ar.get('kui');
-                kc.kpiName = String.isNotBlank(kui) ? kui : (String) ar.get('kname');
-                kc.coins = rowCoins;
-                gc.kpis.add(kc);
+                Id kid = sc.Game_KPI__r != null ? sc.Game_KPI__r.Battleground_KPI__c : null;
+                String kkey = s.userId + '|' + gid + '|' + kid;
+                KpiCoins kc = kpiByKey.get(kkey);
+                if (kc == null) {
+                    kc = new KpiCoins();
+                    kc.kpiId = kid; kc.coins = 0;
+                    String kui, kn;
+                    if (sc.Game_KPI__r != null && sc.Game_KPI__r.Battleground_KPI__r != null) {
+                        kui = sc.Game_KPI__r.Battleground_KPI__r.UI_Name__c;
+                        kn = sc.Game_KPI__r.Battleground_KPI__r.Name;
+                    }
+                    kc.kpiName = String.isNotBlank(kui) ? kui : kn;
+                    kpiByKey.put(kkey, kc);
+                    gc.kpis.add(kc);
+                }
+                kc.coins += rowCoins;
             }
             gc.coins += rowCoins;
             s.totalCoins += rowCoins;

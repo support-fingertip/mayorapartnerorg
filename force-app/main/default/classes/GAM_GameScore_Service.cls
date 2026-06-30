@@ -174,11 +174,16 @@ public without sharing class GAM_GameScore_Service {
             }
         }
 
-        Date scoreDate = Date.today();
+        // Scoring period depends on the game Type: a Daily game scores today's
+        // window keyed to today; a Monthly game scores the current month's window
+        // keyed to the first of the month (one row per period).
+        Date today = Date.today();
+        Date monthStart = today.toStartOfMonth();
+        Set<Date> rowDates = new Set<Date>{ today, monthStart };
         Map<String, Game_Score__c> existing = new Map<String, Game_Score__c>();
         for (Game_Score__c sc : [
             SELECT Id, Game_KPI__c, Salesperson__c, Score_Date__c
-            FROM Game_Score__c WHERE Game__c IN :gameById.keySet() AND Score_Date__c = :scoreDate
+            FROM Game_Score__c WHERE Game__c IN :gameById.keySet() AND Score_Date__c IN :rowDates
         ]) {
             existing.put(scoreKey(sc.Game_KPI__c, sc.Salesperson__c, sc.Score_Date__c), sc);
         }
@@ -193,10 +198,19 @@ public without sharing class GAM_GameScore_Service {
             for (Id tId : teamsForGame) {
                 if (teamMembers.containsKey(tId)) { users.addAll(teamMembers.get(tId)); }
             }
+
+            // Window + storage date for this game's Type, bounded by the game dates.
+            Boolean monthly = game.Type__c == 'Monthly';
+            Date scoreDate = monthly ? monthStart : today;
+            Date winStart = monthly ? monthStart : today;
+            Date winEnd = monthly ? monthStart.addMonths(1).addDays(-1) : today;
+            if (game.Start_Date__c != null && winStart < game.Start_Date__c) { winStart = game.Start_Date__c; }
+            if (game.End_Date__c != null && winEnd > game.End_Date__c) { winEnd = game.End_Date__c; }
+
             for (Id userId : users) {
                 for (Id bgKpiId : kpiMap.keySet()) {
                     List<Game_KPI__c> slabs = kpiMap.get(bgKpiId);
-                    Decimal actual = computeActual(kpiSource.get(bgKpiId), userId, game.Start_Date__c, game.End_Date__c);
+                    Decimal actual = computeActual(kpiSource.get(bgKpiId), userId, winStart, winEnd);
                     Game_KPI__c best;
                     Decimal bestCoins = -1;
                     Boolean qualified = false;
