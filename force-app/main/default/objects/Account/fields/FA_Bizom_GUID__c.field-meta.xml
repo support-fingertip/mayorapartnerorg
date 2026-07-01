@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>FA_Bizom_GUID__c</fullName>
+    <label>FA / Bizom GUID</label>
+    <externalId>true</externalId>
+    <length>60</length>
+    <required>false</required>
+    <type>Text</type>
+    <unique>false</unique>
+    <trackTrending>false</trackTrending>
+</CustomField>

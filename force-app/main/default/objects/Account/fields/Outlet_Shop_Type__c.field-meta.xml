@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Outlet_Shop_Type__c</fullName>
+    <label>Outlet / Shop Type</label>
+    <required>false</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value><fullName>Bakeries</fullName><default>false</default><label>Bakeries</label></value>
+            <value><fullName>School/College Canteen</fullName><default>false</default><label>School/College Canteen</label></value>
+            <value><fullName>Groceries/General Store</fullName><default>false</default><label>Groceries/General Store</label></value>
+            <value><fullName>Pan Shop</fullName><default>false</default><label>Pan Shop</label></value>
+            <value><fullName>Stand Alone Supermarket</fullName><default>false</default><label>Stand Alone Supermarket</label></value>
+            <value><fullName>Wholesale</fullName><default>false</default><label>Wholesale</label></value>
+            <value><fullName>Tea Stall</fullName><default>false</default><label>Tea Stall</label></value>
+            <value><fullName>Stationery/Fancy Store</fullName><default>false</default><label>Stationery/Fancy Store</label></value>
+            <value><fullName>National Key Accounts</fullName><default>false</default><label>National Key Accounts</label></value>
+            <value><fullName>Regional Key Accounts</fullName><default>false</default><label>Regional Key Accounts</label></value>
+            <value><fullName>Hospital/Offices/Railway Canteen</fullName><default>false</default><label>Hospital/Offices/Railway Canteen</label></value>
+            <value><fullName>Hot Spot</fullName><default>false</default><label>Hot Spot</label></value>
+            <value><fullName>Hawker</fullName><default>false</default><label>Hawker</label></value>
+            <value><fullName>Medical Shop</fullName><default>false</default><label>Medical Shop</label></value>
+        </valueSetDefinition>
+    </valueSet>
+    <trackTrending>false</trackTrending>
+</CustomField>

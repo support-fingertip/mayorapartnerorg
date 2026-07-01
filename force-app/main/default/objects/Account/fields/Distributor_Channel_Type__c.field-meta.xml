@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Distributor_Channel_Type__c</fullName>
+    <label>Distributor Channel Type</label>
+    <required>false</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value><fullName>DB-RT</fullName><default>false</default><label>DB-RT</label></value>
+            <value><fullName>DB-Wh</fullName><default>false</default><label>DB-Wh</label></value>
+            <value><fullName>DB-SA</fullName><default>false</default><label>DB-SA</label></value>
+            <value><fullName>DB-I</fullName><default>false</default><label>DB-I</label></value>
+            <value><fullName>SS</fullName><default>false</default><label>SS</label></value>
+            <value><fullName>SD</fullName><default>false</default><label>SD</label></value>
+            <value><fullName>WS</fullName><default>false</default><label>WS</label></value>
+            <value><fullName>MT</fullName><default>false</default><label>MT</label></value>
+            <value><fullName>MT-Direct</fullName><default>false</default><label>MT-Direct</label></value>
+            <value><fullName>INS</fullName><default>false</default><label>INS</label></value>
+        </valueSetDefinition>
+    </valueSet>
+    <trackTrending>false</trackTrending>
+</CustomField>
