@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Price_Level__c</fullName>
+    <label>Price Level</label>
+    <description>Cascade level for the price tier (BRD 10.1-10.3).</description>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value><fullName>Distributor-Specific</fullName><default>false</default><label>Distributor-Specific</label></value>
+            <value><fullName>State &amp; Channel</fullName><default>false</default><label>State &amp; Channel</label></value>
+            <value><fullName>Channel</fullName><default>false</default><label>Channel</label></value>
+            <value><fullName>Nation</fullName><default>false</default><label>Nation</label></value>
+            <value><fullName>State</fullName><default>false</default><label>State</label></value>
+            <value><fullName>Distributor-Type</fullName><default>false</default><label>Distributor-Type</label></value>
+            <value><fullName>Outlet-Type</fullName><default>false</default><label>Outlet-Type</label></value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

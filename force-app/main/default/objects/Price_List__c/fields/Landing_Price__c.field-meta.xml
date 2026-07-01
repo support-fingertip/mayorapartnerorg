@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Landing_Price__c</fullName>
+    <label>Landing Price</label>
+    <description>Computed SS landing price: RBP cascaded by ZSD1 then ZSD2 (BRD 10.1).</description>
+    <formula>RBP_Price__c * (1 - (DB_SD_Margin__c / 100)) * (1 - (SS_Margin__c / 100))</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Currency</type>
+    <precision>18</precision>
+    <scale>2</scale>
+</CustomField>
