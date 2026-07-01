@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Eligible_Distributor__c</fullName>
+    <label>Eligible Distributor</label>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <required>false</required>
+    <referenceTo>Account</referenceTo>
+    <relationshipName>Scheme_Eligible_Distributor</relationshipName>
+    <type>Lookup</type>
+    <trackTrending>false</trackTrending>
+</CustomField>

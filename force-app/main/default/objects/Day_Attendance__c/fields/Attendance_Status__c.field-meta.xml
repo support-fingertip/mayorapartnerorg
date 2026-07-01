@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Attendance_Status__c</fullName>
+    <label>Attendance Status</label>
+    <required>false</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value><fullName>Retailing (R)</fullName><default>false</default><label>Retailing (R)</label></value>
+            <value><fullName>Official (O)</fullName><default>false</default><label>Official (O)</label></value>
+            <value><fullName>Leave (L)</fullName><default>false</default><label>Leave (L)</label></value>
+            <value><fullName>Holiday (H)</fullName><default>false</default><label>Holiday (H)</label></value>
+            <value><fullName>Absent (A)</fullName><default>false</default><label>Absent (A)</label></value>
+            <value><fullName>Weekly Off (W)</fullName><default>false</default><label>Weekly Off (W)</label></value>
+        </valueSetDefinition>
+    </valueSet>
+    <trackTrending>false</trackTrending>
+</CustomField>

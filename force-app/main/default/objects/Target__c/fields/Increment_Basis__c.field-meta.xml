@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Increment_Basis__c</fullName>
+    <label>Increment Basis</label>
+    <required>false</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value><fullName>Last JC Target</fullName><default>false</default><label>Last JC Target</label></value>
+            <value><fullName>Last JC Actual</fullName><default>false</default><label>Last JC Actual</label></value>
+        </valueSetDefinition>
+    </valueSet>
+    <trackTrending>false</trackTrending>
+</CustomField>

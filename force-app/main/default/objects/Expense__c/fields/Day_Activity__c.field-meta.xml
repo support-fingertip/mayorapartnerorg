@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Day_Activity__c</fullName>
+    <label>Day Activity</label>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <required>false</required>
+    <referenceTo>Day_Attendance__c</referenceTo>
+    <relationshipName>Expense_Day_Activity</relationshipName>
+    <type>Lookup</type>
+    <trackTrending>false</trackTrending>
+</CustomField>

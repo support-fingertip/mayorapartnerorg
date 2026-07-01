@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Vehicle_Reading_End__c</fullName>
+    <label>Vehicle Reading End</label>
+    <required>false</required>
+    <type>Number</type>
+    <precision>10</precision>
+    <scale>0</scale>
+    <trackTrending>false</trackTrending>
+</CustomField>

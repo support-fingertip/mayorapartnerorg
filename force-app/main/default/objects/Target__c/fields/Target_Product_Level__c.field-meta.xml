@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Target_Product_Level__c</fullName>
+    <label>Target Product Level</label>
+    <required>false</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value><fullName>Brand</fullName><default>false</default><label>Brand</label></value>
+            <value><fullName>Sub Brand</fullName><default>false</default><label>Sub Brand</label></value>
+            <value><fullName>Brand Alias</fullName><default>false</default><label>Brand Alias</label></value>
+            <value><fullName>SKU</fullName><default>false</default><label>SKU</label></value>
+        </valueSetDefinition>
+    </valueSet>
+    <trackTrending>false</trackTrending>
+</CustomField>

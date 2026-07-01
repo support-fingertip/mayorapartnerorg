@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Expense_Config__c</fullName>
+    <label>Expense Config</label>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <required>false</required>
+    <referenceTo>DA_Policy__c</referenceTo>
+    <relationshipName>Expense_Expense_Config</relationshipName>
+    <type>Lookup</type>
+    <trackTrending>false</trackTrending>
+</CustomField>

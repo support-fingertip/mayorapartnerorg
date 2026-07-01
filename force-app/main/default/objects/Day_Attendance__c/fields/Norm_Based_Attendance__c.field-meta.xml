@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Norm_Based_Attendance__c</fullName>
+    <label>Norm-Based Attendance</label>
+    <required>false</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value><fullName>Present</fullName><default>false</default><label>Present</label></value>
+            <value><fullName>Half Day</fullName><default>false</default><label>Half Day</label></value>
+            <value><fullName>Absent</fullName><default>false</default><label>Absent</label></value>
+        </valueSetDefinition>
+    </valueSet>
+    <trackTrending>false</trackTrending>
+</CustomField>

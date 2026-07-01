@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Current_User__c</fullName>
+    <label>Current User</label>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <required>false</required>
+    <referenceTo>User</referenceTo>
+    <relationshipName>Position_Current_User</relationshipName>
+    <type>Lookup</type>
+    <trackTrending>false</trackTrending>
+</CustomField>

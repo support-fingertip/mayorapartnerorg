@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>check_out_comments__c</fullName>
+    <label>check out comments</label>
+    <required>false</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value><fullName>Product-related</fullName><default>false</default><label>Product-related</label></value>
+            <value><fullName>DB-related</fullName><default>false</default><label>DB-related</label></value>
+            <value><fullName>Competitor-related</fullName><default>false</default><label>Competitor-related</label></value>
+            <value><fullName>Outlet-related</fullName><default>false</default><label>Outlet-related</label></value>
+            <value><fullName>Other</fullName><default>false</default><label>Other</label></value>
+        </valueSetDefinition>
+    </valueSet>
+    <trackTrending>false</trackTrending>
+</CustomField>

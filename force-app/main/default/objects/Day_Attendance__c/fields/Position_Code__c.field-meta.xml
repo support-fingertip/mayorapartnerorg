@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Position_Code__c</fullName>
+    <label>Position Code</label>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <required>false</required>
+    <referenceTo>Position__c</referenceTo>
+    <relationshipName>DayAttendance_Position_Code</relationshipName>
+    <type>Lookup</type>
+    <trackTrending>false</trackTrending>
+</CustomField>
