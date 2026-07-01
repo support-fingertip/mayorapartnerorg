@@ -1,0 +1,114 @@
+<template>
+    <lightning-card title="Target vs Actuals (BRD §13)" icon-name="standard:goals">
+
+        <!-- ===== LIST ===== -->
+        <template if:true={isList}>
+            <lightning-button slot="actions" label="Recalculate All" icon-name="utility:refresh"
+                onclick={handleRecalcAll} class="slds-m-right_x-small"></lightning-button>
+            <lightning-button slot="actions" label="New Target" variant="brand" icon-name="utility:add"
+                onclick={handleNew}></lightning-button>
+
+            <div class="slds-p-horizontal_small slds-p-bottom_small">
+                <p class="slds-text-color_weak slds-p-bottom_small">
+                    Tiered targets — P1 (SS/DB) &amp; P2 (SD) actuals from invoices, Secondary by user &amp; Outlet
+                    from secondary orders, scoped by product hierarchy over the JC period.
+                </p>
+                <template if:true={hasRows}>
+                    <lightning-datatable key-field="Id" data={rows} columns={columns}
+                        onrowaction={handleRowAction} hide-checkbox-column></lightning-datatable>
+                </template>
+                <template if:false={hasRows}>
+                    <p class="slds-text-color_weak slds-p-vertical_medium slds-text-align_center">
+                        No tiered targets yet — click <strong>New Target</strong> to create one.
+                    </p>
+                </template>
+            </div>
+        </template>
+
+        <!-- ===== FORM ===== -->
+        <template if:true={isForm}>
+            <div class="slds-p-around_medium">
+                <h2 class="slds-text-heading_small slds-m-bottom_medium">{formTitle}</h2>
+                <div class="slds-grid slds-wrap slds-gutters">
+                    <div class="slds-col slds-size_1-of-3 slds-p-bottom_x-small">
+                        <lightning-combobox label="Tier" value={form.Tier__c} options={tierOptions}
+                            data-field="Tier__c" onchange={handleField}></lightning-combobox>
+                    </div>
+                    <div class="slds-col slds-size_1-of-3 slds-p-bottom_x-small">
+                        <lightning-combobox label="Target Type" value={form.Target_Type__c} options={targetTypeOptions}
+                            data-field="Target_Type__c" onchange={handleField}></lightning-combobox>
+                    </div>
+                    <div class="slds-col slds-size_1-of-3 slds-p-bottom_x-small">
+                        <lightning-combobox label="Status" value={form.Status__c} options={statusOptions}
+                            data-field="Status__c" onchange={handleField}></lightning-combobox>
+                    </div>
+
+                    <!-- Target For: customer (P1/P2/Outlet) or user (Secondary) -->
+                    <template if:true={isCustomerTier}>
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_x-small">
+                            <lightning-combobox label={customerLabel} value={form.Customer__c} options={customerOptions}
+                                data-field="Customer__c" onchange={handleField} placeholder="Select account"></lightning-combobox>
+                        </div>
+                    </template>
+                    <template if:true={isSecondary}>
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_x-small">
+                            <lightning-combobox label="User (Salesperson)" value={form.User__c} options={userOptions}
+                                data-field="User__c" onchange={handleField} placeholder="Select user"></lightning-combobox>
+                        </div>
+                    </template>
+
+                    <div class="slds-col slds-size_1-of-2 slds-p-bottom_x-small">
+                        <lightning-combobox label="KPI" value={form.KPI__c} options={kpiOptions}
+                            data-field="KPI__c" onchange={handleField} placeholder="Select KPI"></lightning-combobox>
+                    </div>
+
+                    <!-- Product hierarchy level + value -->
+                    <div class="slds-col slds-size_1-of-2 slds-p-bottom_x-small">
+                        <lightning-combobox label="Product Level" value={form.Target_Product_Level__c} options={levelOptions}
+                            data-field="Target_Product_Level__c" onchange={handleField}></lightning-combobox>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-p-bottom_x-small">
+                        <template if:true={isBrandLevel}>
+                            <lightning-input label="Brand" value={form.Brand__c} data-field="Brand__c" onchange={handleField}></lightning-input>
+                        </template>
+                        <template if:true={isSubBrandLevel}>
+                            <lightning-input label="Sub Brand" value={form.Sub_Brand__c} data-field="Sub_Brand__c" onchange={handleField}></lightning-input>
+                        </template>
+                        <template if:true={isAliasLevel}>
+                            <lightning-input label="Brand Alias" value={form.Brand_Alias__c} data-field="Brand_Alias__c" onchange={handleField}></lightning-input>
+                        </template>
+                        <template if:true={isSkuLevel}>
+                            <lightning-combobox label="Product (SKU)" value={form.Product_Ext__c} options={productOptions}
+                                data-field="Product_Ext__c" onchange={handleField} placeholder="Select product"></lightning-combobox>
+                        </template>
+                    </div>
+
+                    <!-- Period -->
+                    <div class="slds-col slds-size_1-of-3 slds-p-bottom_x-small">
+                        <lightning-combobox label="JC / Period" value={form.JC__c} options={periodOptions}
+                            data-field="JC__c" onchange={handleField}></lightning-combobox>
+                    </div>
+                    <div class="slds-col slds-size_1-of-3 slds-p-bottom_x-small">
+                        <lightning-input type="date" label="Period Start" value={form.Period_Start__c}
+                            data-field="Period_Start__c" onchange={handleField}></lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_1-of-3 slds-p-bottom_x-small">
+                        <lightning-input type="date" label="Period End" value={form.Period_End__c}
+                            data-field="Period_End__c" onchange={handleField}></lightning-input>
+                    </div>
+
+                    <div class="slds-col slds-size_1-of-3 slds-p-bottom_x-small">
+                        <lightning-input type="number" label="Target Value" value={form.Target_Value__c}
+                            data-field="Target_Value__c" onchange={handleField}></lightning-input>
+                    </div>
+                </div>
+
+                <div class="slds-m-top_medium slds-text-align_right">
+                    <lightning-button label="Cancel" onclick={handleBack} class="slds-m-right_x-small"></lightning-button>
+                    <lightning-button label={saveLabel} variant="brand" onclick={handleSave} disabled={saving}></lightning-button>
+                </div>
+            </div>
+        </template>
+
+    </lightning-card>
+</template>

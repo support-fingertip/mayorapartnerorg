@@ -27,6 +27,10 @@
         <apexClass>TAM_TargetActuals_Batch</apexClass>
         <enabled>true</enabled>
     </classAccesses>
+    <classAccesses>
+        <apexClass>TAM_TargetVsActuals_Controller</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
     <fieldPermissions>
         <editable>true</editable>
         <field>Award__c.Battleground_KPI__c</field>
