@@ -19,6 +19,14 @@
         <apexClass>GAM_GameScore_Scheduler</apexClass>
         <enabled>true</enabled>
     </classAccesses>
+    <classAccesses>
+        <apexClass>TAM_TargetActuals_Service</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>TAM_TargetActuals_Batch</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
     <fieldPermissions>
         <editable>true</editable>
         <field>Award__c.Battleground_KPI__c</field>
@@ -1852,6 +1860,16 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>Account.Sample__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Target__c.Sub_Brand__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Target__c.Brand_Alias__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <objectPermissions>
